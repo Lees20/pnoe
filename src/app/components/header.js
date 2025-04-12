@@ -8,7 +8,7 @@ export default function Header() {
   const [hasShadow, setHasShadow] = useState(false);
 
   const navLinks = [
-    { name: 'Experiences', href: '#experiences' },
+    { name: 'Experiences', href: '/experiences' },
     { name: 'About', href: '/about' },
     { name: 'Contact', href: '/contact' },
   ];

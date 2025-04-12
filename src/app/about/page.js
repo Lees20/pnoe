@@ -2,6 +2,7 @@
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Leaf, Shield, Users } from 'lucide-react';
+import Link from 'next/link';
 
 export default function About() {
   return (
@@ -181,9 +182,11 @@ export default function About() {
           <h5 className="text-4xl md:text-5xl font-serif leading-snug">
             Ready to join us on this journey?
           </h5>
-          <button className="bg-white text-[#5a4a3f] px-8 py-4 rounded-full font-medium hover:bg-[#f4f1ec] transition-all shadow-md hover:shadow-lg">
-            Contact Us
-          </button>
+          <Link href="/contact">
+            <button className="mt-12 bg-white text-[#5a4a3f] px-8 py-4 rounded-full font-medium hover:bg-[#f4f1ec] transition-all shadow-md hover:shadow-lg">
+              Contact Us
+            </button>
+          </Link>
         </motion.div>
       </section>
     </main>

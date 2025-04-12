@@ -12,10 +12,7 @@ export default function Home() {
     <main className="font-light text-[#2f2f2f] bg-[#f4f1ec]">
       {/* 🌄 HERO */}
       <section ref={heroRef} className="relative min-h-screen w-full flex items-center justify-center text-center overflow-hidden">
-        <motion.div
-          style={{ y }}
-          className="absolute inset-0 z-0 pointer-events-none"
-        >
+        <motion.div style={{ y }} className="absolute inset-0 z-0 pointer-events-none">
           <Image
             src="/background.jpeg"
             alt="Crete landscape"
@@ -26,7 +23,7 @@ export default function Home() {
         </motion.div>
         <div className="relative z-10 px-6 max-w-3xl space-y-8">
           <motion.h1
-            className="text-5xl md:text-6xl font-serif text-white leading-tight tracking-tight drop-shadow-xl"
+            className="text-4xl sm:text-5xl md:text-6xl font-serif text-white leading-tight tracking-tight drop-shadow-xl"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1 }}
@@ -56,7 +53,7 @@ export default function Home() {
       {/* 🌱 Intro / Vision */}
       <section className="py-24 px-6">
         <motion.div
-          className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center"
+          className="max-w-6xl mx-auto grid sm:grid-cols-1 md:grid-cols-2 gap-12 items-center"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -95,7 +92,7 @@ export default function Home() {
             Signature Experiences
           </motion.h3>
         </div>
-        <div className="grid md:grid-cols-3 gap-10">
+        <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           {[
             {
               title: 'Olive Grove Rituals',
@@ -226,10 +223,6 @@ export default function Home() {
         ))}
       </div>
     </section>
-
-
-
-
     </main>
   );
 }

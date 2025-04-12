@@ -4,7 +4,7 @@ import Header from './components/header';
 
 
 export const metadata = {
-  title: 'Pnoé – Agrotourism & Wellness',
+  title: 'Oasis – Agrotourism & Wellness',
   description: 'Rooted, soulful, slow travel in Crete.',
 };
 

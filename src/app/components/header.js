@@ -30,7 +30,7 @@ export default function Header() {
       <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
         {/* Logo */}
         <Link href="/" className="text-2xl font-serif text-[#5a4a3f] hover:opacity-90 transition">
-          Oassis
+          Oasis
         </Link>
 
         {/* Desktop Nav */}

@@ -46,67 +46,65 @@ export async function POST(req) {
     subject: `New message from ${name}`,
     text: message,
     html: `
-      <div style="font-family: 'Segoe UI'; background: #f9fafb; padding: 24px;">
-        <div style="max-width: 600px; margin: auto; background: #fff; border-radius: 18px; box-shadow: 0 8px 30px rgba(0,0,0,0.05); border: 1px solid #e5e7eb;">
-          <div style="text-align: center; padding: 32px 24px; background: linear-gradient(to right, #6366f1, #8b5cf6); color: white;">
-            <h1 style="margin: 0; font-size: 22px;">📨 New Message</h1>
-          </div>
-          <div style="padding: 24px; color: #1f2937;">
-            <p><strong>👤 Name:</strong> ${name}</p>
-            <p><strong>📧 Email:</strong> ${email}</p>
-            <p><strong>🕓 Received:</strong> ${new Date().toLocaleString('en-GB', { timeZone: 'Europe/Athens' })}</p>
-            <p><strong>📍 IP Address:</strong> ${ip}</p>
-            <p><strong>🌍 Location:</strong> ${location}</p>
-          </div>
-          <div style="padding: 0 24px 24px;">
-            <p><strong>💬 Message:</strong></p>
-            <div style="background: #f3f4f6; border-radius: 12px; padding: 16px;">${message}</div>
-          </div>
+    <div style="font-family: 'Segoe UI', sans-serif; background: #f4f1ec; padding: 24px;">
+      <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 20px; box-shadow: 0 12px 30px rgba(0,0,0,0.05); border: 1px solid #e6e0d6;">
+        <div style="text-align: center; padding: 32px 24px; background: linear-gradient(to right, #8b6f47, #b99b75); color: white; border-radius: 20px 20px 0 0;">
+          <h1 style="margin: 0; font-size: 22px; font-weight: 600;">New Contact Message</h1>
+        </div>
+        <div style="padding: 24px; color: #3f3f3f; font-size: 16px;">
+          <p><strong>Name:</strong> ${name}</p>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Received:</strong> ${new Date().toLocaleString('en-GB', { timeZone: 'Europe/Athens' })}</p>
+          <p><strong>IP Address:</strong> ${ip}</p>
+          <p><strong>Location:</strong> ${location}</p>
+        </div>
+        <div style="padding: 0 24px 24px;">
+          <p><strong>Message:</strong></p>
+          <div style="background: #f5f0ea; border-radius: 12px; padding: 16px; font-style: italic;">${message}</div>
         </div>
       </div>
-    `,
+    </div>
+  `,
+  
   };
 
   // Auto-reply email
   const autoReply = {
-    from: `"Pantelis Karabetsos" <noreply@pkarabetsos.com>`,
+    from: `"Oasis" <noreply@pkarabetsos.com>`,
     replyTo: "contact@pkarabetsos.com",
     to: email,
     subject: `We've received your message, ${name}!`,
     html: `
-    <div style="font-family: 'Segoe UI', Roboto, sans-serif; background: #f3f4f6; padding: 32px 16px;">
-      <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 20px; box-shadow: 0 10px 35px rgba(0, 0, 0, 0.05); overflow: hidden; border: 1px solid #e5e7eb;">
+    <div style="font-family: 'Segoe UI', sans-serif; background: #f4f1ec; padding: 32px 16px;">
+      <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); border: 1px solid #e6e0d6;">
         
         <!-- Banner -->
-        <div style="text-align: center; padding: 40px 24px; background: #4f46e5; background: linear-gradient(to right, #6366f1, #8b5cf6); color: #ffffff;">
-          <img src="https://panteliskarabetsos.com/favicon.ico" alt="Logo" width="48" height="48" style="border-radius: 12px; margin-bottom: 16px;" />
-          <h1 style="margin: 0; font-size: 24px; font-weight: 700;">✉️ Message Received</h1>
-          <p style="margin-top: 8px; font-size: 16px; font-weight: 500;">
-            We've got your message and will be in touch soon.
+        <div style="text-align: center; padding: 40px 24px; background: linear-gradient(to right, #8b6f47, #b99b75); color: #ffffff; border-radius: 20px 20px 0 0;">
+          <img src="https://pnoe.vercel.com/favicon.ico" alt="Logo" width="48" height="48" style="border-radius: 12px; margin-bottom: 16px;" />
+          <h1 style="margin: 0; font-size: 24px; font-weight: 700;">Message Received</h1>
+          <p style="margin-top: 8px; font-size: 16px; font-weight: 400;">
+            Thank you for getting in touch. We’ll be with you shortly.
           </p>
         </div>
   
         <!-- Body -->
-        <div style="padding: 32px 24px; font-size: 15px; color: #1f2937; line-height: 1.75;">
+        <div style="padding: 32px 24px; font-size: 15px; color: #3f3f3f; line-height: 1.75;">
           <p>Hi <strong>${name}</strong>,</p>
-          <p>Thank you for getting in touch! 👋</p>
-          <p>I've received your message and will respond as soon as possible.</p>
-          <p>If it's urgent, feel free to reply directly to this email.</p>
+          <p>Thanks for reaching out to Oasis. We’ve received your message and will get back to you soon.</p>
+          <p>In the meantime, feel free to explore <a href="https://pnoe.vercel.com" target="_blank" style="color: #8b6f47; text-decoration: underline;">our experiences</a>.</p>
         </div>
   
-        <!-- Divider -->
-        <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 0 24px;" />
-  
-        <!-- Signature / Footer -->
-        <div style="padding: 24px; font-size: 14px; color: #6b7280; text-align: center;">
-          <p style="margin-bottom: 6px;">— Pantelis Karabetsos</p>
-          <a href="https://panteliskarabetsos.com" target="_blank" style="color: #6366f1; font-weight: 500; text-decoration: none;">
-            panteliskarabetsos.com
+        <!-- Footer -->
+        <div style="padding: 24px; font-size: 14px; color: #888; text-align: center; border-top: 1px solid #eee;">
+          <p style="margin-bottom: 6px;">— Oasis</p>
+          <a href="https://pnoe.vercel.com" target="_blank" style="color: #8b6f47; font-weight: 500; text-decoration: none;">
+            pnoe.vercel.com
           </a>
         </div>
       </div>
     </div>
   `,
+  
   };
 
   try {

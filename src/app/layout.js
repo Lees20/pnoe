@@ -1,6 +1,7 @@
 // app/layout.js
 import './globals.css';
-import Header from './components/Header'; // adjust path if needed
+import Header from './components/header'; 
+
 
 export const metadata = {
   title: 'Pnoé – Agrotourism & Wellness',

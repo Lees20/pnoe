@@ -10,7 +10,7 @@ export default function Home() {
 
   return (
     <main className="font-light text-[#2f2f2f] bg-[#f4f1ec]">
-      {/* 🌄 HERO */}
+      {/*HERO */}
       <section ref={heroRef} className="relative min-h-screen w-full flex items-center justify-center text-center overflow-hidden">
         <motion.div style={{ y }} className="absolute inset-0 z-0 pointer-events-none">
           <Image
@@ -50,7 +50,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 🌱 Intro / Vision */}
+      {/* Intro / Vision */}
       <section className="py-24 px-6">
         <motion.div
           className="max-w-6xl mx-auto grid sm:grid-cols-1 md:grid-cols-2 gap-12 items-center"
@@ -79,7 +79,7 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* 🌾 3 Pillars */}
+      {/*3 Pillars */}
       <section id="experiences" className="bg-[#faf9f7] py-24 px-6">
         <div className="max-w-6xl mx-auto text-center mb-16">
           <motion.h3
@@ -134,7 +134,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 🪷 Motto */}
+      {/*Motto */}
       <section className="py-24 px-6 text-center">
         <motion.div
           className="max-w-3xl mx-auto space-y-6"
@@ -152,7 +152,7 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* 🌿 Call to Action */}
+      {/*Call to Action */}
       <section className="bg-[#8b6f47] text-white text-center py-20 px-6">
         <motion.div
           className="max-w-3xl mx-auto space-y-6"
@@ -170,7 +170,7 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* 🌟 Testimonials */}
+      {/*Testimonials */}
    <section className="py-24 px-6 bg-[#f9f9f9]">
       <div className="max-w-6xl mx-auto text-center">
         <motion.h3

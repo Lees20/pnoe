@@ -7,7 +7,7 @@ import Link from 'next/link';
 export default function About() {
   return (
     <main className="font-light text-[#2f2f2f] bg-[#f4f1ec] dark:bg-[#111] transition-colors duration-500">
-      {/* 🌿 Introduction */}
+      {/*Introduction */}
       <section className="py-32 px-6 md:px-12 bg-[#f9f9f9] dark:bg-[#1a1a1a]">
         <motion.div
           className="max-w-6xl mx-auto text-center"
@@ -24,7 +24,7 @@ export default function About() {
         </motion.div>
       </section>
 
-      {/* 🌿 What Oasis Means */}
+      {/* What Oasis Means */}
       <section className="py-32 px-6 md:px-12 bg-[#e8e2d9] dark:bg-[#191919]">
         <motion.div
           className="max-w-6xl mx-auto text-center"
@@ -41,7 +41,7 @@ export default function About() {
         </motion.div>
       </section>
 
-      {/* 🌿 Call to Action */}
+      {/* Call to Action */}
       <section className="bg-[#8b6f47] text-white text-center py-24 px-6">
         <motion.div
           className="max-w-3xl mx-auto space-y-6"
@@ -60,7 +60,7 @@ export default function About() {
         </motion.div>
       </section>
 
-      {/* 🌱 Our Story */}
+      {/* Our Story */}
       <section className="py-32 px-6 bg-[#fafafa] dark:bg-[#181818]">
         <motion.div
           className="max-w-6xl mx-auto text-center"
@@ -77,7 +77,7 @@ export default function About() {
         </motion.div>
       </section>
 
-      {/* 🌿 Our Values */}
+      {/* Our Values */}
       <section className="py-32 px-6 md:px-12 bg-[#faf9f7] dark:bg-[#1a1a1a] transition-colors duration-500">
         <motion.div
           className="max-w-6xl mx-auto text-center"
@@ -129,7 +129,7 @@ export default function About() {
         </motion.div>
       </section>
 
-      {/* 👥 Meet the Team */}
+      {/* Meet the Team */}
       <section className="py-32 px-6 md:px-12 bg-[#faf9f7] dark:bg-[#181818]">
         <motion.div
           className="max-w-6xl mx-auto text-center"
@@ -170,7 +170,7 @@ export default function About() {
         </motion.div>
       </section>
 
-      {/* 🌟 Final Call to Action */}
+      {/* Final Call to Action */}
       <section className="bg-[#8b6f47] text-white text-center py-24 px-6">
         <motion.div
           className="max-w-3xl mx-auto space-y-6"

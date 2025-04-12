@@ -2,6 +2,7 @@
 import Image from 'next/image';
 import { motion, useScroll, useTransform } from 'framer-motion'; // Import necessary hooks from framer-motion
 import { useRef } from 'react'; // Import useRef from React
+import Link from 'next/link';
 
 export default function Home() {
   const heroRef = useRef(null);
@@ -39,14 +40,17 @@ export default function Home() {
           >
             Curated rituals and nature-immersive journeys for your inner peace.
           </motion.p>
-          <motion.button
-            className="mt-6 bg-[#8b6f47] text-white px-8 py-4 rounded-full text-lg font-medium shadow-md hover:bg-[#a78b62] transition-all"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.8 }}
-          >
-            Discover Experiences
-          </motion.button>
+          
+          <Link href="/experiences">
+            <motion.button
+              className="mt-6 bg-[#8b6f47] text-white px-8 py-4 rounded-full text-lg font-medium shadow-md hover:bg-[#a78b62] transition-all"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.8 }}
+            >
+              Discover Experiences
+            </motion.button>
+          </Link>
         </div>
       </section>
 

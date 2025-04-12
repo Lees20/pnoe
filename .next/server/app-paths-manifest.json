@@ -1,7 +1,4 @@
 {
-  "/about/page": "app/about/page.js",
-  "/contact/page": "app/contact/page.js",
-  "/under-construction/page": "app/under-construction/page.js",
   "/page": "app/page.js",
   "/experiences/page": "app/experiences/page.js"
 }

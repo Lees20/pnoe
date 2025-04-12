@@ -24,22 +24,25 @@ export default function Header() {
   return (
     <header
       className={`fixed top-0 left-0 w-full z-50 transition-shadow duration-300 ${
-        hasShadow ? 'shadow-md' : ''
-      } bg-[#f4f1ec]/70 backdrop-blur-lg border-b border-[#eae6e0]`}
+        hasShadow ? 'shadow-xl' : 'shadow-none'
+      } bg-[#f4f1ec]/90 backdrop-blur-lg border-b border-[#eae6e0]`}
     >
       <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
         {/* Logo */}
-        <Link href="/" className="text-2xl font-serif text-[#5a4a3f] hover:opacity-90 transition">
+        <Link
+          href="/"
+          className="text-3xl font-serif text-[#5a4a3f] hover:text-[#8b6f47] transition-all"
+        >
           Oasis
         </Link>
 
         {/* Desktop Nav */}
-        <nav className="hidden md:flex gap-4">
+        <nav className="hidden md:flex gap-6">
           {navLinks.map((link) => (
             <a
               key={link.name}
               href={link.href}
-              className="px-4 py-2 rounded-full text-sm text-[#5a4a3f] hover:bg-[#e8e2d9] hover:text-[#8b6f47] transition-all"
+              className="text-lg text-[#5a4a3f] hover:bg-[#e8e2d9] hover:text-[#8b6f47] px-4 py-2 rounded-full transition-all"
             >
               {link.name}
             </a>
@@ -58,8 +61,8 @@ export default function Header() {
 
       {/* Mobile Nav */}
       {isOpen && (
-        <div className="md:hidden bg-[#f4f1ec] border-t border-[#e2ded8] px-6 pb-6 pt-2 animate-fade-in">
-          <nav className="flex flex-col gap-3">
+        <div className="md:hidden bg-[#f4f1ec] border-t border-[#e2ded8] px-6 py-6 animate-fade-in">
+          <nav className="flex flex-col gap-4">
             {navLinks.map((link) => (
               <a
                 key={link.name}
@@ -73,6 +76,6 @@ export default function Header() {
           </nav>
         </div>
       )}
-    </header>//comment
+    </header>
   );
 }

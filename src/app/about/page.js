@@ -142,9 +142,9 @@ export default function About() {
           </h3>
           <div className="mt-12 grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
             {[
-              { name: 'Stavroula', role: 'Founder', image: '/team1.jpeg', bio: 'Sophia founded Oasis to bring the serenity and wisdom of Crete to the world, offering guests transformative experiences in harmony with nature.' },
-              { name: 'Christos', role: 'Wellness Expert', image: '/team2.jpeg', bio: 'Oliver is a wellness expert specializing in mindfulness and holistic practices. His healing sessions help guests reconnect with their inner selves.' },
-              { name: 'Maria', role: 'Community Manager', image: '/team3.jpeg', bio: 'Emily’s role is to ensure guests feel a deep sense of belonging. She nurtures the community and facilitates meaningful connections.' },
+              { name: 'Stavroula', role: 'Founder', image: '/team1.jpeg', bio: 'Stavroula founded Oasis to bring the serenity and wisdom of Crete to the world, offering guests transformative experiences in harmony with nature.' },
+              { name: 'Christos', role: 'Wellness Expert', image: '/team2.jpeg', bio: 'Christos is a wellness expert specializing in mindfulness and holistic practices. His healing sessions help guests reconnect with their inner selves.' },
+              { name: 'Maria', role: 'Community Manager', image: '/team3.jpeg', bio: 'Marias’s role is to ensure guests feel a deep sense of belonging. She nurtures the community and facilitates meaningful connections.' },
             ].map((item, i) => (
               <motion.div
                 key={i}

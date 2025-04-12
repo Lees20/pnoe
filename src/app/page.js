@@ -17,7 +17,7 @@ export default function Home() {
           className="absolute inset-0 z-0 pointer-events-none"
         >
           <Image
-            src="https://images.unsplash.com/photo-1506744038136-46273834b3fb"
+            src="/background.jpeg"
             alt="Crete landscape"
             fill
             priority
@@ -172,6 +172,64 @@ export default function Home() {
           </button>
         </motion.div>
       </section>
+
+      {/* 🌟 Testimonials */}
+   <section className="py-24 px-6 bg-[#f9f9f9]">
+      <div className="max-w-6xl mx-auto text-center">
+        <motion.h3
+          className="text-3xl md:text-4xl font-serif text-[#5a4a3f]"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+        >
+          What Our Guests Say
+        </motion.h3>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12 mt-12">
+        {[
+          {
+            name: 'Sophia',
+            feedback: 'An unforgettable experience that allowed me to truly connect with the land and the local community.',
+            image: '/guest1.jpeg',
+          },
+          {
+            name: 'Oliver',
+            feedback: 'A peaceful retreat surrounded by nature. The wellness sessions were truly transformative.',
+            image: '/guest2.jpeg',
+          },
+          {
+            name: 'Emily',
+            feedback: 'Everything felt so authentic and rooted in tradition. A truly enriching journey.',
+            image: '/guest3.jpeg',
+          },
+        ].map((item, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.2, duration: 0.8 }}
+            viewport={{ once: true }}
+            className="bg-white p-6 rounded-xl shadow-lg text-center transform transition-all hover:scale-105 hover:shadow-2xl"
+          >
+            <Image
+              src={item.image}
+              alt={item.name}
+              width={120}
+              height={120}
+              className="rounded-full mx-auto mb-4 border-4 border-[#eae6e0] shadow-lg"
+            />
+            <p className="text-[#4a4a4a] italic text-lg font-light">{`“${item.feedback}”`}</p>
+            <h5 className="mt-4 text-[#5a4a3f] font-semibold text-lg">{item.name}</h5>
+          </motion.div>
+        ))}
+      </div>
+    </section>
+
+
+
+
     </main>
   );
 }

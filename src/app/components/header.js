@@ -2,10 +2,12 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
+import { useRouteLoader } from './RouteLoader';
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [hasShadow, setHasShadow] = useState(false);
+  const routeLoader = useRouteLoader();
 
   const navLinks = [
     { name: 'Experiences', href: '/experiences' },
@@ -29,23 +31,23 @@ export default function Header() {
     >
       <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
         {/* Logo */}
-        <Link
-          href="/"
+        <button
+          onClick={() => routeLoader?.triggerRouteChange('/')}
           className="text-3xl font-serif text-[#5a4a3f] hover:text-[#8b6f47] transition-all"
         >
           Oasis
-        </Link>
+        </button>
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex gap-6">
           {navLinks.map((link) => (
-            <a
+            <button
               key={link.name}
-              href={link.href}
+              onClick={() => routeLoader?.triggerRouteChange(link.href)}
               className="text-lg text-[#5a4a3f] hover:bg-[#e8e2d9] hover:text-[#8b6f47] px-4 py-2 rounded-full transition-all"
             >
               {link.name}
-            </a>
+            </button>
           ))}
         </nav>
 
@@ -64,14 +66,16 @@ export default function Header() {
         <div className="md:hidden bg-[#f4f1ec] border-t border-[#e2ded8] px-6 py-6 animate-fade-in">
           <nav className="flex flex-col gap-4">
             {navLinks.map((link) => (
-              <a
+              <button
                 key={link.name}
-                href={link.href}
-                onClick={() => setIsOpen(false)}
+                onClick={() => {
+                  routeLoader?.triggerRouteChange(link.href);
+                  setIsOpen(false);
+                }}
                 className="px-4 py-2 rounded-full text-[#5a4a3f] hover:bg-[#e8e2d9] hover:text-[#8b6f47] transition"
               >
                 {link.name}
-              </a>
+              </button>
             ))}
           </nav>
         </div>

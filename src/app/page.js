@@ -1,8 +1,10 @@
 'use client';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { motion, useScroll, useTransform } from 'framer-motion'; // Import necessary hooks from framer-motion
 import { useRef } from 'react'; // Import useRef from React
 import Link from 'next/link';
+import LinkWithLoader from './components/LinkWithLoader';
 
 export default function Home() {
   const heroRef = useRef(null);
@@ -41,7 +43,7 @@ export default function Home() {
             Curated rituals and nature-immersive journeys for your inner peace.
           </motion.p>
           
-          <Link href="/experiences">
+          <LinkWithLoader href="/experiences">
             <motion.button
               className="mt-6 bg-[#8b6f47] text-white px-8 py-4 rounded-full text-lg font-medium shadow-md hover:bg-[#a78b62] transition-all"
               initial={{ opacity: 0, y: 10 }}
@@ -50,7 +52,7 @@ export default function Home() {
             >
               Discover Experiences
             </motion.button>
-          </Link>
+          </LinkWithLoader>
         </div>
       </section>
 
@@ -168,9 +170,11 @@ export default function Home() {
           <h5 className="text-3xl md:text-4xl font-serif leading-snug">
             Ready to reconnect with yourself and the land?
           </h5>
-          <button className="bg-white text-[#5a4a3f] px-8 py-4 rounded-full font-medium hover:bg-[#f4f1ec] transition-all">
+          <LinkWithLoader href="/contact">
+          <button className="mt-12 bg-white text-[#5a4a3f] px-8 py-4 rounded-full font-medium hover:bg-[#f4f1ec] transition-all">
             Book a Journey
           </button>
+          </LinkWithLoader>
         </motion.div>
       </section>
 

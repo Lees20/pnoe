@@ -170,7 +170,7 @@ export default function Home() {
           <h5 className="text-3xl md:text-4xl font-serif leading-snug">
             Ready to reconnect with yourself and the land?
           </h5>
-          <LinkWithLoader href="/contact">
+          <LinkWithLoader href="/experiences">
           <button className="mt-12 bg-white text-[#5a4a3f] px-8 py-4 rounded-full font-medium hover:bg-[#f4f1ec] transition-all">
             Book a Journey
           </button>

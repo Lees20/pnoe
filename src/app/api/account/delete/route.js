@@ -1,5 +1,5 @@
 import { getSession } from "next-auth/react"; // If using session-based auth
-import prisma from "../../../../../lib/prisma"; // Correct import path for the singleton
+import prisma from "../../../../lib/prisma"; // Ensure correct import path
 
 export async function DELETE(req) {
   try {

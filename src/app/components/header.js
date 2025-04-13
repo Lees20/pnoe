@@ -212,8 +212,15 @@ export default function Header() {
           >
             Sign Out
           </button>
+          
+          {session?.user?.role === 'admin' && (
+        <nav>
+          <a href="/admin/experiences">Manage Experiences</a> {/* Link to the admin page */}
+        </nav>
+      )}
         </div>
       )}
+      
     </header>
   );
 }

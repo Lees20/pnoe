@@ -16,9 +16,13 @@ model User {
   phone     String?  // User's phone number
   createdAt DateTime @default(now()) // Automatically set when the user is created
   updatedAt DateTime @updatedAt // Automatically set when the user is updated
+  role      String   @default("user") // User role (e.g., "user" or "admin")
   sessions  Session[] // One-to-many relationship with sessions
   accounts  Account[] // One-to-many relationship with accounts
+  favourites Favourite[] // One-to-many relationship with favourites
+  bookings  Booking[] // One-to-many relationship with bookings
 }
+
 
 model Session {
   id            Int      @id @default(autoincrement()) // Unique identifier for session
@@ -34,4 +38,32 @@ model Account {
   provider              String   // Authentication provider (e.g., Google, Facebook)
   providerAccountId     String   // Provider-specific account ID (e.g., Google user ID)
   user                  User     @relation(fields: [userId], references: [id]) // Relate account to user
+}
+
+// New model to store User's Favourites (experiences)
+model Favourite {
+  id            Int      @id @default(autoincrement()) // Unique identifier for the favourite
+  userId        Int      // Foreign key to User model
+  experienceId  Int      // Foreign key to Experience (or whatever you are storing for experiences)
+  user          User     @relation(fields: [userId], references: [id]) // Relate favourite to user
+  experience    Experience @relation(fields: [experienceId], references: [id]) // Relate favourite to experience
+}
+
+// New model to store Bookings made by Users
+model Booking {
+  id            Int      @id @default(autoincrement()) // Unique identifier for booking
+  userId        Int      // Foreign key to User model
+  experienceId  Int      // Foreign key to Experience (or whatever you are storing for experiences)
+  date          DateTime // Date of booking
+  user          User     @relation(fields: [userId], references: [id]) // Relate booking to user
+  experience    Experience @relation(fields: [experienceId], references: [id]) // Relate booking to experience
+}
+
+// Assuming you have an Experience model to store details about experiences
+model Experience {
+  id          Int       @id @default(autoincrement()) // Unique identifier for an experience
+  name        String    // Experience name
+  description String?   // Optional description of the experience
+  favourites  Favourite[] // One-to-many relationship with favourites
+  bookings    Booking[]   // One-to-many relationship with bookings
 }

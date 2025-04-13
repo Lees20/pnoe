@@ -37,13 +37,14 @@ export const authOptions = {
             throw new Error("Invalid password.");
           }
 
-          // If everything is valid, return user object
+          // Return user object with role
           return {
             id: user.id,
             email: user.email,
             name: user.name,
             surname: user.surname,
             phone: user.phone,
+            role: user.role,  // Include role here
           };
         } catch (error) {
           throw new Error("An unexpected error occurred. Please try again.");
@@ -61,6 +62,7 @@ export const authOptions = {
         token.email = user.email;
         token.name = user.name;
         token.phone = user.phone; // Make sure phone is included
+        token.role = user.role;   // Add role to the token
       }
       return token;
     },
@@ -69,6 +71,7 @@ export const authOptions = {
       session.user.email = token.email;
       session.user.name = token.name;
       session.user.phone = token.phone; // Ensure phone is added to the session
+      session.user.role = token.role;   // Ensure role is included in the session
       return session;
     },
   },
@@ -79,7 +82,6 @@ export const authOptions = {
   },
 };
 
-
 // Named exports for GET and POST methods
 export async function GET(req, res) {
   return NextAuth(req, res, authOptions);
@@ -88,4 +90,3 @@ export async function GET(req, res) {
 export async function POST(req, res) {
   return NextAuth(req, res, authOptions);
 }
-

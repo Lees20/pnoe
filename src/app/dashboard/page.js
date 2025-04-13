@@ -13,7 +13,7 @@ export default function Dashboard() {
 
   if (!session) {
     // If no session, redirect to login page
-    window.location.href = '/sign-in';  // Adjust the path to your login page
+    window.location.href = '/login';  // Adjust the path to your login page
     return null;  // Don't render anything else
   }
 

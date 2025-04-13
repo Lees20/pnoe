@@ -1,7 +1,9 @@
 'use client';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
+import { Dialog } from '@headlessui/react';
 
 const experienceData = {
   'olive-grove-rituals': {
@@ -18,6 +20,8 @@ const experienceData = {
     ],
     duration: '4 hours',
     location: 'Chania, Crete',
+    preparation: 'Wear comfortable clothes and bring sun protection. All materials provided.',
+    benefits: 'Connect with nature, learn about ancient Cretan culture, and enjoy local cuisine.',
   },
   'mountain-wellness': {
     title: 'Mountain Wellness',
@@ -33,6 +37,8 @@ const experienceData = {
     ],
     duration: '3.5 hours',
     location: 'White Mountains, Crete',
+    preparation: 'Wear hiking shoes and bring water. Yoga mats are provided.',
+    benefits: 'Reduce stress, reconnect with your breath, and embrace the healing power of herbs.',
   },
   'cretan-connection': {
     title: 'Cretan Connection',
@@ -48,12 +54,15 @@ const experienceData = {
     ],
     duration: '5 hours',
     location: 'Apokoronas, Crete',
+    preparation: 'No prior experience needed. Aprons and pottery tools provided.',
+    benefits: 'Cultural immersion, hands-on learning, and meaningful connections with locals.',
   },
 };
 
 export default function ExperienceDetail() {
   const { slug } = useParams();
   const item = experienceData[slug];
+  const [modalImage, setModalImage] = useState(null);
 
   if (!item) return <div className="text-center py-24">Experience not found.</div>;
 
@@ -64,7 +73,8 @@ export default function ExperienceDetail() {
         <motion.h1
           className="text-5xl font-serif text-[#5a4a3f] mb-4"
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
           {item.title}
@@ -75,21 +85,57 @@ export default function ExperienceDetail() {
       </section>
 
       {/* Description */}
-      <section className="max-w-5xl mx-auto mb-12">
+      <motion.section
+        className="max-w-5xl mx-auto mb-12"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+      >
         <p className="text-lg md:text-xl leading-relaxed text-[#4a4a4a] text-center">
           {item.description}
         </p>
-      </section>
+      </motion.section>
 
       {/* Highlights */}
-      <section className="max-w-4xl mx-auto mb-20">
+      <motion.section
+        className="max-w-4xl mx-auto mb-12"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+      >
         <h3 className="text-2xl font-serif text-[#5a4a3f] mb-4 text-center">What’s Included</h3>
         <ul className="list-disc list-inside text-md md:text-lg text-[#4a4a4a] space-y-2">
           {item.highlights.map((point, index) => (
             <li key={index}>{point}</li>
           ))}
         </ul>
-      </section>
+      </motion.section>
+
+      {/* Preparation Info */}
+      <motion.section
+        className="max-w-4xl mx-auto mb-12"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+      >
+        <h3 className="text-2xl font-serif text-[#5a4a3f] mb-4 text-center">What to Bring</h3>
+        <p className="text-md md:text-lg text-[#4a4a4a] text-center">{item.preparation}</p>
+      </motion.section>
+
+      {/* Benefits */}
+      <motion.section
+        className="max-w-4xl mx-auto mb-20"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+      >
+        <h3 className="text-2xl font-serif text-[#5a4a3f] mb-4 text-center">Why You’ll Love It</h3>
+        <p className="text-md md:text-lg text-[#4a4a4a] text-center">{item.benefits}</p>
+      </motion.section>
 
       {/* Image Gallery */}
       <section className="max-w-6xl mx-auto grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-24">
@@ -100,6 +146,8 @@ export default function ExperienceDetail() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: i * 0.2, duration: 0.6 }}
+            onClick={() => setModalImage(src)}
+            className="cursor-pointer"
           >
             <Image
               src={src}
@@ -112,12 +160,37 @@ export default function ExperienceDetail() {
         ))}
       </section>
 
+      {/* Modal */}
+      <AnimatePresence>
+        {modalImage && (
+          <Dialog open={!!modalImage} onClose={() => setModalImage(null)} className="fixed inset-0 z-50">
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
+              <motion.div
+                className="relative"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Image src={modalImage} alt="Expanded" width={800} height={600} className="rounded-xl shadow-2xl" />
+              </motion.div>
+            </div>
+          </Dialog>
+        )}
+      </AnimatePresence>
+
       {/* CTA */}
-      <section className="max-w-4xl mx-auto text-center pb-32">
+      <motion.section
+        className="max-w-4xl mx-auto text-center pb-32"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+      >
         <button className="bg-[#8b6f47] text-white px-8 py-4 rounded-full font-medium hover:bg-[#a78b62] transition-all shadow-md hover:shadow-lg">
           Book This Experience
         </button>
-      </section>
+      </motion.section>
     </main>
   );
 }

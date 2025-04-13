@@ -1,20 +1,10 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { PrismaClient } from "@prisma/client";
+import prisma from "../../../../../lib/prisma";  // Correctly import the singleton Prisma Client
 import { compare } from "bcryptjs";
 
-// Use the Prisma singleton pattern
-let prisma;
-if (process.env.NODE_ENV === "production") {
-  prisma = new PrismaClient();
-} else {
-  // In development mode, Prisma client can be reused to prevent creating a new connection on each request.
-  if (!global.prisma) {
-    global.prisma = new PrismaClient();
-  }
-  prisma = global.prisma;
-}
+// No need to manually instantiate PrismaClient here, use the singleton from lib/prisma.js
 
 export const authOptions = {
   providers: [

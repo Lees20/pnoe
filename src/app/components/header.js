@@ -76,6 +76,12 @@ export default function Header() {
                     Favourites
                   </button>
                   <button
+                    onClick={() => routeLoader?.triggerRouteChange('/account/settings')}
+                    className="block w-full text-left px-4 py-2 text-sm hover:bg-[#fdfaf5] text-[#5a4a3f]"
+                  >
+                    Settings
+                  </button>
+                  <button
                     onClick={() => signOut()}
                     className="block w-full text-left px-4 py-2 text-sm hover:bg-[#fdfaf5] text-[#b44d4d]"
                   >

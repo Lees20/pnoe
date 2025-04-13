@@ -1,8 +1,8 @@
 {
   "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
-  "/page": "app/page.js",
+  "/api/account/delete/route": "app/api/account/delete/route.js",
+  "/account/settings/page": "app/account/settings/page.js",
   "/login/page": "app/login/page.js",
-  "/favourites/page": "app/favourites/page.js",
   "/bookings/page": "app/bookings/page.js",
-  "/experiences/page": "app/experiences/page.js"
+  "/page": "app/page.js"
 }

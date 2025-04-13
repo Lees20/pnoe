@@ -1,195 +1,137 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from "react";
-import { getSession } from "next-auth/react"; // Assuming you're using NextAuth.js
+import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react'; // Make sure you're using next-auth to manage session
 
 export default function SettingsPage() {
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [name, setName] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(true); // Add loading state
+  const { data: session, status } = useSession();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
 
-  // Fetch user data from the session when the component mounts
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+
+  // Fetch session on component mount
   useEffect(() => {
-    const fetchUserData = async () => {
-      setLoading(true); // Set loading to true while fetching session
-      const session = await getSession();
-      if (session && session.user) {
-        setEmail(session.user.email);
-        setName(session.user.name || "");
-        setPhone(session.user.phone || "");
-      }
-      setLoading(false); // Set loading to false once the session is fetched
-    };
-    fetchUserData();
-  }, []); // This will run once when the component is mounted
+    if (session) {
+      setEmail(session.user.email);  // Pre-fill email and other details from session
+      setName(session.user.name);
+      setPhone(session.user.phone);
+    }
+  }, [session]);
 
   // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
-    // Password confirmation check
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+    if (!email || !password) {
+      setErrorMessage('Email and password are required.');
+      setSuccessMessage('');
       return;
     }
 
-    // Check for password strength (simple example)
-    if (password.length < 6) {
-      setError("Password should be at least 6 characters.");
-      return;
-    }
-
-    const data = { email, phone, name, password };
-
-    // Send update request to the backend
-    const res = await fetch('/api/account/update', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (res.ok) {
-      setMessage("Account updated successfully!");
-      setError(""); // Clear any previous errors
-    } else {
-      const errorData = await res.json();
-      setError(errorData.message || "Failed to update account.");
-    }
-  };
-
-  // Handle delete account
-  const handleDelete = async () => {
-    const confirmation = window.confirm(
-      "Are you sure you want to delete your account? This action cannot be undone."
-    );
-
-    if (confirmation) {
-      // Send delete account request to the backend
-      const res = await fetch('/api/account/delete', {
-        method: 'DELETE',
+    try {
+      const response = await fetch('/api/account/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, phone, password }),
       });
 
-      if (res.ok) {
-        setMessage("Account deleted successfully.");
-        // Redirect the user after deletion
-        setTimeout(() => {
-          window.location.href = "/"; // Redirect to home or login page
-        }, 2000);
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuccessMessage(data.message); // Show success message
+        setErrorMessage(''); // Clear any previous error messages
       } else {
-        const errorData = await res.json();
-        setError(errorData.message || "Failed to delete account.");
+        setErrorMessage(data.message || 'An error occurred while updating your information.');
+        setSuccessMessage(''); // Clear any previous success messages
       }
+    } catch (error) {
+      setErrorMessage('Something went wrong. Please try again later.');
     }
   };
 
-  // Show loading spinner if loading is true
-  if (loading) {
+  if (status === 'loading') return <p>Loading...</p>; // Display loading state while fetching session
+
+  if (!session) {
     return (
-      <div className="min-h-screen bg-[#f4f1ec] flex items-center justify-center">
-        <div className="loader">Loading...</div> {/* You can replace this with a spinner */}
+      <div className="min-h-screen flex items-center justify-center bg-[#f4f1ec] p-6">
+        <div className="bg-white p-8 rounded-lg shadow-lg max-w-md text-center">
+          <h2 className="text-2xl font-semibold text-[#5a4a3f] mb-4">You need to be signed in</h2>
+          <p>Please log in to access the account settings page.</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#f4f1ec] flex items-center justify-center px-4 py-12">
-      <div className="bg-white rounded-2xl shadow-lg w-full max-w-lg p-8">
-        <h1 className="text-3xl font-serif text-[#5a4a3f] mb-6 text-center">Update Settings</h1>
+    <div className="min-h-screen flex items-center justify-center bg-[#f4f1ec] p-6">
+      <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
+        <h1 className="text-3xl font-semibold text-[#5a4a3f] mb-6 text-center">Account Settings</h1>
         
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Name Input */}
-          <div className="form-group">
-            <label htmlFor="name" className="block text-[#5a4a3f] font-medium">Name</label>
-            <input 
-              type="text" 
-              id="name"
-              value={name} 
-              onChange={(e) => setName(e.target.value)} 
-              required 
-              className="w-full p-3 border border-[#e0dcd4] rounded-md focus:outline-none focus:ring-2 focus:ring-[#8b6f47] transition duration-200"
+          <div>
+            <label className="block text-sm font-medium text-[#5a4a3f] mb-2">Name</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter your new name"
+              className="w-full px-4 py-2 rounded-md border border-[#e0dcd4] focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
             />
           </div>
 
           {/* Email Input */}
-          <div className="form-group">
-            <label htmlFor="email" className="block text-[#5a4a3f] font-medium">Email</label>
-            <input 
-              type="email" 
-              id="email"
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
-              required 
-              className="w-full p-3 border border-[#e0dcd4] rounded-md focus:outline-none focus:ring-2 focus:ring-[#8b6f47] transition duration-200"
+          <div>
+            <label className="block text-sm font-medium text-[#5a4a3f] mb-2">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your new email"
+              className="w-full px-4 py-2 rounded-md border border-[#e0dcd4] focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
             />
           </div>
 
           {/* Phone Input */}
-          <div className="form-group">
-            <label htmlFor="phone" className="block text-[#5a4a3f] font-medium">Phone</label>
-            <input 
-              type="text" 
-              id="phone"
-              value={phone} 
-              onChange={(e) => setPhone(e.target.value)} 
-              className="w-full p-3 border border-[#e0dcd4] rounded-md focus:outline-none focus:ring-2 focus:ring-[#8b6f47] transition duration-200"
+          <div>
+            <label className="block text-sm font-medium text-[#5a4a3f] mb-2">Phone</label>
+            <input
+              type="text"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="Enter your new phone number"
+              className="w-full px-4 py-2 rounded-md border border-[#e0dcd4] focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
             />
           </div>
 
           {/* Password Input */}
-          <div className="form-group">
-            <label htmlFor="password" className="block text-[#5a4a3f] font-medium">Password</label>
-            <input 
-              type="password" 
-              id="password"
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
-              required 
-              className="w-full p-3 border border-[#e0dcd4] rounded-md focus:outline-none focus:ring-2 focus:ring-[#8b6f47] transition duration-200"
+          <div>
+            <label className="block text-sm font-medium text-[#5a4a3f] mb-2">Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your new password"
+              className="w-full px-4 py-2 rounded-md border border-[#e0dcd4] focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
             />
           </div>
 
-          {/* Confirm Password Input */}
-          <div className="form-group">
-            <label htmlFor="confirmPassword" className="block text-[#5a4a3f] font-medium">Confirm Password</label>
-            <input 
-              type="password" 
-              id="confirmPassword"
-              value={confirmPassword} 
-              onChange={(e) => setConfirmPassword(e.target.value)} 
-              required 
-              className="w-full p-3 border border-[#e0dcd4] rounded-md focus:outline-none focus:ring-2 focus:ring-[#8b6f47] transition duration-200"
-            />
-          </div>
-
-          {/* Error Message */}
-          {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-
-          {/* Success Message */}
-          {message && <p className="text-green-500 text-sm mt-2">{message}</p>}
+          {/* Success and Error Messages */}
+          {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
+          {successMessage && <p className="text-green-500 text-sm">{successMessage}</p>}
 
           {/* Submit Button */}
-          <button 
-            type="submit" 
-            className="w-full py-3 bg-[#8b6f47] text-white font-semibold rounded-md hover:bg-[#a78b62] transition-all duration-300"
+          <button
+            type="submit"
+            className="w-full py-3 rounded-full text-lg text-white bg-[#8b6f47] hover:bg-[#a78b62] transition-all"
           >
-            Update
+            Update Settings
           </button>
         </form>
-
-        {/* Delete Account Button */}
-        <button 
-          onClick={handleDelete} 
-          className="w-full py-3 mt-6 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700 transition-all duration-300"
-        >
-          Delete Account
-        </button>
       </div>
     </div>
   );

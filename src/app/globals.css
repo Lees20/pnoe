@@ -58,3 +58,8 @@
 }
 
 
+/* styles/globals.css */
+body {
+  font-family: 'Inter', sans-serif;
+  /* If you're using a custom font, make sure it's linked in _document.js as mentioned above */
+}

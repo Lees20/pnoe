@@ -19,7 +19,7 @@ export default function Experiences() {
       description:
         'Join us for mindful hiking, herbal tea rituals, and open-air meditation in the Cretan mountains.',
       image: '/mountain-wellness.jpg',
-      price: '€95',
+      price: '€85',
       date: 'Tuesdays & Thursdays',
       slug: 'mountain-wellness',
     },

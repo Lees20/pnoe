@@ -1,52 +1,67 @@
-import { PrismaClient } from '@prisma/client';
-import { compare } from 'bcryptjs';
+// src/app/login/page.js
 
-const prisma = new PrismaClient();
+'use client';
 
-export async function POST(request) {
-  try {
-    const body = await request.json();
-    const { email, password } = body;
+import { useState } from 'react';
+import { signIn } from 'next-auth/react';  // Import NextAuth's signIn method
 
-    if (!email || !password) {
-      return new Response(
-        JSON.stringify({ message: 'Missing email or password' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
+export default function Login() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-    // Find user by email
-    const user = await prisma.user.findUnique({
-      where: { email },
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');  // Clear any previous errors
+
+    const res = await signIn('credentials', {
+      redirect: false,
+      email,
+      password,
     });
 
-    if (!user) {
-      return new Response(
-        JSON.stringify({ message: 'User not found' }),
-        { status: 404, headers: { 'Content-Type': 'application/json' } }
-      );
+    if (res?.error) {
+      setError(res.error); // Set error message if authentication fails
+    } else {
+      // Redirect to a protected page after successful login (e.g., dashboard)
+      window.location.href = '/dashboard';  // Replace with your desired path
     }
+    setLoading(false);
+  };
 
-    // Compare entered password with hashed password in the database
-    const isPasswordValid = await compare(password, user.password);
-
-    if (!isPasswordValid) {
-      return new Response(
-        JSON.stringify({ message: 'Invalid password' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // If login is successful, you can create a session or JWT (this depends on your auth flow)
-    return new Response(
-      JSON.stringify({ message: 'Login successful' }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
-    );
-  } catch (error) {
-    console.error('Login error:', error);
-    return new Response(
-      JSON.stringify({ message: 'Internal server error' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
-  }
+  return (
+    <div className="login-form">
+      <form onSubmit={handleSubmit}>
+        <h2>Login</h2>
+        <div>
+          <label htmlFor="email">Email:</label>
+          <input
+            type="email"
+            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label htmlFor="password">Password:</label>
+          <input
+            type="password"
+            id="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <button type="submit" disabled={loading}>
+            {loading ? 'Logging in...' : 'Log In'}
+          </button>
+        </div>
+        {error && <p style={{ color: 'red' }}>{error}</p>}
+      </form>
+    </div>
+  );
 }

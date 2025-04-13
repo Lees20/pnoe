@@ -1,3 +1,4 @@
+// prisma/schema.prisma
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -5,7 +6,6 @@ datasource db {
 
 generator client {
   provider = "prisma-client-js"
-  output   = "./prisma/generated" 
 }
 
 model User {
@@ -15,6 +15,22 @@ model User {
   name      String?
   surname   String?
   phone     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  sessions  Session[]
+  accounts  Account[]
+}
+
+model Session {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  sessionToken String  @unique
+  expires    DateTime
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model Account {
+  id         Int    @id @default(autoincrement())
+  userId     Int
+  provider   String
+  providerAccountId String
+  user       User   @relation(fields: [userId], references: [id])
 }

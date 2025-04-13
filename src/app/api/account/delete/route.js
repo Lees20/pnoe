@@ -1,11 +1,9 @@
-import { getSession } from "next-auth/react"; // If using session-based auth
-import prisma from "../../../../../lib/prisma"; // Ensure correct import path
+import { getSession } from "next-auth/react";
+import prisma from "../../../../../lib/prisma"; // Ensure correct import
 
 export async function DELETE(req) {
   try {
-    // Get the current session
     const session = await getSession({ req });
-
     if (!session || !session.user) {
       return new Response(
         JSON.stringify({ message: "You must be logged in to delete your account." }),
@@ -13,7 +11,7 @@ export async function DELETE(req) {
       );
     }
 
-    // Find the user in the database using email
+    // Perform user deletion logic
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
     });
@@ -25,12 +23,10 @@ export async function DELETE(req) {
       );
     }
 
-    // Delete the user from the database
     await prisma.user.delete({
       where: { email: user.email },
     });
 
-    // Send a success response
     return new Response(
       JSON.stringify({ message: "Account deleted successfully." }),
       { status: 200, headers: { "Content-Type": "application/json" } }

@@ -1,8 +1,6 @@
-import { PrismaClient } from "@prisma/client";
 import { hash } from "bcryptjs";
 import { getSession } from "next-auth/react"; // If using session-based auth
-
-const prisma = new PrismaClient();
+import prisma from '../../../../../lib/prisma';  // Correct import path for the singleton Prisma Client
 
 export async function POST(request) {
   try {
@@ -19,7 +17,7 @@ export async function POST(request) {
     const body = await request.json();
     const { email, password } = body;
 
-    // Find user by session ID
+    // Find user by session email
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
     });

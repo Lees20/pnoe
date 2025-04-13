@@ -6,6 +6,8 @@
 @tailwind components;
 @tailwind utilities;
 
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 :root {
   --background: 255 255 255;
   --foreground: 17 17 17;
@@ -57,9 +59,3 @@
   animation: shimmer 2s infinite linear;
 }
 
-
-/* styles/globals.css */
-body {
-  font-family: 'Inter', sans-serif;
-  /* If you're using a custom font, make sure it's linked in _document.js as mentioned above */
-}

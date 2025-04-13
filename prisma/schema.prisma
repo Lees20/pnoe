@@ -1,4 +1,3 @@
-// prisma/schema.prisma
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -9,28 +8,30 @@ generator client {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  name      String?
-  surname   String?
-  phone     String?
-  sessions  Session[]
-  accounts  Account[]
+  id        Int      @id @default(autoincrement()) // Unique identifier for the user
+  email     String   @unique // Email address (unique)
+  password  String   // Hashed password
+  name      String?  // User's first name
+  surname   String?  // User's last name
+  phone     String?  // User's phone number
+  createdAt DateTime @default(now()) // Automatically set when the user is created
+  updatedAt DateTime @updatedAt // Automatically set when the user is updated
+  sessions  Session[] // One-to-many relationship with sessions
+  accounts  Account[] // One-to-many relationship with accounts
 }
 
 model Session {
-  id         Int      @id @default(autoincrement())
-  userId     Int
-  sessionToken String  @unique
-  expires    DateTime
-  user       User     @relation(fields: [userId], references: [id])
+  id            Int      @id @default(autoincrement()) // Unique identifier for session
+  userId        Int      // Foreign key to User model
+  sessionToken  String   @unique // Unique session token
+  expires       DateTime // Expiration date of the session
+  user          User     @relation(fields: [userId], references: [id]) // Relate session to user
 }
 
 model Account {
-  id         Int    @id @default(autoincrement())
-  userId     Int
-  provider   String
-  providerAccountId String
-  user       User   @relation(fields: [userId], references: [id])
+  id                    Int      @id @default(autoincrement()) // Unique identifier for account
+  userId                Int      // Foreign key to User model
+  provider              String   // Authentication provider (e.g., Google, Facebook)
+  providerAccountId     String   // Provider-specific account ID (e.g., Google user ID)
+  user                  User     @relation(fields: [userId], references: [id]) // Relate account to user
 }

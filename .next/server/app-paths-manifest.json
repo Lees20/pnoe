@@ -1,11 +1,9 @@
 {
-  "/api/auth/signup/route": "app/api/auth/signup/route.js",
   "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
-  "/login/page": "app/login/page.js",
+  "/experiences/page": "app/experiences/page.js",
   "/dashboard/page": "app/dashboard/page.js",
-  "/bookings/page": "app/bookings/page.js",
-  "/sign-up/page": "app/sign-up/page.js",
-  "/page": "app/page.js",
+  "/login/page": "app/login/page.js",
+  "/account/settings/page": "app/account/settings/page.js",
   "/favourites/page": "app/favourites/page.js",
-  "/experiences/page": "app/experiences/page.js"
+  "/bookings/page": "app/bookings/page.js"
 }

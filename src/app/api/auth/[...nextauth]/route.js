@@ -74,7 +74,8 @@ export const POST = (req, res) => NextAuth(req, res, authOptions);
 
 // Gracefully disconnect Prisma client when the server shuts down (for serverless environments)
 if (process.env.NODE_ENV === "production") {
-  prisma.$on('beforeExit', async () => {
+  process.on('SIGINT', async () => {
     await prisma.$disconnect();
+    process.exit(0);  // Exit the process after disconnecting
   });
 }

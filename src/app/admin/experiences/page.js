@@ -34,6 +34,9 @@ const AdminExperiencesPage = () => {
   }, [session]);
 
   const handleDeleteExperience = async (id) => {
+    const confirmed = confirm('Are you sure you want to delete this experience?');
+    if (!confirmed) return;
+  
     const response = await fetch(`/api/admin/experiences`, {
       method: 'DELETE',
       headers: {
@@ -41,9 +44,13 @@ const AdminExperiencesPage = () => {
       },
       body: JSON.stringify({ id }),
     });
-
+  
+    const data = await response.json();
+  
     if (response.ok) {
-      setExperiences(experiences.filter(experience => experience.id !== id));
+      setExperiences(experiences.filter(exp => exp.id !== id));
+    } else {
+      alert(data.error || 'Failed to delete experience.');
     }
   };
 

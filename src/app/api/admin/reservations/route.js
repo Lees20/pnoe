@@ -83,6 +83,7 @@ export async function DELETE(req) {
     return NextResponse.json(deletedBooking);
   } catch (error) {
     console.error('Error deleting reservation:', error);
+    
     return NextResponse.json({ error: 'Failed to delete reservation' }, { status: 500 });
   }
 }

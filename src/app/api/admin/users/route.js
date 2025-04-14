@@ -78,7 +78,7 @@ export async function DELETE(req) {
     if (error.code === 'P2003') {
       return NextResponse.json(
         {
-          error: 'Ο χρήστης δεν μπορεί να διαγραφεί γιατί σχετίζεται με άλλες εγγραφές (π.χ. κρατήσεις). Διαγράψτε τον χρήστη απο τις σχετικές εγγραφές πρώτα και ξανά προσπαθήστε.',
+          error: 'Cannot delete user. User has bookings or favourites. Please delete them first.',
         },
         { status: 400 }
       );

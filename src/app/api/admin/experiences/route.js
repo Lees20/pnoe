@@ -103,6 +103,14 @@ export async function DELETE(req) {
     if (error.code === 'P2025') { // Prisma error for record not found
       return handleResponse({ error: 'Experience not found' }, 404);
     }
+    if (error.code === 'P2003') {
+      return NextResponse.json(
+        {
+          error: 'The experience cannot be deleted because it is related to other records (e.g., bookings). Please delete the related records first and try again.',
+        },
+        { status: 400 }
+      );
+    }
     console.error("Error deleting experience:", error);
     return handleResponse({ error: 'Failed to delete experience' }, 500);
   }

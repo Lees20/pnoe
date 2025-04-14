@@ -32,7 +32,7 @@ const AdminDashboardPage = () => {
             className="p-6 cursor-pointer bg-white border rounded-xl shadow-md hover:shadow-lg hover:bg-blue-50 transition"
           >
             <h3 className="text-xl font-semibold text-blue-700">🧭 Manage Experiences</h3>
-            <p className="text-gray-600 mt-2">Create, edit and delete travel experiences.</p>
+            <p className="text-gray-600 mt-2">Create, edit and delete experiences.</p>
           </div>
 
           <div
@@ -40,7 +40,7 @@ const AdminDashboardPage = () => {
             className="p-6 cursor-pointer bg-white border rounded-xl shadow-md hover:shadow-lg hover:bg-blue-50 transition"
           >
             <h3 className="text-xl font-semibold text-blue-700">📆 View Reservations</h3>
-            <p className="text-gray-600 mt-2">See all bookings made by users.</p>
+            <p className="text-gray-600 mt-2">Manage Bookings made by users.</p>
           </div>
 
           <div

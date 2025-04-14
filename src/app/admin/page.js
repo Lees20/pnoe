@@ -39,7 +39,7 @@ const AdminDashboardPage = () => {
             onClick={() => handleRedirect('/admin/reservations')}
             className="p-6 cursor-pointer bg-white border rounded-xl shadow-md hover:shadow-lg hover:bg-blue-50 transition"
           >
-            <h3 className="text-xl font-semibold text-blue-700">📆 View Reservations</h3>
+            <h3 className="text-xl font-semibold text-blue-700">📆 Manage Reservations</h3>
             <p className="text-gray-600 mt-2">Manage Bookings made by users.</p>
           </div>
 

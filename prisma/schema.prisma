@@ -61,9 +61,19 @@ model Booking {
 
 // Assuming you have an Experience model to store details about experiences
 model Experience {
-  id          Int       @id @default(autoincrement()) // Unique identifier for an experience
-  name        String    // Experience name
-  description String?   // Optional description of the experience
+  id            Int      @id @default(autoincrement()) // Unique identifier for an experience
+  name          String   // Experience name
+  description   String?  // Optional description of the experience
+  price         Float    @default(85) // Default value for price (€85)
+  location      String   @default("Chania, Crete") // Default location
+  whatsIncluded String?  // "Hands-on olive harvesting..."
+  whatToBring   String?  // "Wear comfortable clothes..."
+  whyYoullLove  String?  // "Connect with nature..."
+  duration      String? 
+  // Use Json type for storing arrays
+  images        Json?    // Store image URLs as JSON array
+  mapPin        String?  // URL or coordinates for the map pin
+  guestReviews  Json?    // Store reviews as JSON array
   favourites  Favourite[] // One-to-many relationship with favourites
   bookings    Booking[]   // One-to-many relationship with bookings
 }

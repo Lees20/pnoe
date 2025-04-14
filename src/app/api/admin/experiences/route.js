@@ -1,57 +1,109 @@
 import { NextResponse } from 'next/server';
 import prisma from '../../../../lib/prisma'; // Adjust the path if necessary
 
-// GET /api/admin/experiences
+// Utility function to handle errors and responses
+const handleResponse = (data, status = 200) => {
+  return NextResponse.json(data, { status });
+};
+
+// GET /api/admin/experiences - Fetch all experiences
 export async function GET() {
   try {
-    // Fetch experiences from the database
     const experiences = await prisma.experience.findMany();
-    return NextResponse.json(experiences); // Return JSON response with 200 status by default
+    return handleResponse(experiences);
   } catch (error) {
-    console.error("Error fetching experiences:", error); // Log error details for debugging
-    return NextResponse.json({ error: 'Failed to fetch experiences' }, { status: 500 });
+    console.error("Error fetching experiences:", error);
+    return handleResponse({ error: 'Failed to fetch experiences' }, 500);
   }
 }
 
-// POST /api/admin/experiences
+// POST /api/admin/experiences - Create a new experience
 export async function POST(req) {
-  const { name, description } = await req.json(); // Read the request body
+  const { name, description, price, location, duration, whatsIncluded, whatToBring, whyYoullLove, images, mapPin, guestReviews } = await req.json();
+
+  // Simple validation for required fields
+  if (!name || !description || !price || !location || !duration) {
+    return handleResponse({ error: 'Missing required fields' }, 400);
+  }
 
   try {
     const newExperience = await prisma.experience.create({
-      data: { name, description },
+      data: {
+        name,
+        description,
+        price,
+        location,
+        duration,
+        whatsIncluded,
+        whatToBring,
+        whyYoullLove,
+        images,
+        mapPin,
+        guestReviews,
+      },
     });
-    return NextResponse.json(newExperience, { status: 200 });
+    return handleResponse(newExperience);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to add experience' }, { status: 500 });
+    console.error("Error creating experience:", error);
+    return handleResponse({ error: 'Failed to add experience' }, 500);
   }
 }
 
-// PUT /api/admin/experiences
+// PUT /api/admin/experiences - Update an existing experience
 export async function PUT(req) {
-  const { id, name, description } = await req.json(); // Read the request body
+  const { id, name, description, price, location, duration, whatsIncluded, whatToBring, whyYoullLove, images, mapPin, guestReviews } = await req.json();
+
+  // Validate ID and required fields
+  if (!id || !name || !description || !price || !location || !duration) {
+    return handleResponse({ error: 'Missing required fields' }, 400);
+  }
 
   try {
     const updatedExperience = await prisma.experience.update({
       where: { id },
-      data: { name, description },
+      data: {
+        name,
+        description,
+        price,
+        location,
+        duration,
+        whatsIncluded,
+        whatToBring,
+        whyYoullLove,
+        images,
+        mapPin,
+        guestReviews,
+      },
     });
-    return NextResponse.json(updatedExperience, { status: 200 });
+    return handleResponse(updatedExperience);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to update experience' }, { status: 500 });
+    if (error.code === 'P2025') { // Prisma error for record not found
+      return handleResponse({ error: 'Experience not found' }, 404);
+    }
+    console.error("Error updating experience:", error);
+    return handleResponse({ error: 'Failed to update experience' }, 500);
   }
 }
 
-// DELETE /api/admin/experiences
+// DELETE /api/admin/experiences - Delete an experience
 export async function DELETE(req) {
-  const { id } = await req.json(); // Read the request body
+  const { id } = await req.json();
+
+  // Validate ID
+  if (!id) {
+    return handleResponse({ error: 'Experience ID is required' }, 400);
+  }
 
   try {
     const deletedExperience = await prisma.experience.delete({
       where: { id },
     });
-    return NextResponse.json(deletedExperience, { status: 200 });
+    return handleResponse(deletedExperience);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to delete experience' }, { status: 500 });
+    if (error.code === 'P2025') { // Prisma error for record not found
+      return handleResponse({ error: 'Experience not found' }, 404);
+    }
+    console.error("Error deleting experience:", error);
+    return handleResponse({ error: 'Failed to delete experience' }, 500);
   }
 }

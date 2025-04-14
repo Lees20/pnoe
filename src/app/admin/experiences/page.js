@@ -93,6 +93,15 @@ const AdminExperiencesPage = () => {
               const newExperience = {
                 name: e.target.name.value,
                 description: e.target.description.value,
+                price: parseFloat(e.target.price.value), // Make sure the price is a number
+                location: e.target.location.value,
+                duration: e.target.duration.value,
+                whatsIncluded: e.target.whatsIncluded.value, // Ensure this is included
+                whatToBring: e.target.whatToBring.value, // Ensure this is included
+                whyYoullLove: e.target.whyYoullLove.value, // Ensure this is included
+                images: e.target.images.value.split(','), // Assuming images are comma-separated URLs
+                mapPin: e.target.mapPin.value,
+                guestReviews: e.target.guestReviews.value.split(','), // Assuming reviews are comma-separated
               };
               handleAddExperience(newExperience);
               e.target.reset();
@@ -104,11 +113,69 @@ const AdminExperiencesPage = () => {
                 required 
                 className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
               />
+              <input 
+                type="text" 
+                name="location" 
+                placeholder="Location" 
+                required 
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+              />
+              <input 
+                type="text" 
+                name="duration" 
+                placeholder="Duration" 
+                required 
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+              />
+              <input 
+                type="number" 
+                name="price" 
+                placeholder="Price" 
+                required 
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+              />
               <textarea 
                 name="description" 
                 placeholder="Experience Description" 
                 required 
                 className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <textarea 
+                name="whatsIncluded" 
+                placeholder="What’s Included" 
+                required 
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <textarea 
+                name="whatToBring" 
+                placeholder="What to Bring" 
+                required 
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <textarea 
+                name="whyYoullLove" 
+                placeholder="Why You’ll Love It" 
+                required 
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <input 
+                type="text" 
+                name="images" 
+                placeholder="Images (comma-separated URLs)" 
+                required 
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+              />
+              <input 
+                type="text" 
+                name="mapPin" 
+                placeholder="Map Pin (URL or Coordinates)" 
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+              />
+              <input 
+                type="text" 
+                name="guestReviews" 
+                placeholder="Guest Reviews (comma-separated)" 
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
               />
               <button 
                 type="submit" 
@@ -117,6 +184,7 @@ const AdminExperiencesPage = () => {
                 Add Experience
               </button>
             </form>
+
           </div>
 
           {/* Experiences List */}
@@ -125,6 +193,9 @@ const AdminExperiencesPage = () => {
               <div key={experience.id} className="p-6 bg-white border rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
                 <h3 className="text-xl font-semibold">{experience.name}</h3>
                 <p className="mt-2 text-gray-600">{experience.description}</p>
+                <p className="mt-2 text-gray-600"><strong>Location:</strong> {experience.location}</p>
+                <p className="mt-2 text-gray-600"><strong>Price:</strong> €{experience.price}</p>
+                <p className="mt-2 text-gray-600"><strong>Duration:</strong> {experience.duration}</p>
 
                 <div className="mt-4 flex justify-between">
                   <button 
@@ -161,6 +232,15 @@ const AdminExperiencesPage = () => {
                     id: editingExperience.id,
                     name: e.target.name.value,
                     description: e.target.description.value,
+                    price: parseFloat(e.target.price.value),
+                    location: e.target.location.value,
+                    duration: e.target.duration.value,
+                    whatsIncluded: e.target.whatsIncluded.value,
+                    whatToBring: e.target.whatToBring.value,
+                    whyYoullLove: e.target.whyYoullLove.value,
+                    images: e.target.images.value.split(','),
+                    mapPin: e.target.mapPin.value,
+                    guestReviews: e.target.guestReviews.value.split(','),
                   };
                   handleUpdateExperience(updatedExperience);
                 }}>

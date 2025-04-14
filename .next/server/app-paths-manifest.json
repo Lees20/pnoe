@@ -1,7 +1,3 @@
 {
-  "/login/page": "app/login/page.js",
-  "/admin/experiences/page": "app/admin/experiences/page.js",
-  "/page": "app/page.js",
-  "/dashboard/page": "app/dashboard/page.js",
-  "/account/settings/page": "app/account/settings/page.js"
+  "/page": "app/page.js"
 }

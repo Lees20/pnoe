@@ -42,6 +42,7 @@ export default function Header() {
         </button>
 
         {/* Desktop Nav */}
+            
         <nav className="hidden md:flex gap-6 items-center">
           {navLinks.map((link) => (
             <button
@@ -61,6 +62,7 @@ export default function Header() {
               >
                 <UserCircle size={20} /> {session.user?.name?.split(' ')[0] || 'Account'} <ChevronDown size={16} />
               </button>
+              
               {dropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-[#eae6e0] z-10">
                   <button
@@ -81,6 +83,13 @@ export default function Header() {
                   >
                     Settings
                   </button>
+                  
+                  {session?.user?.role === 'admin' && (
+                    <nav>
+                      <a   className="block w-full text-left px-4 py-2 text-sm hover:bg-[#fdfaf5] text-[#5a4a3f]" 
+                      href="/admin/experiences">Manage Experiences</a> {/* Link to the admin page */}
+                    </nav>
+                  )}
                   <button
                     onClick={() => signOut()}
                     className="block w-full text-left px-4 py-2 text-sm hover:bg-[#fdfaf5] text-[#b44d4d]"
@@ -90,6 +99,7 @@ export default function Header() {
                 </div>
               )}
             </div>
+            
           ) : (
             <>
               {/* Discreet "Log In" Button with Icon */}
@@ -214,12 +224,13 @@ export default function Header() {
           </button>
           
           {session?.user?.role === 'admin' && (
-        <nav>
-          <a href="/admin/experiences">Manage Experiences</a> {/* Link to the admin page */}
-        </nav>
-      )}
-        </div>
-      )}
+                    <nav>
+                      <a   className="block w-full text-left px-4 py-2 text-sm hover:bg-[#fdfaf5] text-[#5a4a3f]" 
+                      href="/admin/experiences">Manage Experiences</a> {/* Link to the admin page */}
+                    </nav>
+                  )}
+            </div>
+          )}
       
     </header>
   );

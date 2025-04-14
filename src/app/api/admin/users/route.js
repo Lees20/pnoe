@@ -67,10 +67,26 @@ export async function DELETE(req) {
 
   try {
     const deletedUser = await prisma.user.delete({
-      where: { id },
+      where: { id: Number(id) },
     });
+
     return NextResponse.json(deletedUser);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to delete user' }, { status: 500 });
+    console.error('Error deleting user:', error);
+
+    // Prisma Foreign Key Constraint Error (π.χ. υπάρχουν bookings ή favourites)
+    if (error.code === 'P2003') {
+      return NextResponse.json(
+        {
+          error: 'Ο χρήστης δεν μπορεί να διαγραφεί γιατί σχετίζεται με άλλες εγγραφές (π.χ. κρατήσεις). Διαγράψτε τον χρήστη απο τις σχετικές εγγραφές πρώτα και ξανά προσπαθήστε.',
+        },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json(
+      { error: 'Αποτυχία διαγραφής χρήστη.' },
+      { status: 500 }
+    );
   }
 }

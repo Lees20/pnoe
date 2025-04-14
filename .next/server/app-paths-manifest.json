@@ -1,11 +1,10 @@
 {
-  "/api/admin/reservations/route": "app/api/admin/reservations/route.js",
-  "/api/admin/experiences/route": "app/api/admin/experiences/route.js",
   "/api/admin/users/route": "app/api/admin/users/route.js",
-  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
-  "/admin/reservations/page": "app/admin/reservations/page.js",
+  "/api/admin/experiences/route": "app/api/admin/experiences/route.js",
+  "/api/admin/reservations/route": "app/api/admin/reservations/route.js",
   "/admin/page": "app/admin/page.js",
   "/admin/users/page": "app/admin/users/page.js",
   "/admin/experiences/page": "app/admin/experiences/page.js",
+  "/admin/reservations/page": "app/admin/reservations/page.js",
   "/page": "app/page.js"
 }

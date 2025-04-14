@@ -97,8 +97,16 @@ const AdminClientsPage = () => {
     <div className="p-6 max-w-screen-xl mx-auto">
       <h1 className="text-3xl font-bold mb-6">Registered Clients</h1>
 
-      {/* Add New User Button */}
+      <div className="mb-4">
+        <button
+            onClick={() => router.push('/admin/')}
+            className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+        >
+            ← Back to Dashboard
+        </button>
+        </div>
       {!showAddForm ? (
+        
         <button
           onClick={() => setShowAddForm(true)}
           className="mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"

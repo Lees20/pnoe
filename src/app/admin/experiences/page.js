@@ -87,8 +87,14 @@ const AdminExperiencesPage = () => {
       <h1 className="text-3xl font-bold text-center mb-6">Admin Dashboard</h1>
       {session && session.user.role === "admin" ? (
         <div>
-          {/* Add Experience Form */}
-        {/* Toggle Add Experience Button & Form */}
+             <div className="mb-4">
+        <button
+            onClick={() => router.push('/admin/')}
+            className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+        >
+            ← Back to Dashboard
+        </button>
+        </div>
           <div className="mb-6 text-center">
             {!showAddForm ? (
               <button

@@ -87,7 +87,7 @@ export default function Header() {
                   {session?.user?.role === 'admin' && (
                     <nav>
                       <a   className="block w-full text-left px-4 py-2 text-sm hover:bg-[#fdfaf5] text-[#5a4a3f]" 
-                      href="/admin/experiences">Manage Experiences</a> {/* Link to the admin page */}
+                      href="/admin">Admin Dashboard</a> {/* Link to the admin page */}
                     </nav>
                   )}
                   <button
@@ -216,7 +216,7 @@ export default function Header() {
           {session?.user?.role === 'admin' && (
                     <nav>
                       <a   className="block w-full text-left px-4 py-2 text-sm hover:bg-[#fdfaf5] text-[#5a4a3f]" 
-                      href="/admin/experiences">Manage Experiences</a> {/* Link to the admin page */}
+                      href="/admin">Admin Dashboard</a> {/* Link to the admin page */}
                     </nav>
                   )}
           <button

@@ -21,126 +21,134 @@ const AdminReservationsPage = () => {
   const [showForm, setShowForm] = useState(false);
   const [viewMode, setViewMode] = useState('today'); // today | all | upcoming | past
 
-  const exportToExcel = () => {
-    if (!bookings || bookings.length === 0) {
-      alert("No bookings available to export.");
-      return;
-    }
-  
-    const workbook = XLSX.utils.book_new();
-    const sheetData = [];
-    const merges = [];
-  
-    const groupedByExperience = bookings.reduce((acc, b) => {
-      const expName = b.experience?.name || 'Unknown Experience';
-      if (!acc[expName]) acc[expName] = [];
-      acc[expName].push({
-        Name: `${b.user?.name ?? '—'} ${b.user?.surname ?? ''}`,
-        Email: b.user?.email ?? '—',
-        Phone: b.user?.phone ?? '—',
-        Date: new Date(b.date),
-      });
-      return acc;
-    }, {});
-  
-    let rowIndex = 0;
-  
-    Object.entries(groupedByExperience).forEach(([experienceName, rows], index, array) => {
-      // Experience Title Row
-      const titleCell = `${experienceName} Reservations`;
-      sheetData.push([titleCell]);
-      merges.push({
-        s: { r: rowIndex, c: 0 },
-        e: { r: rowIndex, c: 3 }
-      });
-      rowIndex++;
-  
-      // Header Row
-      const headers = ['Name', 'Email', 'Phone', 'Date'];
-      sheetData.push(headers);
-      rowIndex++;
-  
-      // Data Rows
-      // Sort by ascending date (closer to today first)
-      rows.sort((a, b) => a.Date - b.Date);
-
-      // Push to sheet AFTER sorting
-      rows.forEach(row => {
-        sheetData.push([
-          row.Name,
-          row.Email,
-          row.Phone,
-          row.Date.toLocaleString(), // Format here!
-        ]);
-        rowIndex++;
-      });
-
-
-      // Spacer Row
-      if (index < array.length - 1) {
-        sheetData.push([]);
-        rowIndex++;
-      }
-    });
-  
-    const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
-    worksheet['!merges'] = merges;
-  
-    // Set column widths
-    worksheet['!cols'] = [
-      { wch: 25 },
-      { wch: 30 },
-      { wch: 20 },
-      { wch: 25 },
-    ];
-  
-    // Apply styles
-    Object.keys(worksheet).forEach(cell => {
-      if (!cell.startsWith('!')) {
-        const cellRef = XLSX.utils.decode_cell(cell);
-        const value = worksheet[cell].v;
-  
-        // Bold titles
-        if (value?.toString().includes('Reservations') && cellRef.c === 0) {
-          worksheet[cell].s = {
-            font: { bold: true, sz: 14 },
-            alignment: { horizontal: 'center' },
-          };
+      const exportToExcel = () => {
+        if (!bookings || bookings.length === 0) {
+          alert("No bookings available to export.");
+          return;
         }
-  
-        // Bold headers
-        if (
-          sheetData[cellRef.r]?.[0] === 'Name' &&
-          ['Name', 'Email', 'Phone', 'Date'].includes(value)
-        ) {
-          worksheet[cell].s = {
-            font: { bold: true },
-            alignment: { horizontal: 'left' },
-            fill: { fgColor: { rgb: "E8EAF6" } },
-          };
-        }
-  
-        // Add borders to all
-        worksheet[cell].s = {
-          ...(worksheet[cell].s || {}),
-          border: {
-            top: { style: "thin", color: { auto: 1 } },
-            bottom: { style: "thin", color: { auto: 1 } },
-            left: { style: "thin", color: { auto: 1 } },
-            right: { style: "thin", color: { auto: 1 } }
-          },
-          alignment: {
-            ...(worksheet[cell].s?.alignment || {}),
-            vertical: 'center',
+      
+        const now = new Date();
+      
+        const filteredBookings = bookings.filter(b => {
+          const date = new Date(b.date);
+          const isToday = date.toDateString() === now.toDateString();
+          const isFuture = date > now && !isToday;
+          const isPast = date < now && !isToday;
+      
+          switch (viewMode) {
+            case 'today':
+              return isToday;
+            case 'upcoming':
+              return isFuture;
+            case 'past':
+              return isPast;
+            case 'all':
+            default:
+              return true;
           }
-        };
-      }
-    });
-  
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'All Reservations');
-    XLSX.writeFile(workbook, `reservations-${new Date().toISOString().slice(0, 10)}.xlsx`);
-  };
-  
+        });
+      
+        if (filteredBookings.length === 0) {
+          alert("No bookings to export for selected view.");
+          return;
+        }
+      
+        const workbook = XLSX.utils.book_new();
+        const sheetData = [];
+        const merges = [];
+      
+        const groupedByExperience = filteredBookings.reduce((acc, b) => {
+          const expName = b.experience?.name || 'Unknown Experience';
+          if (!acc[expName]) acc[expName] = [];
+          acc[expName].push({
+            Name: `${b.user?.name ?? '—'} ${b.user?.surname ?? ''}`,
+            Email: b.user?.email ?? '—',
+            Phone: b.user?.phone ?? '—',
+            Date: new Date(b.date),
+          });
+          return acc;
+        }, {});
+      
+        let rowIndex = 0;
+      
+        Object.entries(groupedByExperience).forEach(([experienceName, rows], index, array) => {
+          sheetData.push([`${experienceName} Reservations`]);
+          merges.push({ s: { r: rowIndex, c: 0 }, e: { r: rowIndex, c: 3 } });
+          rowIndex++;
+      
+          const headers = ['Name', 'Email', 'Phone', 'Date'];
+          sheetData.push(headers);
+          rowIndex++;
+      
+          rows.sort((a, b) => a.Date - b.Date).forEach(row => {
+            sheetData.push([
+              row.Name,
+              row.Email,
+              row.Phone,
+              row.Date.toLocaleString(),
+            ]);
+            rowIndex++;
+          });
+      
+          if (index < array.length - 1) {
+            sheetData.push([]);
+            rowIndex++;
+          }
+        });
+      
+        const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
+        worksheet['!merges'] = merges;
+        worksheet['!cols'] = [
+          { wch: 25 },
+          { wch: 30 },
+          { wch: 20 },
+          { wch: 25 },
+        ];
+      
+        Object.keys(worksheet).forEach(cell => {
+          if (!cell.startsWith('!')) {
+            const cellRef = XLSX.utils.decode_cell(cell);
+            const value = worksheet[cell].v;
+      
+            if (value?.toString().includes('Reservations') && cellRef.c === 0) {
+              worksheet[cell].s = {
+                font: { bold: true, sz: 14 },
+                alignment: { horizontal: 'center' },
+              };
+            }
+      
+            if (
+              sheetData[cellRef.r]?.[0] === 'Name' &&
+              ['Name', 'Email', 'Phone', 'Date'].includes(value)
+            ) {
+              worksheet[cell].s = {
+                font: { bold: true },
+                alignment: { horizontal: 'left' },
+                fill: { fgColor: { rgb: "E8EAF6" } },
+              };
+            }
+      
+            worksheet[cell].s = {
+              ...(worksheet[cell].s || {}),
+              border: {
+                top: { style: "thin", color: { auto: 1 } },
+                bottom: { style: "thin", color: { auto: 1 } },
+                left: { style: "thin", color: { auto: 1 } },
+                right: { style: "thin", color: { auto: 1 } }
+              },
+              alignment: {
+                ...(worksheet[cell].s?.alignment || {}),
+                vertical: 'center',
+              }
+            };
+          }
+        });
+      
+        XLSX.utils.book_append_sheet(workbook, worksheet, `Reservations - ${viewMode}`);
+        XLSX.writeFile(workbook, `reservations-${viewMode}-${new Date().toISOString().slice(0, 10)}.xlsx`);
+      };
+      
+
   
 
 

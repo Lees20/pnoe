@@ -15,6 +15,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (session) {
+      console.log("Session user:", session.user);
       setEmail(session.user.email || '');
       setName(session.user.name || '');
       setPhone(session.user.phone || '');

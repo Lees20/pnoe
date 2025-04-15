@@ -1,3 +1,5 @@
+// src/app/api/auth/[...nextauth]/route.js
+
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaClient } from '@prisma/client';
@@ -7,19 +9,19 @@ import { PrismaAdapter } from '@next-auth/prisma-adapter';
 const prisma = new PrismaClient();
 
 export const authOptions = {
-  adapter: PrismaAdapter(prisma), // Optional if you're using sessions stored in DB
+  adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
         const { email, password } = credentials;
 
         if (!email || !password) {
-          throw new Error("Please enter both email and password.");
+          throw new Error('Please enter both email and password.');
         }
 
         try {
@@ -28,14 +30,15 @@ export const authOptions = {
           });
 
           if (!user) {
-            throw new Error("No user found with this email.");
+            throw new Error('No user found with this email.');
           }
 
           const isPasswordValid = await compare(password, user.password);
           if (!isPasswordValid) {
-            throw new Error("Invalid password.");
+            throw new Error('Invalid password.');
           }
 
+          // Return fields to be embedded into the JWT
           return {
             id: user.id,
             email: user.email,
@@ -43,10 +46,10 @@ export const authOptions = {
             surname: user.surname,
             phone: user.phone,
             role: user.role,
-            dateOfBirth: user.dateOfBirth?.toISOString() ?? null, // ✅ include it here too
+            dateOfBirth: user.dateOfBirth?.toISOString() ?? null,
           };
         } catch (error) {
-          throw new Error("An unexpected error occurred. Please try again.");
+          throw new Error('An unexpected error occurred. Please try again.');
         }
       },
     }),
@@ -62,17 +65,19 @@ export const authOptions = {
         token.name = user.name;
         token.phone = user.phone;
         token.role = user.role;
-        token.dateOfBirth = user.dateOfBirth ?? null; // ✅ fix: include in token
+        token.dateOfBirth = user.dateOfBirth ?? null;
       }
       return token;
     },
     async session({ session, token }) {
-      session.user.id = token.id;
-      session.user.email = token.email;
-      session.user.name = token.name;
-      session.user.phone = token.phone;
-      session.user.role = token.role;
-      session.user.dateOfBirth = token.dateOfBirth; // ✅ now this will be available client-side
+      if (session.user) {
+        session.user.id = token.id;
+        session.user.email = token.email;
+        session.user.name = token.name;
+        session.user.phone = token.phone;
+        session.user.role = token.role;
+        session.user.dateOfBirth = token.dateOfBirth ?? null;
+      }
       return session;
     },
   },
@@ -82,7 +87,6 @@ export const authOptions = {
   },
 };
 
-// API route handlers
 export async function GET(req, res) {
   return NextAuth(req, res, authOptions);
 }

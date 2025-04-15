@@ -300,58 +300,85 @@ const AdminReservationsPage = () => {
 
   return (
     <div className="p-6 max-w-screen-xl mx-auto print:block">
-      <h1 className="text-3xl font-bold mb-6">Reservations per Experience</h1>
-        <div className="mb-4">
-        <button
-            onClick={() => router.push('/admin/')}
-            className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 print:hidden"
-        >
-            ← Back to Dashboard
-        </button>
-        </div>
+      <h1 className="text-3xl font-serif font-semibold text-[#5a4a3f] mb-8 text-center">
+  Reservations per Experience
+</h1>
 
-      <button
-        onClick={() => { setEditingBooking(null); setShowForm(true); }}
-        className="px-4 py-2 mb-4 bg-green-600 text-white rounded print:hidden"
-      >
-        + Add Reservation
-      </button>
- 
-      <button
-        onClick={exportToExcel}
-        className="mb-6 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 print:hidden"
-      >
-        Download Excel
-      </button>
-      <button
-        onClick={() => window.print()}
-        className="mb-6 ml-4 px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-800 print:hidden"
-      >
-        Print Reservations
-      </button>
+      <div className="flex flex-wrap gap-4 mb-8 justify-center sm:justify-start print:hidden">
+
+        {/* Back to Dashboard */}
+        <button
+          onClick={() => router.push('/admin/')}
+          className="px-5 py-2.5 rounded-full bg-[#f4f1ec] text-[#5a4a3f] border border-[#d8cfc3] shadow-sm hover:bg-[#eae5df] transition-all text-sm font-medium"
+        >
+          ← Back to Dashboard
+        </button>
+
+        {/* Add Reservation */}
+        <button
+          onClick={() => { setEditingBooking(null); setShowForm(true); }}
+          className="px-5 py-2.5 rounded-full bg-[#8b6f47] text-white shadow hover:bg-[#a78b62] transition-all text-sm font-medium"
+        >
+          + Add Reservation
+        </button>
+
+        {/* Export Excel */}
+        <button
+          onClick={exportToExcel}
+          className="px-5 py-2.5 rounded-full bg-[#6b63ff] text-white shadow hover:bg-[#5852dc] transition-all text-sm font-medium"
+        >
+          Download Excel
+        </button>
+
+        {/* Print Reservations */}
+        <button
+          onClick={() => window.print()}
+          className="px-5 py-2.5 rounded-full bg-[#5a4a3f] text-white shadow hover:bg-[#463c33] transition-all text-sm font-medium"
+        >
+          Print Reservations
+        </button>
+      </div>
+
 
 
 
       {/* Filters */}
-      <div className="flex gap-4 mb-6 print:hidden">
-        <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="border p-2 rounded" />
-        <select value={selectedExperience} onChange={(e) => setSelectedExperience(e.target.value)} className="border p-2 rounded">
+      <div className="flex flex-wrap items-center gap-4 mb-8 print:hidden">
+        {/* Date Picker */}
+        <input
+          type="date"
+          value={selectedDate}
+          onChange={(e) => setSelectedDate(e.target.value)}
+          className="px-4 py-2 rounded-full border border-[#d8cfc3] bg-[#fefcf9] text-[#5a4a3f] focus:outline-none focus:ring-2 focus:ring-[#8b6f47] font-serif"
+        />
+
+        {/* Experience Select */}
+        <select
+          value={selectedExperience}
+          onChange={(e) => setSelectedExperience(e.target.value)}
+          className="px-4 py-2 rounded-full border border-[#d8cfc3] bg-[#fefcf9] text-[#5a4a3f] focus:outline-none focus:ring-2 focus:ring-[#8b6f47] font-serif"
+        >
           <option value="">All Experiences</option>
-          {experiences.map(exp => (
-            <option key={exp.id} value={exp.id}>{exp.name}</option>
+          {experiences.map((exp) => (
+            <option key={exp.id} value={exp.id}>
+              {exp.name}
+            </option>
           ))}
         </select>
+
+        {/* View Mode */}
+        <select
+          value={viewMode}
+          onChange={(e) => setViewMode(e.target.value)}
+          className="px-4 py-2 rounded-full border border-[#d8cfc3] bg-[#fefcf9] text-[#5a4a3f] focus:outline-none focus:ring-2 focus:ring-[#8b6f47] font-serif"
+        >
+          <option value="today">Today</option>
+          <option value="upcoming">Upcoming</option>
+          <option value="past">Past</option>
+          <option value="all">All</option>
+        </select>
       </div>
-      <select
-        value={viewMode}
-        onChange={(e) => setViewMode(e.target.value)}
-        className="border p-2 rounded print:hidden"
-      >
-        <option value="today">Today</option>
-        <option value="upcoming">Upcoming</option>
-        <option value="past">Past</option>
-        <option value="all">All</option>
-      </select>
+
 
 
       {/* Grouped bookings */}
@@ -359,54 +386,56 @@ const AdminReservationsPage = () => {
   {Object.entries(grouped).map(([expId, { experience, upcoming, past, future }]) => (
     <div
       key={expId}
-      className="bg-white shadow-md rounded-lg p-6 border border-gray-200 print:border-none print:shadow-none"
+      className="bg-white shadow-lg rounded-2xl p-8 border border-[#e6e0d3] print:border-none print:shadow-none"
     >
-      <h2 className="text-2xl font-bold text-blue-700 mb-4 print:text-black print:font-bold">
+      <h2 className="text-2xl font-serif font-semibold text-[#5a4a3f] mb-6 print:text-black">
         {experience.name}
       </h2>
 
-      {/* Helper Component */}
       {[
-        { title: "Upcoming Today", data: upcoming, color: "text-green-700", border: "border-green-200" },
-        { title: "Past Today", data: past, color: "text-gray-700", border: "border-gray-300" },
-        { title: "Future Reservations", data: future, color: "text-purple-700", border: "border-purple-200" },
+        { title: "Upcoming Today", data: upcoming, color: "text-green-700", border: "border-l-4 border-green-400" },
+        { title: "Past Today", data: past, color: "text-gray-600", border: "border-l-4 border-gray-300" },
+        { title: "Future Reservations", data: future, color: "text-purple-700", border: "border-l-4 border-purple-300" },
       ].map(({ title, data, color, border }) =>
         data?.length > 0 && (
-          <div key={title} className={`mb-6 ${border}`}>
-            <h3 className={`text-lg font-semibold mb-2 ${color} print:text-black`}>
+          <div key={title} className={`mb-8 pl-4 ${border}`}>
+            <h3 className={`text-lg font-medium mb-3 ${color} print:text-black`}>
               {title}
             </h3>
-            <div className="overflow-x-auto rounded-lg">
-              <table className="w-full text-left border border-gray-200 print:border-black print:text-sm">
-                <thead className="bg-gray-100 text-sm print:bg-white print:border-b print:border-black">
+            <div className="overflow-x-auto rounded-xl border border-[#e0dcd4] print:border-black">
+              <table className="w-full text-left text-[#5a4a3f] print:text-black text-sm">
+                <thead className="bg-[#f7f5f1] text-sm print:bg-white print:border-b print:border-black">
                   <tr>
-                    <th className="p-2">User</th>
-                    <th className="p-2">Email</th>
-                    <th className="p-2">Phone</th>
-                    <th className="p-2">Date</th>
-                    <th className="p-2 print:hidden">Actions</th>
+                    <th className="p-3 font-normal">User</th>
+                    <th className="p-3 font-normal">Email</th>
+                    <th className="p-3 font-normal">Phone</th>
+                    <th className="p-3 font-normal">Date</th>
+                    <th className="p-3 font-normal print:hidden">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.map((b) => (
-                    <tr key={b.id} className="border-t hover:bg-gray-50 print:hover:bg-transparent">
-                      <td className="p-2">{b.user?.name} {b.user?.surname}</td>
-                      <td className="p-2">{b.user?.email}</td>
-                      <td className="p-2">{b.user?.phone}</td>
-                      <td className="p-2">{new Date(b.date).toLocaleString()}</td>
-                      <td className="p-2 space-x-2 print:hidden">
+                    <tr
+                      key={b.id}
+                      className="border-t border-[#f0ece6] hover:bg-[#f9f7f4] transition print:hover:bg-transparent"
+                    >
+                      <td className="p-3">{b.user?.name} {b.user?.surname}</td>
+                      <td className="p-3">{b.user?.email}</td>
+                      <td className="p-3">{b.user?.phone}</td>
+                      <td className="p-3">{new Date(b.date).toLocaleString()}</td>
+                      <td className="p-3 space-x-2 print:hidden">
                         <button
                           onClick={() => {
                             setEditingBooking(b);
                             setShowForm(true);
                           }}
-                          className="bg-yellow-400 text-white px-2 py-1 rounded hover:bg-yellow-500"
+                          className="px-3 py-1 rounded-full bg-yellow-400 text-white hover:bg-yellow-500 transition-all text-sm"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => handleDelete(b.id)}
-                          className="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700"
+                          className="px-3 py-1 rounded-full bg-red-600 text-white hover:bg-red-700 transition-all text-sm"
                         >
                           Delete
                         </button>
@@ -425,29 +454,84 @@ const AdminReservationsPage = () => {
 
 
 
+
       {/* Add/Edit form modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center">
-          <form className="bg-white p-6 rounded shadow space-y-3" onSubmit={handleSubmit}>
-            <select name="userId" required defaultValue={editingBooking?.user?.id || ''} className="border p-2 rounded w-full">
-              <option value="">Select User</option>
-              {users.map(u => <option key={u.id} value={u.id}>{u.name} {u.surname}</option>)}
-            </select>
+  <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50">
+    <form
+      onSubmit={handleSubmit}
+      className="bg-white p-8 rounded-2xl shadow-xl border border-[#e5ded2] w-full max-w-md space-y-5"
+    >
+      <h2 className="text-2xl font-semibold text-[#5a4a3f] mb-2 text-center">Manage Booking</h2>
 
-            <select name="experienceId" required defaultValue={editingBooking?.experience?.id || ''} className="border p-2 rounded w-full">
-              <option value="">Select Experience</option>
-              {experiences.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
-            </select>
+      {/* User Select */}
+      <div>
+        <label className="block text-sm text-[#5a4a3f] mb-1">Select User</label>
+        <select
+          name="userId"
+          required
+          defaultValue={editingBooking?.user?.id || ''}
+          className="w-full border border-[#e0dcd4] rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
+        >
+          <option value="">Select User</option>
+          {users.map((u) => (
+            <option key={u.id} value={u.id}>
+              {u.name} {u.surname}
+            </option>
+          ))}
+        </select>
+      </div>
 
-            <input type="datetime-local" name="date" required defaultValue={editingBooking?.date?.slice(0,16) || ''} className="border p-2 rounded w-full" />
+      {/* Experience Select */}
+      <div>
+        <label className="block text-sm text-[#5a4a3f] mb-1">Select Experience</label>
+        <select
+          name="experienceId"
+          required
+          defaultValue={editingBooking?.experience?.id || ''}
+          className="w-full border border-[#e0dcd4] rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
+        >
+          <option value="">Select Experience</option>
+          {experiences.map((e) => (
+            <option key={e.id} value={e.id}>
+              {e.name}
+            </option>
+          ))}
+        </select>
+      </div>
 
-            <div className="flex gap-2 justify-end">
-              <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">Save</button>
-              <button type="button" onClick={() => setShowForm(false)} className="bg-gray-400 text-white px-4 py-2 rounded">Cancel</button>
-            </div>
-          </form>
-        </div>
-      )}
+      {/* Date */}
+      <div>
+        <label className="block text-sm text-[#5a4a3f] mb-1">Booking Date</label>
+        <input
+          type="datetime-local"
+          name="date"
+          required
+          defaultValue={editingBooking?.date?.slice(0, 16) || ''}
+          className="w-full border border-[#e0dcd4] rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
+        />
+      </div>
+
+      {/* Buttons */}
+      <div className="flex justify-end gap-2 pt-2">
+        <button
+          type="submit"
+          className="px-4 py-2 bg-[#8b6f47] text-white rounded-full hover:bg-[#a78b62] transition-all"
+        >
+          Save
+        </button>
+        <button
+          type="button"
+          onClick={() => setShowForm(false)}
+          className="px-4 py-2 bg-gray-300 text-[#5a4a3f] rounded-full hover:bg-gray-400 transition-all"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+)}
+
     </div>
   );
 };

@@ -3,8 +3,9 @@
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Compass, CalendarDays, Users } from 'lucide-react';
 
-const AdminDashboardPage = () => {
+export default function AdminDashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
@@ -23,37 +24,51 @@ const AdminDashboardPage = () => {
 
   return (
     session?.user?.role === 'admin' && (
-      <div className="p-8 max-w-screen-xl mx-auto">
-        <h1 className="text-4xl font-bold text-center mb-8">Admin Dashboard</h1>
+      <div className="min-h-screen bg-[#f4f1ec] py-12 px-4">
+        <div className="max-w-6xl mx-auto">
+          <h1 className="text-4xl font-semibold text-[#5a4a3f] text-center mb-12">
+            Admin Dashboard
+          </h1>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div
-            onClick={() => handleRedirect('/admin/experiences')}
-            className="p-6 cursor-pointer bg-white border rounded-xl shadow-md hover:shadow-lg hover:bg-blue-50 transition"
-          >
-            <h3 className="text-xl font-semibold text-blue-700">🧭 Manage Experiences</h3>
-            <p className="text-gray-600 mt-2">Create, edit and delete experiences.</p>
-          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Experiences Card */}
+            <div
+              onClick={() => handleRedirect('/admin/experiences')}
+              className="cursor-pointer bg-white border border-[#e0dcd4] rounded-2xl p-6 shadow-sm hover:shadow-md hover:bg-[#f9f6f2] transition-all"
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <Compass className="text-[#8b6f47]" size={24} />
+                <h3 className="text-xl font-semibold text-[#5a4a3f]">Manage Experiences</h3>
+              </div>
+              <p className="text-sm text-[#4a4a4a]">Create, edit and delete curated experiences.</p>
+            </div>
 
-          <div
-            onClick={() => handleRedirect('/admin/reservations')}
-            className="p-6 cursor-pointer bg-white border rounded-xl shadow-md hover:shadow-lg hover:bg-blue-50 transition"
-          >
-            <h3 className="text-xl font-semibold text-blue-700">📆 Manage Reservations</h3>
-            <p className="text-gray-600 mt-2">Manage Bookings made by users.</p>
-          </div>
+            {/* Reservations Card */}
+            <div
+              onClick={() => handleRedirect('/admin/reservations')}
+              className="cursor-pointer bg-white border border-[#e0dcd4] rounded-2xl p-6 shadow-sm hover:shadow-md hover:bg-[#f9f6f2] transition-all"
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <CalendarDays className="text-[#8b6f47]" size={24} />
+                <h3 className="text-xl font-semibold text-[#5a4a3f]">Manage Reservations</h3>
+              </div>
+              <p className="text-sm text-[#4a4a4a]">Review and organize client bookings.</p>
+            </div>
 
-          <div
-            onClick={() => handleRedirect('/admin/users')}
-            className="p-6 cursor-pointer bg-white border rounded-xl shadow-md hover:shadow-lg hover:bg-blue-50 transition"
-          >
-            <h3 className="text-xl font-semibold text-blue-700">👤 Manage Clients</h3>
-            <p className="text-gray-600 mt-2">Browse and manage registered users.</p>
+            {/* Users Card */}
+            <div
+              onClick={() => handleRedirect('/admin/users')}
+              className="cursor-pointer bg-white border border-[#e0dcd4] rounded-2xl p-6 shadow-sm hover:shadow-md hover:bg-[#f9f6f2] transition-all"
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <Users className="text-[#8b6f47]" size={24} />
+                <h3 className="text-xl font-semibold text-[#5a4a3f]">Manage Clients</h3>
+              </div>
+              <p className="text-sm text-[#4a4a4a]">View and manage registered users.</p>
+            </div>
           </div>
         </div>
       </div>
     )
   );
-};
-
-export default AdminDashboardPage;
+}

@@ -8,19 +8,20 @@ generator client {
 }
 
 model User {
-  id        Int      @id @default(autoincrement()) // Unique identifier for the user
-  email     String   @unique // Email address (unique)
-  password  String   // Hashed password
-  name      String?  // User's first name
-  surname   String?  // User's last name
-  phone     String?  // User's phone number
-  createdAt DateTime @default(now()) // Automatically set when the user is created
-  updatedAt DateTime @updatedAt // Automatically set when the user is updated
-  role      String   @default("user") // User role (e.g., "user" or "admin")
-  sessions  Session[] // One-to-many relationship with sessions
-  accounts  Account[] // One-to-many relationship with accounts
-  favourites Favourite[] // One-to-many relationship with favourites
-  bookings  Booking[] // One-to-many relationship with bookings
+  id          Int       @id @default(autoincrement())
+  email       String    @unique
+  password    String
+  name        String?
+  surname     String?
+  phone       String?
+  dateOfBirth DateTime? // ✅ Ημερομηνία γέννησης (προαιρετική)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  role        String    @default("user")
+  sessions    Session[]
+  accounts    Account[]
+  favourites  Favourite[]
+  bookings    Booking[]
 }
 
 

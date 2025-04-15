@@ -8,7 +8,7 @@ const handleResponse = (data, status = 200) => {
   return NextResponse.json(data, { status });
 };
 
-// Utility to require admin session
+// Require admin session
 const requireAdmin = async (req) => {
   const session = await getServerSession({ req, ...authOptions });
   if (!session || session.user.role !== 'admin') {
@@ -31,6 +31,7 @@ export async function GET(req) {
         surname: true,
         phone: true,
         role: true,
+        dateOfBirth: true, // ✅ Include new field
         createdAt: true,
       },
       orderBy: { createdAt: 'desc' },
@@ -47,29 +48,26 @@ export async function POST(req) {
   const auth = await requireAdmin(req);
   if (auth.error) return auth.response;
 
-  const { email, password, name, surname, phone, role } = await req.json();
+  const { email, password, name, surname, phone, role, dateOfBirth } = await req.json();
 
   try {
     const newUser = await prisma.user.create({
       data: {
         email,
-        password, // In production: hash before saving
+        password, // ✅ In production: hash
         name,
         surname,
         phone,
         role,
+        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null, // ✅ Handle new field
       },
     });
     return handleResponse(newUser);
   } catch (error) {
     if (error.code === 'P2002' && error.meta?.target?.includes('email')) {
-      return NextResponse.json(
-        { error: 'A user with this email already exists.' },
-        { status: 400 }
-      );
+      return handleResponse({ error: 'A user with this email already exists.' }, 400);
     }
     console.error('Failed to create user:', error);
-
     return handleResponse({ error: 'Failed to create user' }, 500);
   }
 }
@@ -79,12 +77,19 @@ export async function PUT(req) {
   const auth = await requireAdmin(req);
   if (auth.error) return auth.response;
 
-  const { id, email, name, surname, phone, role } = await req.json();
+  const { id, email, name, surname, phone, role, dateOfBirth } = await req.json();
 
   try {
     const updatedUser = await prisma.user.update({
       where: { id },
-      data: { email, name, surname, phone, role },
+      data: {
+        email,
+        name,
+        surname,
+        phone,
+        role,
+        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
+      },
     });
     return handleResponse(updatedUser);
   } catch (error) {
@@ -113,7 +118,7 @@ export async function DELETE(req) {
         error: 'Cannot delete user. User has bookings or favourites. Please delete them first.',
       }, 400);
     }
-  
+
     return handleResponse({ error: 'Failed to delete user.' }, 500);
   }
 }

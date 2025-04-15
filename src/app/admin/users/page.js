@@ -61,6 +61,7 @@ const AdminClientsPage = () => {
       surname: form.surname.value,
       phone: form.phone.value,
       role: form.role.value,
+      dateOfBirth: form.dateOfBirth.value || null,
     };
 
     const res = await fetch('/api/admin/users', {
@@ -91,6 +92,7 @@ const AdminClientsPage = () => {
       surname: form.surname.value,
       phone: form.phone.value,
       role: form.role.value,
+      dateOfBirth: form.dateOfBirth.value || null,
     };
 
     const res = await fetch('/api/admin/users', {
@@ -183,6 +185,13 @@ const AdminClientsPage = () => {
             placeholder="Phone"
             className="px-4 py-3 rounded-md border border-[#e0dcd4] focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
           />
+          <input
+              name="dateOfBirth"
+              type="date"
+              placeholder="Date of Birth"
+              className="px-4 py-3 rounded-md border border-[#e0dcd4] focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
+          />
+
           <select
             name="role"
             defaultValue="user"
@@ -225,13 +234,14 @@ const AdminClientsPage = () => {
 
 
       {/* Users Table */}
-      <div className="overflow-x-auto rounded-xl shadow-lg border border-[#e0dcd4]">
+        <div className="overflow-x-auto rounded-xl shadow-lg border border-[#e0dcd4]">
           <table className="w-full text-left bg-white font-sans">
             <thead className="bg-[#f4f1ec] text-[#5a4a3f] text-sm uppercase tracking-wide">
               <tr>
                 <th className="p-4">Name</th>
                 <th className="p-4">Email</th>
                 <th className="p-4">Phone</th>
+                <th className="p-4">Date of Birth</th>
                 <th className="p-4">Role</th>
                 <th className="p-4">Joined</th>
                 <th className="p-4">Actions</th>
@@ -240,9 +250,14 @@ const AdminClientsPage = () => {
             <tbody>
               {filteredUsers.map((user) => (
                 <tr key={user.id} className="border-t border-[#eae6de] hover:bg-[#f9f7f3] transition">
-                  <td className="p-4 text-[#3d3227]">{user.name ?? '—'} {user.surname ?? ''}</td>
+                  <td className="p-4 text-[#3d3227]">
+                    {user.name ?? '—'} {user.surname ?? ''}
+                  </td>
                   <td className="p-4 text-[#3d3227]">{user.email}</td>
                   <td className="p-4 text-[#3d3227]">{user.phone ?? '—'}</td>
+                  <td className="p-4 text-[#3d3227]">
+                    {user.dateOfBirth ? new Date(user.dateOfBirth).toLocaleDateString() : '—'}
+                  </td>
                   <td className="p-4 capitalize text-[#5a4a3f] font-medium">{user.role}</td>
                   <td className="p-4 text-[#7d6c5e]">{new Date(user.createdAt).toLocaleDateString()}</td>
                   <td className="p-4 space-x-2">
@@ -297,6 +312,14 @@ const AdminClientsPage = () => {
                   placeholder="Phone"
                   className="px-4 py-3 rounded-md border border-[#e0dcd4] focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
                 />
+                <input
+                  name="dateOfBirth"
+                  type="date"
+                  defaultValue={editingUser.dateOfBirth ? editingUser.dateOfBirth.slice(0, 10) : ''}
+                  placeholder="Date of Birth"
+                  className="px-4 py-3 rounded-md border border-[#e0dcd4] focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
+                />
+
                 <select
                   name="role"
                   defaultValue={editingUser.role}

@@ -19,27 +19,129 @@ const AdminReservationsPage = () => {
   
   const [editingBooking, setEditingBooking] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const [viewMode, setViewMode] = useState('today'); // today | all | upcoming | past
+
+  const exportToExcel = () => {
+    if (!bookings || bookings.length === 0) {
+      alert("No bookings available to export.");
+      return;
+    }
+  
+    const workbook = XLSX.utils.book_new();
+    const sheetData = [];
+    const merges = [];
+  
+    const groupedByExperience = bookings.reduce((acc, b) => {
+      const expName = b.experience?.name || 'Unknown Experience';
+      if (!acc[expName]) acc[expName] = [];
+      acc[expName].push({
+        Name: `${b.user?.name ?? '—'} ${b.user?.surname ?? ''}`,
+        Email: b.user?.email ?? '—',
+        Phone: b.user?.phone ?? '—',
+        Date: new Date(b.date),
+      });
+      return acc;
+    }, {});
+  
+    let rowIndex = 0;
+  
+    Object.entries(groupedByExperience).forEach(([experienceName, rows], index, array) => {
+      // Experience Title Row
+      const titleCell = `${experienceName} Reservations`;
+      sheetData.push([titleCell]);
+      merges.push({
+        s: { r: rowIndex, c: 0 },
+        e: { r: rowIndex, c: 3 }
+      });
+      rowIndex++;
+  
+      // Header Row
+      const headers = ['Name', 'Email', 'Phone', 'Date'];
+      sheetData.push(headers);
+      rowIndex++;
+  
+      // Data Rows
+      // Sort by ascending date (closer to today first)
+      rows.sort((a, b) => a.Date - b.Date);
+
+      // Push to sheet AFTER sorting
+      rows.forEach(row => {
+        sheetData.push([
+          row.Name,
+          row.Email,
+          row.Phone,
+          row.Date.toLocaleString(), // Format here!
+        ]);
+        rowIndex++;
+      });
 
 
-      const exportToExcel = () => {
-        if (!bookings || bookings.length === 0) {
-          alert("No bookings available to export.");
-          return;
+      // Spacer Row
+      if (index < array.length - 1) {
+        sheetData.push([]);
+        rowIndex++;
+      }
+    });
+  
+    const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
+    worksheet['!merges'] = merges;
+  
+    // Set column widths
+    worksheet['!cols'] = [
+      { wch: 25 },
+      { wch: 30 },
+      { wch: 20 },
+      { wch: 25 },
+    ];
+  
+    // Apply styles
+    Object.keys(worksheet).forEach(cell => {
+      if (!cell.startsWith('!')) {
+        const cellRef = XLSX.utils.decode_cell(cell);
+        const value = worksheet[cell].v;
+  
+        // Bold titles
+        if (value?.toString().includes('Reservations') && cellRef.c === 0) {
+          worksheet[cell].s = {
+            font: { bold: true, sz: 14 },
+            alignment: { horizontal: 'center' },
+          };
         }
-      
-        const rows = bookings.map(b => ({
-          Experience: b.experience?.name ?? '—',
-          User: `${b.user?.name ?? '—'} ${b.user?.surname ?? ''}`,
-          Email: b.user?.email ?? '—',
-          Date: new Date(b.date).toLocaleString(),
-        }));
-      
-        const worksheet = XLSX.utils.json_to_sheet(rows);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Reservations');
-        XLSX.writeFile(workbook, `reservations-${new Date().toISOString().slice(0, 10)}.xlsx`);
-      };
-   
+  
+        // Bold headers
+        if (
+          sheetData[cellRef.r]?.[0] === 'Name' &&
+          ['Name', 'Email', 'Phone', 'Date'].includes(value)
+        ) {
+          worksheet[cell].s = {
+            font: { bold: true },
+            alignment: { horizontal: 'left' },
+            fill: { fgColor: { rgb: "E8EAF6" } },
+          };
+        }
+  
+        // Add borders to all
+        worksheet[cell].s = {
+          ...(worksheet[cell].s || {}),
+          border: {
+            top: { style: "thin", color: { auto: 1 } },
+            bottom: { style: "thin", color: { auto: 1 } },
+            left: { style: "thin", color: { auto: 1 } },
+            right: { style: "thin", color: { auto: 1 } }
+          },
+          alignment: {
+            ...(worksheet[cell].s?.alignment || {}),
+            vertical: 'center',
+          }
+        };
+      }
+    });
+  
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'All Reservations');
+    XLSX.writeFile(workbook, `reservations-${new Date().toISOString().slice(0, 10)}.xlsx`);
+  };
+  
+  
 
 
   useEffect(() => {
@@ -72,33 +174,75 @@ const AdminReservationsPage = () => {
       fetchAllData();
     }
   }, [session]);
-
   useEffect(() => {
+    const now = new Date();
+  
     const filtered = bookings.filter((b) => {
+      const bookingDate = new Date(b.date);
+  
+      const matchesExperience = selectedExperience
+        ? b.experience?.id?.toString() === selectedExperience
+        : true;
+  
       const matchesDate = selectedDate
         ? new Date(b.date).toISOString().slice(0, 10) === selectedDate
         : true;
-
-      const matchesExperience = selectedExperience
-        ? b.experience?.id.toString() === selectedExperience
-        : true;
-
-      return matchesDate && matchesExperience;
+  
+      if (!matchesExperience || !matchesDate) return false;
+  
+      const isToday = bookingDate.toDateString() === now.toDateString();
+      const isFuture = bookingDate > now && !isToday;
+      const isPast = bookingDate < now && isToday;
+      const isAfterToday = bookingDate.toDateString() !== now.toDateString() && bookingDate > now;
+      const isBeforeNow = bookingDate < now;
+  
+      switch (viewMode) {
+        case 'today':
+          return isToday;
+        case 'upcoming':
+          return isAfterToday;
+        case 'past':
+          return isBeforeNow;
+        case 'all':
+        default:
+          return true;
+      }
     });
-
+  
     const groupedByExperience = filtered.reduce((acc, booking) => {
       const expId = booking.experience?.id;
+      if (!expId) return acc;
+  
+      const bookingDate = new Date(booking.date);
+      const isToday = bookingDate.toDateString() === now.toDateString();
+      const isFuture = bookingDate > now && !isToday;
+      const group = isToday
+        ? bookingDate > now ? 'upcoming' : 'past'
+        : isFuture
+          ? 'future'
+          : null;
+  
+      if (!group && viewMode !== 'past') return acc;
+  
       if (!acc[expId]) {
-        acc[expId] = { experience: booking.experience, bookings: [] };
+        acc[expId] = {
+          experience: booking.experience,
+          upcoming: [],
+          past: [],
+          future: []
+        };
       }
-      acc[expId].bookings.push(booking);
-      acc[expId].bookings.sort((a, b) => new Date(a.date) - new Date(b.date));
-
+  
+      acc[expId][group ?? 'past'].push(booking);
       return acc;
     }, {});
-
+  
     setGrouped(groupedByExperience);
-  }, [bookings, selectedDate, selectedExperience]);
+  }, [bookings, selectedDate, selectedExperience, viewMode]);
+  
+  
+  
+  
 
   const handleDelete = async (id) => {
     if (!confirm('Are you sure you want to delete this booking?')) return;
@@ -190,38 +334,86 @@ const AdminReservationsPage = () => {
           ))}
         </select>
       </div>
+      <select
+        value={viewMode}
+        onChange={(e) => setViewMode(e.target.value)}
+        className="border p-2 rounded print:hidden"
+      >
+        <option value="today">Today</option>
+        <option value="upcoming">Upcoming</option>
+        <option value="past">Past</option>
+        <option value="all">All</option>
+      </select>
+
 
       {/* Grouped bookings */}
-      <div className="print:block">
-      {Object.entries(grouped).map(([expId, { experience, bookings }]) => (
-        <div key={expId} className="mb-10 break-inside-avoid-page print:break-inside-avoid print:bg-white print:text-black">  
-          <h2 className="text-2xl font-semibold text-blue-700 print:text-black print:font-bold">{experience.name}</h2>
-          <table className="w-full border mt-2 print:text-sm print:border-black">
-            <thead className="bg-gray-100 print:bg-white print:border-b print:border-black">
-              <tr>
-                <th className="p-2">User</th>
-                <th className="p-2">Email</th>
-                <th className="p-2">Date</th>
-                <th className="p-2 print:hidden">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bookings.map(b => (
-                <tr key={b.id}>
-                  <td className="p-2">{b.user.name} {b.user.surname}</td>
-                  <td className="p-2">{b.user.email}</td>
-                  <td className="p-2">{new Date(b.date).toLocaleString()}</td>
-                  <td className="p-2 space-x-2">
-                    <button onClick={() => { setEditingBooking(b); setShowForm(true); }} className="print:hidden bg-yellow-400 text-white px-2 py-1 rounded">Edit</button>
-                    <button onClick={() => handleDelete(b.id)} className="print:hidden bg-red-600 text-white px-2 py-1 rounded">Delete</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ))}
-      </div>
+      <div className="space-y-12 print:block">
+  {Object.entries(grouped).map(([expId, { experience, upcoming, past, future }]) => (
+    <div
+      key={expId}
+      className="bg-white shadow-md rounded-lg p-6 border border-gray-200 print:border-none print:shadow-none"
+    >
+      <h2 className="text-2xl font-bold text-blue-700 mb-4 print:text-black print:font-bold">
+        {experience.name}
+      </h2>
+
+      {/* Helper Component */}
+      {[
+        { title: "Upcoming Today", data: upcoming, color: "text-green-700", border: "border-green-200" },
+        { title: "Past Today", data: past, color: "text-gray-700", border: "border-gray-300" },
+        { title: "Future Reservations", data: future, color: "text-purple-700", border: "border-purple-200" },
+      ].map(({ title, data, color, border }) =>
+        data?.length > 0 && (
+          <div key={title} className={`mb-6 ${border}`}>
+            <h3 className={`text-lg font-semibold mb-2 ${color} print:text-black`}>
+              {title}
+            </h3>
+            <div className="overflow-x-auto rounded-lg">
+              <table className="w-full text-left border border-gray-200 print:border-black print:text-sm">
+                <thead className="bg-gray-100 text-sm print:bg-white print:border-b print:border-black">
+                  <tr>
+                    <th className="p-2">User</th>
+                    <th className="p-2">Email</th>
+                    <th className="p-2">Date</th>
+                    <th className="p-2 print:hidden">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.map((b) => (
+                    <tr key={b.id} className="border-t hover:bg-gray-50 print:hover:bg-transparent">
+                      <td className="p-2">{b.user?.name} {b.user?.surname}</td>
+                      <td className="p-2">{b.user?.email}</td>
+                      <td className="p-2">{new Date(b.date).toLocaleString()}</td>
+                      <td className="p-2 space-x-2 print:hidden">
+                        <button
+                          onClick={() => {
+                            setEditingBooking(b);
+                            setShowForm(true);
+                          }}
+                          className="bg-yellow-400 text-white px-2 py-1 rounded hover:bg-yellow-500"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(b.id)}
+                          className="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )
+      )}
+    </div>
+  ))}
+</div>
+
+
 
       {/* Add/Edit form modal */}
       {showForm && (

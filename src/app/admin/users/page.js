@@ -125,124 +125,207 @@ const AdminClientsPage = () => {
     <div className="p-6 max-w-screen-xl mx-auto">
       <h1 className="text-3xl font-bold mb-6">Registered Clients</h1>
 
-      <div className="mb-4">
-        <button
-          onClick={() => router.push('/admin/')}
-          className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
-        >
-          ← Back to Dashboard
-        </button>
-      </div>
+      <div className="mb-6">
+         <button
+            onClick={() => router.push('/admin/')}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#e0dcd4] text-[#5a4a3f] font-medium hover:bg-[#d6d1c8] transition-all shadow-md hover:shadow-lg"
+          >
+            <span className="text-xl">←</span>
+            Back to Dashboard
+          </button>
+        </div>
 
       {!showAddForm ? (
         
         <button
-          onClick={() => setShowAddForm(true)}
-          className="mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          + Add New User
-        </button>
+        onClick={() => setShowAddForm(true)}
+        className="mb-4 px-6 py-3 rounded-full bg-[#8b6f47] text-white text-base font-medium shadow-md hover:bg-[#a78b62] transition-all"
+      >
+        + Add New User
+      </button>
+      
       ) : (
-        <div className="mb-6 p-4 bg-gray-100 rounded shadow">
-          <h2 className="text-xl font-semibold mb-2">Add New User</h2>
-          {errorMessage && (
-            <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-              {errorMessage}
-            </div>
-          )}
-
-          <form onSubmit={handleAddUser} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <input name="email" placeholder="Email" required className="p-2 border rounded" />
-            <input name="password" type="password" placeholder="Password" required className="p-2 border rounded" />
-            <input name="name" placeholder="First Name" className="p-2 border rounded" />
-            <input name="surname" placeholder="Last Name" className="p-2 border rounded" />
-            <input name="phone" placeholder="Phone" className="p-2 border rounded" />
-            <select name="role" defaultValue="user" className="p-2 border rounded">
-              <option value="user">User</option>
-              <option value="admin">Admin</option>
-            </select>
-            <div className="col-span-2 flex justify-end gap-2">
-              <button type="submit" className="px-4 py-2 bg-green-600 text-white rounded">Add</button>
-              <button type="button" onClick={() => setShowAddForm(false)} className="px-4 py-2 bg-gray-400 text-white rounded">Cancel</button>
-            </div>
-          </form>
-        </div>
+        <div className="mb-8 p-6 bg-white rounded-2xl shadow-lg border border-[#e0dcd4]">
+        <h2 className="text-2xl font-serif text-[#5a4a3f] mb-4">Add New User</h2>
+      
+        {errorMessage && (
+          <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-md text-sm">
+            {errorMessage}
+          </div>
+        )}
+      
+        <form onSubmit={handleAddUser} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <input
+            name="email"
+            placeholder="Email"
+            required
+            className="px-4 py-3 rounded-md border border-[#e0dcd4] focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
+          />
+          <input
+            name="password"
+            type="password"
+            placeholder="Password"
+            required
+            className="px-4 py-3 rounded-md border border-[#e0dcd4] focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
+          />
+          <input
+            name="name"
+            placeholder="First Name"
+            className="px-4 py-3 rounded-md border border-[#e0dcd4] focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
+          />
+          <input
+            name="surname"
+            placeholder="Last Name"
+            className="px-4 py-3 rounded-md border border-[#e0dcd4] focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
+          />
+          <input
+            name="phone"
+            placeholder="Phone"
+            className="px-4 py-3 rounded-md border border-[#e0dcd4] focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
+          />
+          <select
+            name="role"
+            defaultValue="user"
+            className="px-4 py-3 rounded-md border border-[#e0dcd4] bg-white focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
+          >
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+          </select>
+      
+          <div className="col-span-2 flex justify-end gap-3 mt-2">
+            <button
+              type="submit"
+              className="px-6 py-2 rounded-full bg-[#8b6f47] text-white font-medium hover:bg-[#a78b62] transition-all"
+            >
+              Add
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowAddForm(false)}
+              className="px-6 py-2 rounded-full bg-gray-300 text-gray-700 hover:bg-gray-400 transition-all"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+      
       )}
 
-      {/* Search Bar */}
-      <div className="mb-4">
+        {/* Search Bar */}
+      <div className="mb-6">
         <input
           type="text"
           placeholder="Search by name, email or phone number..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full sm:w-96 p-2 border rounded"
+          className="w-full sm:w-96 px-4 py-2 rounded-full border border-[#e0dcd4] bg-[#faf8f4] text-[#5a4a3f] placeholder-[#b3a89e] shadow-sm focus:outline-none focus:ring-2 focus:ring-[#8b6f47] transition"
         />
       </div>
 
+
       {/* Users Table */}
-      <div className="overflow-x-auto rounded-md shadow">
-        <table className="w-full text-left border border-gray-200">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="p-3">Name</th>
-              <th className="p-3">Email</th>
-              <th className="p-3">Phone</th>
-              <th className="p-3">Role</th>
-              <th className="p-3">Joined</th>
-              <th className="p-3">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredUsers.map((user) => (
-              <tr key={user.id} className="border-t hover:bg-gray-50">
-                <td className="p-3">{user.name ?? '—'} {user.surname ?? ''}</td>
-                <td className="p-3">{user.email}</td>
-                <td className="p-3">{user.phone ?? '—'}</td>
-                <td className="p-3 capitalize">{user.role}</td>
-                <td className="p-3">{new Date(user.createdAt).toLocaleDateString()}</td>
-                <td className="p-3 space-x-2">
-                  <button
-                    onClick={() => setEditingUser(user)}
-                    className="px-3 py-1 bg-yellow-400 text-white rounded"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(user.id)}
-                    className="px-3 py-1 bg-red-600 text-white rounded"
-                  >
-                    Delete
-                  </button>
-                </td>
+      <div className="overflow-x-auto rounded-xl shadow-lg border border-[#e0dcd4]">
+          <table className="w-full text-left bg-white font-sans">
+            <thead className="bg-[#f4f1ec] text-[#5a4a3f] text-sm uppercase tracking-wide">
+              <tr>
+                <th className="p-4">Name</th>
+                <th className="p-4">Email</th>
+                <th className="p-4">Phone</th>
+                <th className="p-4">Role</th>
+                <th className="p-4">Joined</th>
+                <th className="p-4">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {filteredUsers.map((user) => (
+                <tr key={user.id} className="border-t border-[#eae6de] hover:bg-[#f9f7f3] transition">
+                  <td className="p-4 text-[#3d3227]">{user.name ?? '—'} {user.surname ?? ''}</td>
+                  <td className="p-4 text-[#3d3227]">{user.email}</td>
+                  <td className="p-4 text-[#3d3227]">{user.phone ?? '—'}</td>
+                  <td className="p-4 capitalize text-[#5a4a3f] font-medium">{user.role}</td>
+                  <td className="p-4 text-[#7d6c5e]">{new Date(user.createdAt).toLocaleDateString()}</td>
+                  <td className="p-4 space-x-2">
+                    <button
+                      onClick={() => setEditingUser(user)}
+                      className="px-4 py-1.5 bg-yellow-400 text-white rounded-full text-sm hover:bg-yellow-500 transition"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(user.id)}
+                      className="px-4 py-1.5 bg-red-600 text-white rounded-full text-sm hover:bg-red-700 transition"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
 
       {/* Edit User Modal */}
       {editingUser && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-6 w-full max-w-lg">
-            <h2 className="text-xl font-bold mb-4">Edit User</h2>
-            <form onSubmit={handleEditUser} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <input name="email" defaultValue={editingUser.email} required className="p-2 border rounded" />
-              <input name="name" defaultValue={editingUser.name ?? ''} className="p-2 border rounded" />
-              <input name="surname" defaultValue={editingUser.surname ?? ''} className="p-2 border rounded" />
-              <input name="phone" defaultValue={editingUser.phone ?? ''} className="p-2 border rounded" />
-              <select name="role" defaultValue={editingUser.role} className="p-2 border rounded">
-                <option value="user">User</option>
-                <option value="admin">Admin</option>
-              </select>
-              <div className="col-span-2 flex justify-end gap-2">
-                <button type="submit" className="px-4 py-2 bg-green-600 text-white rounded">Save</button>
-                <button type="button" onClick={() => setEditingUser(null)} className="px-4 py-2 bg-gray-400 text-white rounded">Cancel</button>
-              </div>
-            </form>
+          <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+            <div className="bg-white rounded-2xl p-8 w-full max-w-lg shadow-xl border border-[#e0dcd4]">
+              <h2 className="text-2xl font-serif text-[#5a4a3f] mb-6 text-center">Edit User</h2>
+
+              <form onSubmit={handleEditUser} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <input
+                  name="email"
+                  defaultValue={editingUser.email}
+                  required
+                  className="px-4 py-3 rounded-md border border-[#e0dcd4] focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
+                />
+                <input
+                  name="name"
+                  defaultValue={editingUser.name ?? ''}
+                  placeholder="First Name"
+                  className="px-4 py-3 rounded-md border border-[#e0dcd4] focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
+                />
+                <input
+                  name="surname"
+                  defaultValue={editingUser.surname ?? ''}
+                  placeholder="Last Name"
+                  className="px-4 py-3 rounded-md border border-[#e0dcd4] focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
+                />
+                <input
+                  name="phone"
+                  defaultValue={editingUser.phone ?? ''}
+                  placeholder="Phone"
+                  className="px-4 py-3 rounded-md border border-[#e0dcd4] focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
+                />
+                <select
+                  name="role"
+                  defaultValue={editingUser.role}
+                  className="px-4 py-3 rounded-md border border-[#e0dcd4] bg-white focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
+                >
+                  <option value="user">User</option>
+                  <option value="admin">Admin</option>
+                </select>
+
+                <div className="col-span-2 flex justify-end gap-3 mt-2">
+                  <button
+                    type="submit"
+                    className="px-6 py-2 rounded-full bg-[#8b6f47] text-white font-medium hover:bg-[#a78b62] transition-all"
+                  >
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditingUser(null)}
+                    className="px-6 py-2 rounded-full bg-gray-300 text-gray-700 hover:bg-gray-400 transition-all"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+
     </div>
   );
 };

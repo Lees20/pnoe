@@ -3,6 +3,7 @@
 import { useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { MapPin, Clock, Euro, Pencil, Trash2, Eye } from 'lucide-react';
 
 const AdminExperiencesPage = () => {
   const { data: session, status } = useSession();
@@ -90,6 +91,7 @@ const AdminExperiencesPage = () => {
   if (!isClient) return null; // Ensure it doesn't render until the client-side is confirmed
 
   return (
+    
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold text-center mb-6">Admin Dashboard</h1>
       {session && session.user.role === "admin" ? (
@@ -210,33 +212,37 @@ const AdminExperiencesPage = () => {
       <div>
         <h3 className="text-2xl font-bold text-gray-800 mb-2">{experience.name}</h3>
         <p className="text-gray-600 text-sm mb-4">{experience.description}</p>
-        <div className="text-sm space-y-2">
-          <p><span className="font-medium text-gray-800">📍 Location:</span> {experience.location}</p>
-          <p><span className="font-medium text-gray-800">🕒 Duration:</span> {experience.duration}</p>
-          <p><span className="font-medium text-gray-800">💶 Price:</span> €{experience.price}</p>
-        </div>
+     
+      </div>
+      <div className="text-sm space-y-2 text-[#5a4a3f]">
+        <p className="flex items-center gap-2"><MapPin size={18} /> {experience.location}</p>
+        <p className="flex items-center gap-2"><Clock size={18} /> {experience.duration}</p>
+        <p className="flex items-center gap-2"><Euro size={18} /> {experience.price}</p>
       </div>
 
-      <div className="mt-6 flex flex-wrap justify-between gap-2">
+      <div className="mt-6 flex flex-wrap justify-between gap-3">
         <button
           onClick={() => handleEditExperience(experience)}
-          className="flex-1 px-4 py-2 bg-yellow-400 text-white rounded-lg hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-300"
+          className="flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-400 text-white hover:bg-yellow-500 transition"
         >
-          ✏️ Edit
+          <Pencil size={18} /> Edit
         </button>
+
         <button
           onClick={() => handleDeleteExperience(experience.id)}
-          className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+          className="flex items-center gap-2 px-4 py-2 rounded-full bg-red-500 text-white hover:bg-red-600 transition"
         >
-          🗑 Delete
+          <Trash2 size={18} /> Delete
         </button>
+
         <button
           onClick={() => router.push(`/admin/experiences/${experience.id}`)}
-          className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition"
         >
-          🔍 View
+          <Eye size={18} /> View
         </button>
       </div>
+
     </div>
   ))}
 </div>

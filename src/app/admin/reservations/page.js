@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import * as XLSX from 'xlsx';
 
 const AdminReservationsPage = () => {
   const { data: session, status } = useSession();
@@ -18,6 +19,21 @@ const AdminReservationsPage = () => {
   
   const [editingBooking, setEditingBooking] = useState(null);
   const [showForm, setShowForm] = useState(false);
+
+  const exportToExcel = () => {
+    const rows = bookings.map(b => ({
+      Experience: b.experience?.name,
+      User: `${b.user?.name ?? ''} ${b.user?.surname ?? ''}`,
+      Email: b.user?.email,
+      Date: new Date(b.date).toLocaleString(),
+    }));
+  
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Reservations');
+  
+    XLSX.writeFile(workbook, `reservations-${new Date().toISOString().slice(0, 10)}.xlsx`);
+  };
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -141,6 +157,15 @@ const AdminReservationsPage = () => {
       >
         + Add Reservation
       </button>
+ 
+      <button
+        onClick={exportToExcel}
+        className="mb-6 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+      >
+        Download Excel
+      </button>
+
+
 
       {/* Filters */}
       <div className="flex gap-4 mb-6">

@@ -269,7 +269,7 @@ const AdminReservationsPage = () => {
       date: form.date.value,
     };
 
-    const method = editingBooking ? 'PATCH' : 'POST'; // ✅ PATCH method
+    const method = editingBooking ? 'PATCH' : 'POST'; // PATCH method
 
     const res = await fetch('/api/admin/reservations', {
       method,
@@ -374,6 +374,7 @@ const AdminReservationsPage = () => {
                   <tr>
                     <th className="p-2">User</th>
                     <th className="p-2">Email</th>
+                    <th className="p-2">Phone</th>
                     <th className="p-2">Date</th>
                     <th className="p-2 print:hidden">Actions</th>
                   </tr>
@@ -383,6 +384,7 @@ const AdminReservationsPage = () => {
                     <tr key={b.id} className="border-t hover:bg-gray-50 print:hover:bg-transparent">
                       <td className="p-2">{b.user?.name} {b.user?.surname}</td>
                       <td className="p-2">{b.user?.email}</td>
+                      <td className="p-2">{b.user?.phone}</td>
                       <td className="p-2">{new Date(b.date).toLocaleString()}</td>
                       <td className="p-2 space-x-2 print:hidden">
                         <button

@@ -62,7 +62,14 @@ export async function POST(req) {
     });
     return handleResponse(newUser);
   } catch (error) {
+    if (error.code === 'P2002' && error.meta?.target?.includes('email')) {
+      return NextResponse.json(
+        { error: 'A user with this email already exists.' },
+        { status: 400 }
+      );
+    }
     console.error('Failed to create user:', error);
+
     return handleResponse({ error: 'Failed to create user' }, 500);
   }
 }
@@ -106,7 +113,7 @@ export async function DELETE(req) {
         error: 'Cannot delete user. User has bookings or favourites. Please delete them first.',
       }, 400);
     }
-
+  
     return handleResponse({ error: 'Failed to delete user.' }, 500);
   }
 }

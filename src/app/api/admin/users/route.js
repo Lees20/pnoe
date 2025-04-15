@@ -1,8 +1,27 @@
 import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 
+// Utility function to handle responses
+const handleResponse = (data, status = 200) => {
+  return NextResponse.json(data, { status });
+};
+
+// Utility to require admin session
+const requireAdmin = async (req) => {
+  const session = await getServerSession({ req, ...authOptions });
+  if (!session || session.user.role !== 'admin') {
+    return { error: true, response: handleResponse({ error: 'Unauthorized' }, 401) };
+  }
+  return { error: false, session };
+};
+
 // GET: Fetch all users
-export async function GET() {
+export async function GET(req) {
+  const auth = await requireAdmin(req);
+  if (auth.error) return auth.response;
+
   try {
     const users = await prisma.user.findMany({
       select: {
@@ -16,77 +35,78 @@ export async function GET() {
       },
       orderBy: { createdAt: 'desc' },
     });
-    return NextResponse.json(users);
+    return handleResponse(users);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 });
+    console.error('Failed to fetch users:', error);
+    return handleResponse({ error: 'Failed to fetch users' }, 500);
   }
 }
 
 // POST: Create new user
 export async function POST(req) {
-  const body = await req.json();
-  const { email, password, name, surname, phone, role } = body;
+  const auth = await requireAdmin(req);
+  if (auth.error) return auth.response;
+
+  const { email, password, name, surname, phone, role } = await req.json();
 
   try {
     const newUser = await prisma.user.create({
       data: {
         email,
-        password, // Hash in real case
+        password, // In production: hash before saving
         name,
         surname,
         phone,
         role,
       },
     });
-    return NextResponse.json(newUser);
+    return handleResponse(newUser);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
+    console.error('Failed to create user:', error);
+    return handleResponse({ error: 'Failed to create user' }, 500);
   }
 }
 
 // PUT: Update user
 export async function PUT(req) {
-  const body = await req.json();
-  const { id, email, name, surname, phone, role } = body;
+  const auth = await requireAdmin(req);
+  if (auth.error) return auth.response;
+
+  const { id, email, name, surname, phone, role } = await req.json();
 
   try {
     const updatedUser = await prisma.user.update({
       where: { id },
       data: { email, name, surname, phone, role },
     });
-    return NextResponse.json(updatedUser);
+    return handleResponse(updatedUser);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to update user' }, { status: 500 });
+    console.error('Failed to update user:', error);
+    return handleResponse({ error: 'Failed to update user' }, 500);
   }
 }
 
 // DELETE: Delete user
 export async function DELETE(req) {
-  const body = await req.json();
-  const { id } = body;
+  const auth = await requireAdmin(req);
+  if (auth.error) return auth.response;
+
+  const { id } = await req.json();
 
   try {
     const deletedUser = await prisma.user.delete({
       where: { id: Number(id) },
     });
-
-    return NextResponse.json(deletedUser);
+    return handleResponse(deletedUser);
   } catch (error) {
     console.error('Error deleting user:', error);
 
-    // Prisma Foreign Key Constraint Error (π.χ. υπάρχουν bookings ή favourites)
     if (error.code === 'P2003') {
-      return NextResponse.json(
-        {
-          error: 'Cannot delete user. User has bookings or favourites. Please delete them first.',
-        },
-        { status: 400 }
-      );
+      return handleResponse({
+        error: 'Cannot delete user. User has bookings or favourites. Please delete them first.',
+      }, 400);
     }
 
-    return NextResponse.json(
-      { error: 'Αποτυχία διαγραφής χρήστη.' },
-      { status: 500 }
-    );
+    return handleResponse({ error: 'Failed to delete user.' }, 500);
   }
 }

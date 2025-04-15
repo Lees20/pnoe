@@ -1,13 +1,27 @@
 import { NextResponse } from 'next/server';
-import prisma from '../../../../lib/prisma'; // Adjust the path if necessary
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
+import prisma from '@/lib/prisma';
 
-// Utility function to handle errors and responses
+// Utility function to handle responses
 const handleResponse = (data, status = 200) => {
   return NextResponse.json(data, { status });
 };
 
-// GET /api/admin/experiences - Fetch all experiences
-export async function GET() {
+// Utility to require admin session
+const requireAdmin = async (req) => {
+  const session = await getServerSession({ req, ...authOptions });
+  if (!session || session.user.role !== 'admin') {
+    return { error: true, response: handleResponse({ error: 'Unauthorized' }, 401) };
+  }
+  return { error: false, session };
+};
+
+// GET /api/admin/experiences
+export async function GET(req) {
+  const auth = await requireAdmin(req);
+  if (auth.error) return auth.response;
+
   try {
     const experiences = await prisma.experience.findMany();
     return handleResponse(experiences);
@@ -17,11 +31,17 @@ export async function GET() {
   }
 }
 
-// POST /api/admin/experiences - Create a new experience
+// POST /api/admin/experiences
 export async function POST(req) {
-  const { name, description, price, location, duration, whatsIncluded, whatToBring, whyYoullLove, images, mapPin, guestReviews } = await req.json();
+  const auth = await requireAdmin(req);
+  if (auth.error) return auth.response;
 
-  // Simple validation for required fields
+  const {
+    name, description, price, location, duration,
+    whatsIncluded, whatToBring, whyYoullLove,
+    images, mapPin, guestReviews
+  } = await req.json();
+
   if (!name || !description || !price || !location || !duration) {
     return handleResponse({ error: 'Missing required fields' }, 400);
   }
@@ -49,11 +69,17 @@ export async function POST(req) {
   }
 }
 
-// PUT /api/admin/experiences - Update an existing experience
+// PUT /api/admin/experiences
 export async function PUT(req) {
-  const { id, name, description, price, location, duration, whatsIncluded, whatToBring, whyYoullLove, images, mapPin, guestReviews } = await req.json();
+  const auth = await requireAdmin(req);
+  if (auth.error) return auth.response;
 
-  // Validate ID and required fields
+  const {
+    id, name, description, price, location, duration,
+    whatsIncluded, whatToBring, whyYoullLove,
+    images, mapPin, guestReviews
+  } = await req.json();
+
   if (!id || !name || !description || !price || !location || !duration) {
     return handleResponse({ error: 'Missing required fields' }, 400);
   }
@@ -77,7 +103,7 @@ export async function PUT(req) {
     });
     return handleResponse(updatedExperience);
   } catch (error) {
-    if (error.code === 'P2025') { // Prisma error for record not found
+    if (error.code === 'P2025') {
       return handleResponse({ error: 'Experience not found' }, 404);
     }
     console.error("Error updating experience:", error);
@@ -85,31 +111,28 @@ export async function PUT(req) {
   }
 }
 
-// DELETE /api/admin/experiences - Delete an experience
+// DELETE /api/admin/experiences
 export async function DELETE(req) {
+  const auth = await requireAdmin(req);
+  if (auth.error) return auth.response;
+
   const { id } = await req.json();
 
-  // Validate ID
   if (!id) {
     return handleResponse({ error: 'Experience ID is required' }, 400);
   }
 
   try {
-    const deletedExperience = await prisma.experience.delete({
-      where: { id },
-    });
+    const deletedExperience = await prisma.experience.delete({ where: { id } });
     return handleResponse(deletedExperience);
   } catch (error) {
-    if (error.code === 'P2025') { // Prisma error for record not found
+    if (error.code === 'P2025') {
       return handleResponse({ error: 'Experience not found' }, 404);
     }
     if (error.code === 'P2003') {
-      return NextResponse.json(
-        {
-          error: 'The experience cannot be deleted because it is related to other records (e.g., bookings). Please delete the related records first and try again.',
-        },
-        { status: 400 }
-      );
+      return handleResponse({
+        error: 'The experience is related to other records (e.g., bookings). Please delete them first.'
+      }, 400);
     }
     console.error("Error deleting experience:", error);
     return handleResponse({ error: 'Failed to delete experience' }, 500);

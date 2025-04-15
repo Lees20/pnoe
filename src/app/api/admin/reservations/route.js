@@ -1,8 +1,27 @@
 import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 
+// Utility function to handle API responses
+const handleResponse = (data, status = 200) => {
+  return NextResponse.json(data, { status });
+};
+
+// Utility function to protect routes
+const requireAdmin = async (req) => {
+  const session = await getServerSession({ req, ...authOptions });
+  if (!session || session.user.role !== 'admin') {
+    return { error: true, response: handleResponse({ error: 'Unauthorized' }, 401) };
+  }
+  return { error: false };
+};
+
 // GET: Fetch all reservations
-export async function GET() {
+export async function GET(req) {
+  const auth = await requireAdmin(req);
+  if (auth.error) return auth.response;
+
   try {
     const bookings = await prisma.booking.findMany({
       include: {
@@ -12,78 +31,83 @@ export async function GET() {
       orderBy: { date: 'desc' },
     });
 
-    return NextResponse.json(bookings);
+    return handleResponse(bookings);
   } catch (error) {
     console.error('Error fetching reservations:', error);
-    return NextResponse.json({ error: 'Failed to fetch reservations' }, { status: 500 });
+    return handleResponse({ error: 'Failed to fetch reservations' }, 500);
   }
 }
+
 // POST: Create new reservation
 export async function POST(req) {
-    const body = await req.json();
-    const { userId, experienceId, date } = body;
-  
-    try {
-      const booking = await prisma.booking.create({
-        data: {
-          userId: Number(userId),
-          experienceId: Number(experienceId),
-          date: new Date(date),
-        },
-        include: { //  Include για να επιστραφούν τα πλήρη δεδομένα
-          user: { select: { id: true, email: true, name: true, surname: true } },
-          experience: { select: { id: true, name: true } },
-        },
-      });
-  
-      return NextResponse.json(booking);
-    } catch (error) {
-      console.error('Error creating reservation:', error);
-      return NextResponse.json({ error: 'Failed to create reservation' }, { status: 500 });
-    }
-  }
-  
+  const auth = await requireAdmin(req);
+  if (auth.error) return auth.response;
 
-export async function PATCH(req) {
-    const body = await req.json();
-    const { id, userId, experienceId, date } = body;
-  
-    try {
-      const updatedBooking = await prisma.booking.update({
-        where: { id: Number(id) },
-        data: {
-          userId: Number(userId),
-          experienceId: Number(experienceId),
-          date: new Date(date),
-        },
-        include: { 
-          user: { select: { id: true, email: true, name: true, surname: true } },
-          experience: { select: { id: true, name: true } },
-        },
-      });
-  
-      return NextResponse.json(updatedBooking);
-    } catch (error) {
-      console.error('Error updating reservation:', error);
-      return NextResponse.json({ error: 'Failed to update reservation' }, { status: 500 });
-    }
+  const { userId, experienceId, date } = await req.json();
+
+  try {
+    const booking = await prisma.booking.create({
+      data: {
+        userId: Number(userId),
+        experienceId: Number(experienceId),
+        date: new Date(date),
+      },
+      include: {
+        user: { select: { id: true, email: true, name: true, surname: true } },
+        experience: { select: { id: true, name: true } },
+      },
+    });
+
+    return handleResponse(booking);
+  } catch (error) {
+    console.error('Error creating reservation:', error);
+    return handleResponse({ error: 'Failed to create reservation' }, 500);
   }
-  
+}
+
+// PATCH: Update reservation
+export async function PATCH(req) {
+  const auth = await requireAdmin(req);
+  if (auth.error) return auth.response;
+
+  const { id, userId, experienceId, date } = await req.json();
+
+  try {
+    const updatedBooking = await prisma.booking.update({
+      where: { id: Number(id) },
+      data: {
+        userId: Number(userId),
+        experienceId: Number(experienceId),
+        date: new Date(date),
+      },
+      include: {
+        user: { select: { id: true, email: true, name: true, surname: true } },
+        experience: { select: { id: true, name: true } },
+      },
+    });
+
+    return handleResponse(updatedBooking);
+  } catch (error) {
+    console.error('Error updating reservation:', error);
+    return handleResponse({ error: 'Failed to update reservation' }, 500);
+  }
+}
 
 // DELETE: Delete reservation
 export async function DELETE(req) {
-  const body = await req.json();
-  const { id } = body;
+  const auth = await requireAdmin(req);
+  if (auth.error) return auth.response;
+
+  const { id } = await req.json();
 
   try {
     const deletedBooking = await prisma.booking.delete({
       where: { id: Number(id) },
     });
 
-    return NextResponse.json(deletedBooking);
+    return handleResponse(deletedBooking);
   } catch (error) {
     console.error('Error deleting reservation:', error);
-    
-    return NextResponse.json({ error: 'Failed to delete reservation' }, { status: 500 });
+    return handleResponse({ error: 'Failed to delete reservation' }, 500);
   }
 }

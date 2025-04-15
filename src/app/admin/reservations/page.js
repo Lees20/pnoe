@@ -20,20 +20,27 @@ const AdminReservationsPage = () => {
   const [editingBooking, setEditingBooking] = useState(null);
   const [showForm, setShowForm] = useState(false);
 
-  const exportToExcel = () => {
-    const rows = bookings.map(b => ({
-      Experience: b.experience?.name,
-      User: `${b.user?.name ?? ''} ${b.user?.surname ?? ''}`,
-      Email: b.user?.email,
-      Date: new Date(b.date).toLocaleString(),
-    }));
-  
-    const worksheet = XLSX.utils.json_to_sheet(rows);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Reservations');
-  
-    XLSX.writeFile(workbook, `reservations-${new Date().toISOString().slice(0, 10)}.xlsx`);
-  };
+
+      const exportToExcel = () => {
+        if (!bookings || bookings.length === 0) {
+          alert("No bookings available to export.");
+          return;
+        }
+      
+        const rows = bookings.map(b => ({
+          Experience: b.experience?.name ?? '—',
+          User: `${b.user?.name ?? '—'} ${b.user?.surname ?? ''}`,
+          Email: b.user?.email ?? '—',
+          Date: new Date(b.date).toLocaleString(),
+        }));
+      
+        const worksheet = XLSX.utils.json_to_sheet(rows);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Reservations');
+        XLSX.writeFile(workbook, `reservations-${new Date().toISOString().slice(0, 10)}.xlsx`);
+      };
+   
+
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -140,12 +147,12 @@ const AdminReservationsPage = () => {
   if (status === 'loading') return null;
 
   return (
-    <div className="p-6 max-w-screen-xl mx-auto">
+    <div className="p-6 max-w-screen-xl mx-auto print:block">
       <h1 className="text-3xl font-bold mb-6">Reservations per Experience</h1>
         <div className="mb-4">
         <button
             onClick={() => router.push('/admin/')}
-            className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+            className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 print:hidden"
         >
             ← Back to Dashboard
         </button>
@@ -153,22 +160,28 @@ const AdminReservationsPage = () => {
 
       <button
         onClick={() => { setEditingBooking(null); setShowForm(true); }}
-        className="px-4 py-2 mb-4 bg-green-600 text-white rounded"
+        className="px-4 py-2 mb-4 bg-green-600 text-white rounded print:hidden"
       >
         + Add Reservation
       </button>
  
       <button
         onClick={exportToExcel}
-        className="mb-6 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+        className="mb-6 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 print:hidden"
       >
         Download Excel
+      </button>
+      <button
+        onClick={() => window.print()}
+        className="mb-6 ml-4 px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-800 print:hidden"
+      >
+        Print Reservations
       </button>
 
 
 
       {/* Filters */}
-      <div className="flex gap-4 mb-6">
+      <div className="flex gap-4 mb-6 print:hidden">
         <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="border p-2 rounded" />
         <select value={selectedExperience} onChange={(e) => setSelectedExperience(e.target.value)} className="border p-2 rounded">
           <option value="">All Experiences</option>
@@ -179,16 +192,17 @@ const AdminReservationsPage = () => {
       </div>
 
       {/* Grouped bookings */}
+      <div className="print:block">
       {Object.entries(grouped).map(([expId, { experience, bookings }]) => (
-        <div key={expId} className="mb-10">
-          <h2 className="text-2xl font-semibold text-blue-700">{experience.name}</h2>
-          <table className="w-full border mt-2">
-            <thead className="bg-gray-100">
+        <div key={expId} className="mb-10 break-inside-avoid-page print:break-inside-avoid print:bg-white print:text-black">  
+          <h2 className="text-2xl font-semibold text-blue-700 print:text-black print:font-bold">{experience.name}</h2>
+          <table className="w-full border mt-2 print:text-sm print:border-black">
+            <thead className="bg-gray-100 print:bg-white print:border-b print:border-black">
               <tr>
                 <th className="p-2">User</th>
                 <th className="p-2">Email</th>
                 <th className="p-2">Date</th>
-                <th className="p-2">Actions</th>
+                <th className="p-2 print:hidden">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -198,8 +212,8 @@ const AdminReservationsPage = () => {
                   <td className="p-2">{b.user.email}</td>
                   <td className="p-2">{new Date(b.date).toLocaleString()}</td>
                   <td className="p-2 space-x-2">
-                    <button onClick={() => { setEditingBooking(b); setShowForm(true); }} className="bg-yellow-400 text-white px-2 py-1 rounded">Edit</button>
-                    <button onClick={() => handleDelete(b.id)} className="bg-red-600 text-white px-2 py-1 rounded">Delete</button>
+                    <button onClick={() => { setEditingBooking(b); setShowForm(true); }} className="print:hidden bg-yellow-400 text-white px-2 py-1 rounded">Edit</button>
+                    <button onClick={() => handleDelete(b.id)} className="print:hidden bg-red-600 text-white px-2 py-1 rounded">Delete</button>
                   </td>
                 </tr>
               ))}
@@ -207,6 +221,7 @@ const AdminReservationsPage = () => {
           </table>
         </div>
       ))}
+      </div>
 
       {/* Add/Edit form modal */}
       {showForm && (

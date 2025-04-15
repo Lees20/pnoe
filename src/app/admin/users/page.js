@@ -11,6 +11,7 @@ const AdminClientsPage = () => {
   const [editingUser, setEditingUser] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     setIsClient(true);
@@ -99,6 +100,20 @@ const AdminClientsPage = () => {
 
   if (!isClient || status === 'loading') return null;
 
+
+    const filteredUsers = users.filter(user => {
+      const fullName = `${user.name ?? ''} ${user.surname ?? ''}`.toLowerCase();
+      const email = user.email?.toLowerCase() ?? '';
+      const phone = user.phone ?? '';
+      const query = searchTerm.toLowerCase();
+
+      return (
+        fullName.includes(query) ||
+        email.includes(query) ||
+        phone.includes(query)
+      );
+    });
+
   return (
     <div className="p-6 max-w-screen-xl mx-auto">
       <h1 className="text-3xl font-bold mb-6">Registered Clients</h1>
@@ -140,6 +155,17 @@ const AdminClientsPage = () => {
         </div>
       )}
 
+      {/* Search Bar */}
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="Search by name, email or phone number..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full sm:w-96 p-2 border rounded"
+        />
+      </div>
+
       {/* Users Table */}
       <div className="overflow-x-auto rounded-md shadow">
         <table className="w-full text-left border border-gray-200">
@@ -154,7 +180,7 @@ const AdminClientsPage = () => {
             </tr>
           </thead>
           <tbody>
-            {users.map((user) => (
+            {filteredUsers.map((user) => (
               <tr key={user.id} className="border-t hover:bg-gray-50">
                 <td className="p-3">{user.name ?? '—'} {user.surname ?? ''}</td>
                 <td className="p-3">{user.email}</td>

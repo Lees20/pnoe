@@ -15,6 +15,16 @@ export default function Register() {
   const [isLoading, setIsLoading] = useState(false);  // Loading state
   const [isSuccess, setIsSuccess] = useState(false);  // Success message visibility
   const router = useRouter();  // Initialize useRouter for page redirection
+  const [dateOfBirth, setDateOfBirth] = useState('');
+
+
+  const isLegalAge = (dob) => { //checks if user is 18+
+    const today = new Date();
+    const birthDate = new Date(dob);
+    const age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    return age > 18 || (age === 18 && m >= 0);
+  };
 
   // Redirect to the dashboard if the user is already logged in
   useEffect(() => {
@@ -23,22 +33,39 @@ export default function Register() {
     }
   }, [session, router]);
 
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true); // Set loading to true when the form is submitting
-
+    console.log({
+      email,
+      password,
+      name,
+      surname,
+      phone,
+      dateOfBirth,
+    });
+    
     const res = await fetch('/api/auth/signup', {
       method: 'POST',
-      body: JSON.stringify({ email, password, name, surname, phone }),
+      body: JSON.stringify({ email, password, name, surname, phone, dateOfBirth }),
       headers: {
         'Content-Type': 'application/json',
       },
     });
 
+
+    
     const data = await res.json();
 
     setIsLoading(false); // Set loading to false after form submission
 
+    if (!isLegalAge(dateOfBirth)) {
+      setError('You must be at least 18 years old to register.');
+      setIsLoading(false);
+      return;
+    }
+  
     if (res.ok) {
       setIsSuccess(true);  // Show success message
       setError('');  // Clear any previous errors
@@ -133,6 +160,19 @@ export default function Register() {
                   autoComplete="off"
                 />
               </div>
+
+              {/* Date of Birth */}
+                <div>
+                  <label className="block text-sm font-medium text-[#5a4a3f] mb-2">Date of Birth</label>
+                  <input
+                    type="date"
+                    value={dateOfBirth}
+                    onChange={(e) => setDateOfBirth(e.target.value)}
+                    className="w-full px-6 py-4 rounded-lg border border-[#e0dcd4] focus:outline-none focus:ring-2 focus:ring-[#8b6f47] shadow-lg transition-all duration-300"
+                    required
+                  />
+                </div>
+
 
               {/* Error Message */}
               {error && <p className="text-red-500 text-sm">{error}</p>}

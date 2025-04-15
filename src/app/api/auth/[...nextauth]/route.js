@@ -7,6 +7,7 @@ import { PrismaAdapter } from '@next-auth/prisma-adapter';
 const prisma = new PrismaClient();
 
 export const authOptions = {
+  adapter: PrismaAdapter(prisma), // Optional if you're using sessions stored in DB
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -22,7 +23,6 @@ export const authOptions = {
         }
 
         try {
-          // Find the user by email
           const user = await prisma.user.findUnique({
             where: { email },
           });
@@ -31,20 +31,19 @@ export const authOptions = {
             throw new Error("No user found with this email.");
           }
 
-          // Compare the password
           const isPasswordValid = await compare(password, user.password);
           if (!isPasswordValid) {
             throw new Error("Invalid password.");
           }
 
-          // Return user object with role
           return {
             id: user.id,
             email: user.email,
             name: user.name,
             surname: user.surname,
             phone: user.phone,
-            role: user.role,  // Include role here
+            role: user.role,
+            dateOfBirth: user.dateOfBirth?.toISOString() ?? null, // ✅ include it here too
           };
         } catch (error) {
           throw new Error("An unexpected error occurred. Please try again.");
@@ -53,7 +52,7 @@ export const authOptions = {
     }),
   ],
   session: {
-    strategy: 'jwt', // Enable JWT strategy
+    strategy: 'jwt',
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -61,8 +60,9 @@ export const authOptions = {
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
-        token.phone = user.phone; // Make sure phone is included
-        token.role = user.role;   // Add role to the token
+        token.phone = user.phone;
+        token.role = user.role;
+        token.dateOfBirth = user.dateOfBirth ?? null; // ✅ fix: include in token
       }
       return token;
     },
@@ -70,19 +70,19 @@ export const authOptions = {
       session.user.id = token.id;
       session.user.email = token.email;
       session.user.name = token.name;
-      session.user.phone = token.phone; // Ensure phone is added to the session
-      session.user.role = token.role;   // Ensure role is included in the session
+      session.user.phone = token.phone;
+      session.user.role = token.role;
+      session.user.dateOfBirth = token.dateOfBirth; // ✅ now this will be available client-side
       return session;
     },
   },
-  
-  secret: process.env.JWT_SECRET, // Keep this for JWT if needed
+  secret: process.env.JWT_SECRET,
   pages: {
-    error: '/auth/error', // Redirect to a custom error page if there's an error
+    error: '/auth/error',
   },
 };
 
-// Named exports for GET and POST methods
+// API route handlers
 export async function GET(req, res) {
   return NextAuth(req, res, authOptions);
 }

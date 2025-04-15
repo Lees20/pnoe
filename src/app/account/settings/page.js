@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react'; // Make sure you're using next-auth to manage session
+import { useSession } from 'next-auth/react';
 
 export default function SettingsPage() {
   const { data: session, status } = useSession();
@@ -9,20 +9,24 @@ export default function SettingsPage() {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
-
+  const [dateOfBirth, setDateOfBirth] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  // Fetch session on component mount
   useEffect(() => {
     if (session) {
-      setEmail(session.user.email);  // Pre-fill email and other details from session
-      setName(session.user.name);
-      setPhone(session.user.phone);
+      setEmail(session.user.email || '');
+      setName(session.user.name || '');
+      setPhone(session.user.phone || '');
+      setDateOfBirth(
+        session.user.dateOfBirth
+          ? new Date(session.user.dateOfBirth).toISOString().split('T')[0]
+          : ''
+      );
     }
   }, [session]);
+  
 
-  // Handle form submission
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -36,24 +40,25 @@ export default function SettingsPage() {
       const response = await fetch('/api/account/update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, phone, password }),
+        body: JSON.stringify({ name, email, phone, password, dateOfBirth }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        setSuccessMessage(data.message); // Show success message
-        setErrorMessage(''); // Clear any previous error messages
+        setSuccessMessage(data.message || 'Account updated successfully.');
+        setErrorMessage('');
       } else {
         setErrorMessage(data.message || 'An error occurred while updating your information.');
-        setSuccessMessage(''); // Clear any previous success messages
+        setSuccessMessage('');
       }
     } catch (error) {
       setErrorMessage('Something went wrong. Please try again later.');
+      setSuccessMessage('');
     }
   };
 
-  if (status === 'loading') return <p>Loading...</p>; // Display loading state while fetching session
+  if (status === 'loading') return <p>Loading...</p>;
 
   if (!session) {
     return (
@@ -70,61 +75,75 @@ export default function SettingsPage() {
     <div className="min-h-screen flex items-center justify-center bg-[#f4f1ec] p-6">
       <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
         <h1 className="text-3xl font-semibold text-[#5a4a3f] mb-6 text-center">Account Settings</h1>
-        
+
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Name Input */}
+          {/* Name */}
           <div>
             <label className="block text-sm font-medium text-[#5a4a3f] mb-2">Name</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Enter your new name"
+              placeholder="Enter your name"
               className="w-full px-4 py-2 rounded-md border border-[#e0dcd4] focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
             />
           </div>
 
-          {/* Email Input */}
+          {/* Email */}
           <div>
             <label className="block text-sm font-medium text-[#5a4a3f] mb-2">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your new email"
+              placeholder="Enter your email"
               className="w-full px-4 py-2 rounded-md border border-[#e0dcd4] focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
+              required
             />
           </div>
 
-          {/* Phone Input */}
+          {/* Phone */}
           <div>
             <label className="block text-sm font-medium text-[#5a4a3f] mb-2">Phone</label>
             <input
               type="text"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              placeholder="Enter your new phone number"
+              placeholder="Enter your phone number"
               className="w-full px-4 py-2 rounded-md border border-[#e0dcd4] focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
             />
           </div>
 
-          {/* Password Input */}
+          {/* Date of Birth */}
+          <div>
+            <label className="block text-sm font-medium text-[#5a4a3f] mb-2">Date of Birth</label>
+            <input
+              type="date"
+              value={dateOfBirth}
+              onChange={(e) => setDateOfBirth(e.target.value)}
+              required
+              className="w-full px-4 py-2 rounded-md border border-[#e0dcd4] focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
+            />
+          </div>
+
+          {/* Password */}
           <div>
             <label className="block text-sm font-medium text-[#5a4a3f] mb-2">Password</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your new password"
+              placeholder="Enter your password"
               className="w-full px-4 py-2 rounded-md border border-[#e0dcd4] focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
+              required
             />
           </div>
 
-          {/* Success and Error Messages */}
+          {/* Messages */}
           {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
           {successMessage && <p className="text-green-500 text-sm">{successMessage}</p>}
 
-          {/* Submit Button */}
+          {/* Submit */}
           <button
             type="submit"
             className="w-full py-3 rounded-full text-lg text-white bg-[#8b6f47] hover:bg-[#a78b62] transition-all"

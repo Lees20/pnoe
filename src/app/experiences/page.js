@@ -59,9 +59,12 @@ export default async function Experiences() {
                 </p>
               </div>
               <div className="mt-auto flex flex-col gap-3">
+              <LinkWithLoader className= "text-center" href={`/check-availability` }>
                 <button className="bg-[#8b6f47] text-white px-6 py-3 rounded-full font-medium hover:bg-[#a78b62] transition-all">
                    Check Availability
                 </button>
+                </LinkWithLoader>
+
                 <LinkWithLoader className= "text-center" href={`/experiences/${exp.id}` }>
                   <button className="text-sm text-[#5a4a3f] underline hover:text-[#8b6f47] transition-all">
                     View more details →

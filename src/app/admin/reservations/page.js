@@ -20,13 +20,14 @@ const AdminReservationsPage = () => {
   const [editingBooking, setEditingBooking] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [viewMode, setViewMode] = useState('today'); // today | all | upcoming | past
+  const [isLoadingGrouped, setIsLoadingGrouped] = useState(true);
 
       const exportToExcel = () => {
         if (!bookings || bookings.length === 0) {
           alert("No bookings available to export.");
           return;
         }
-      
+        setIsLoadingGrouped(true);
         const now = new Date();
       
         const filteredBookings = bookings.filter(b => {
@@ -50,6 +51,7 @@ const AdminReservationsPage = () => {
       
         if (filteredBookings.length === 0) {
           alert("No bookings to export for selected view.");
+          setIsLoadingGrouped(false); // Stop loading state
           return;
         }
       
@@ -161,6 +163,7 @@ const AdminReservationsPage = () => {
 
   useEffect(() => {
     const fetchAllData = async () => {
+      setIsLoadingGrouped(true);
       const [bookingsRes, usersRes, experiencesRes] = await Promise.all([
         fetch('/api/admin/reservations'),
         fetch('/api/admin/users'),
@@ -176,6 +179,7 @@ const AdminReservationsPage = () => {
       setBookings(bookingsData);
       setUsers(usersData);
       setExperiences(experiencesData);
+      setIsLoadingGrouped(false);
     };
    
     if (session?.user?.role === 'admin') {
@@ -246,6 +250,7 @@ const AdminReservationsPage = () => {
     }, {});
   
     setGrouped(groupedByExperience);
+    setIsLoadingGrouped(false);
   }, [bookings, selectedDate, selectedExperience, viewMode]);
   
   
@@ -383,74 +388,86 @@ const AdminReservationsPage = () => {
 
       {/* Grouped bookings */}
       <div className="space-y-12 print:block">
-  {Object.entries(grouped).map(([expId, { experience, upcoming, past, future }]) => (
-    <div
-      key={expId}
-      className="bg-white shadow-lg rounded-2xl p-8 border border-[#e6e0d3] print:border-none print:shadow-none"
-    >
-      <h2 className="text-2xl font-serif font-semibold text-[#5a4a3f] mb-6 print:text-black">
-        {experience.name}
-      </h2>
-
-      {[
-        { title: "Upcoming Today", data: upcoming, color: "text-green-700", border: "border-l-4 border-green-400" },
-        { title: "Past Today", data: past, color: "text-gray-600", border: "border-l-4 border-gray-300" },
-        { title: "Future Reservations", data: future, color: "text-purple-700", border: "border-l-4 border-purple-300" },
-      ].map(({ title, data, color, border }) =>
-        data?.length > 0 && (
-          <div key={title} className={`mb-8 pl-4 ${border}`}>
-            <h3 className={`text-lg font-medium mb-3 ${color} print:text-black`}>
-              {title}
-            </h3>
-            <div className="overflow-x-auto rounded-xl border border-[#e0dcd4] print:border-black">
-              <table className="w-full text-left text-[#5a4a3f] print:text-black text-sm">
-                <thead className="bg-[#f7f5f1] text-sm print:bg-white print:border-b print:border-black">
-                  <tr>
-                    <th className="p-3 font-normal">User</th>
-                    <th className="p-3 font-normal">Email</th>
-                    <th className="p-3 font-normal">Phone</th>
-                    <th className="p-3 font-normal">Date</th>
-                    <th className="p-3 font-normal print:hidden">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.map((b) => (
-                    <tr
-                      key={b.id}
-                      className="border-t border-[#f0ece6] hover:bg-[#f9f7f4] transition print:hover:bg-transparent"
-                    >
-                      <td className="p-3">{b.user?.name} {b.user?.surname}</td>
-                      <td className="p-3">{b.user?.email}</td>
-                      <td className="p-3">{b.user?.phone}</td>
-                      <td className="p-3">{new Date(b.date).toLocaleString()}</td>
-                      <td className="p-3 space-x-2 print:hidden">
-                        <button
-                          onClick={() => {
-                            setEditingBooking(b);
-                            setShowForm(true);
-                          }}
-                          className="px-3 py-1 rounded-full bg-yellow-400 text-white hover:bg-yellow-500 transition-all text-sm"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(b.id)}
-                          className="px-3 py-1 rounded-full bg-red-600 text-white hover:bg-red-700 transition-all text-sm"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )
-      )}
+  {isLoadingGrouped ? (
+    <div className="flex flex-col items-center justify-center mt-12 text-[#5a4a3f] font-serif text-lg">
+      <div className="animate-spin rounded-full h-8 w-8 border-4 border-[#8b6f47] border-t-transparent mb-4" />
+      Loading reservations...
     </div>
-  ))}
+  ) : Object.keys(grouped).length === 0 ? (
+    <p className="text-center text-[#5a4a3f] text-lg font-serif italic mt-12">
+      No {viewMode} reservations found.
+    </p>
+  ) : (
+    Object.entries(grouped).map(([expId, { experience, upcoming, past, future }]) => (
+      <div
+        key={expId}
+        className="bg-white shadow-lg rounded-2xl p-8 border border-[#e6e0d3] print:border-none print:shadow-none"
+      >
+        <h2 className="text-2xl font-serif font-semibold text-[#5a4a3f] mb-6 print:text-black">
+          {experience.name}
+        </h2>
+
+        {[
+          { title: "Upcoming Today", data: upcoming, color: "text-green-700", border: "border-l-4 border-green-400" },
+          { title: "Past Today", data: past, color: "text-gray-600", border: "border-l-4 border-gray-300" },
+          { title: "Future Reservations", data: future, color: "text-purple-700", border: "border-l-4 border-purple-300" },
+        ].map(({ title, data, color, border }) =>
+          data?.length > 0 && (
+            <div key={title} className={`mb-8 pl-4 ${border}`}>
+              <h3 className={`text-lg font-medium mb-3 ${color} print:text-black`}>
+                {title}
+              </h3>
+              <div className="overflow-x-auto rounded-xl border border-[#e0dcd4] print:border-black">
+                <table className="w-full text-left text-[#5a4a3f] print:text-black text-sm">
+                  <thead className="bg-[#f7f5f1] text-sm print:bg-white print:border-b print:border-black">
+                    <tr>
+                      <th className="p-3 font-normal">User</th>
+                      <th className="p-3 font-normal">Email</th>
+                      <th className="p-3 font-normal">Phone</th>
+                      <th className="p-3 font-normal">Date</th>
+                      <th className="p-3 font-normal print:hidden">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.map((b) => (
+                      <tr
+                        key={b.id}
+                        className="border-t border-[#f0ece6] hover:bg-[#f9f7f4] transition print:hover:bg-transparent"
+                      >
+                        <td className="p-3">{b.user?.name} {b.user?.surname}</td>
+                        <td className="p-3">{b.user?.email}</td>
+                        <td className="p-3">{b.user?.phone}</td>
+                        <td className="p-3">{new Date(b.date).toLocaleString()}</td>
+                        <td className="p-3 space-x-2 print:hidden">
+                          <button
+                            onClick={() => {
+                              setEditingBooking(b);
+                              setShowForm(true);
+                            }}
+                            className="px-3 py-1 rounded-full bg-yellow-400 text-white hover:bg-yellow-500 transition-all text-sm"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(b.id)}
+                            className="px-3 py-1 rounded-full bg-red-600 text-white hover:bg-red-700 transition-all text-sm"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )
+        )}
+      </div>
+    ))
+  )}
 </div>
+
 
 
 

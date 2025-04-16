@@ -77,4 +77,7 @@ model Experience {
   guestReviews  Json?    // Store reviews as JSON array
   favourites  Favourite[] // One-to-many relationship with favourites
   bookings    Booking[]   // One-to-many relationship with bookings
+
+  createdAt     DateTime @default(now())  
+  updatedAt     DateTime @updatedAt   
 }

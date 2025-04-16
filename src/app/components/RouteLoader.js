@@ -21,7 +21,7 @@ export function RouteLoader({ children }) {
         router.push(nextPath);
         setIsLoading(false);
         setNextPath(null);
-      }, 800); // page transition
+      }, 1000); // page transition
       return () => clearTimeout(timeout);
     }
   }, [nextPath]);

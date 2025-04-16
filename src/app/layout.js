@@ -15,6 +15,13 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className="h-full">
+      <head>
+        {/* Add Cloudinary script here */}
+        <script
+          src="https://upload-widget.cloudinary.com/global/all.js"
+          type="text/javascript"
+        ></script>
+      </head>
       <body className="flex min-h-screen flex-col pt-[72px] bg-[#f4f1ec] text-[#2f2f2f] antialiased">
         <SessionWrapper>
           <RouteLoader>

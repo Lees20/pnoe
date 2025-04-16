@@ -18,6 +18,8 @@
     "@vercel/toolbar": "^0.1.36",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^3.0.2",
+    "cloudinary": "^2.6.0",
+    "formidable": "^3.5.2",
     "framer-motion": "^12.6.3",
     "jsonwebtoken": "^9.0.2",
     "leaflet": "^1.9.4",

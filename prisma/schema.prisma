@@ -71,7 +71,7 @@ model Experience {
   whyYoullLove  String?  // "Connect with nature..."
   duration      String? 
   // Use Json type for storing arrays
-  images        Json?    // Store image URLs as JSON array
+  images        String[]    
   mapPin        String?  // URL or coordinates for the map pin
   guestReviews  Json?    // Store reviews as JSON array
   favourites    Favourite[] // One-to-many relationship with favourites

@@ -14,7 +14,7 @@ model User {
   name        String?
   surname     String?
   phone       String?
-  dateOfBirth DateTime? // ✅ Ημερομηνία γέννησης (προαιρετική)
+  dateOfBirth DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   role        String    @default("user")
@@ -60,7 +60,6 @@ model Booking {
   experience    Experience @relation(fields: [experienceId], references: [id]) // Relate booking to experience
 }
 
-// Assuming you have an Experience model to store details about experiences
 model Experience {
   id            Int      @id @default(autoincrement()) // Unique identifier for an experience
   name          String   // Experience name
@@ -75,8 +74,11 @@ model Experience {
   images        Json?    // Store image URLs as JSON array
   mapPin        String?  // URL or coordinates for the map pin
   guestReviews  Json?    // Store reviews as JSON array
-  favourites  Favourite[] // One-to-many relationship with favourites
-  bookings    Booking[]   // One-to-many relationship with bookings
+  favourites    Favourite[] // One-to-many relationship with favourites
+  bookings      Booking[]   // One-to-many relationship with bookings
+
+  frequency     String[]  // New field: stores the days of the week (e.g., "Monday, Wednesday, Friday")
+  visibility    Boolean  @default(true)  // New field: true for public, false for private
 
   createdAt     DateTime @default(now())  
   updatedAt     DateTime @updatedAt   

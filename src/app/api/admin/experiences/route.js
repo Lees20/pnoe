@@ -31,6 +31,7 @@ export async function GET(req) {
   }
 }
 
+
 // POST /api/admin/experiences
 export async function POST(req) {
   const auth = await requireAdmin(req);
@@ -39,7 +40,7 @@ export async function POST(req) {
   const {
     name, description, price, location, duration,
     whatsIncluded, whatToBring, whyYoullLove,
-    images, mapPin, guestReviews
+    images, mapPin, guestReviews, frequency, visibility
   } = await req.json();
 
   if (!name || !description || !price || !location || !duration) {
@@ -60,6 +61,8 @@ export async function POST(req) {
         images,
         mapPin,
         guestReviews,
+        frequency,  // Add frequency array
+        visibility,  // Add visibility toggle
       },
     });
     return handleResponse(newExperience);
@@ -69,7 +72,9 @@ export async function POST(req) {
   }
 }
 
+
 // PUT /api/admin/experiences
+
 export async function PUT(req) {
   const auth = await requireAdmin(req);
   if (auth.error) return auth.response;
@@ -77,7 +82,7 @@ export async function PUT(req) {
   const {
     id, name, description, price, location, duration,
     whatsIncluded, whatToBring, whyYoullLove,
-    images, mapPin, guestReviews
+    images, mapPin, guestReviews, frequency, visibility
   } = await req.json();
 
   if (!id || !name || !description || !price || !location || !duration) {
@@ -99,6 +104,8 @@ export async function PUT(req) {
         images,
         mapPin,
         guestReviews,
+        frequency,  // Update frequency array
+        visibility,  // Update visibility toggle
       },
     });
     return handleResponse(updatedExperience);
@@ -110,6 +117,7 @@ export async function PUT(req) {
     return handleResponse({ error: 'Failed to update experience' }, 500);
   }
 }
+
 
 // DELETE /api/admin/experiences
 export async function DELETE(req) {

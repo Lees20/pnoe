@@ -105,107 +105,144 @@ const AdminExperiencesPage = () => {
             </button>
 
         </div>
-          <div className="mb-6 text-center">
-            {!showAddForm ? (
-             <button
-             onClick={() => setShowAddForm(true)}
-             className="px-6 py-3 bg-[#8b6f47] text-white rounded-full font-medium font-serif shadow-sm hover:bg-[#a78b62] transition-all focus:outline-none focus:ring-2 focus:ring-[#c7b29e]"
-           >
-             + Add New Experience
-           </button>
-           
-            ) : (
-              <div className="p-8 bg-[#fefcf9] rounded-2xl shadow-xl border border-[#e8e2d8] max-w-4xl mx-auto">
-              <h3 className="text-4xl font-serif font-semibold text-[#5a4a3f] mb-10 text-center">
-                Add New Experience
-              </h3>
-            
-              <form
-                className="space-y-6 font-serif text-[#5a4a3f]"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const newExperience = {
-                    name: e.target.name.value,
-                    description: e.target.description.value,
-                    price: parseFloat(e.target.price.value),
-                    location: e.target.location.value,
-                    duration: e.target.duration.value,
-                    whatsIncluded: e.target.whatsIncluded.value,
-                    whatToBring: e.target.whatToBring.value,
-                    whyYoullLove: e.target.whyYoullLove.value,
-                    images: e.target.images.value.split(',').map((s) => s.trim()),
-                    mapPin: e.target.mapPin.value,
-                    guestReviews: e.target.guestReviews.value.split(',').map((s) => s.trim()),
-                  };
-                  handleAddExperience(newExperience);
-                  e.target.reset();
-                  setShowAddForm(false);
-                }}
-              >
-                {/* Input fields */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {[
-                    { label: 'Name', name: 'name' },
-                    { label: 'Location', name: 'location' },
-                    { label: 'Duration', name: 'duration' },
-                    { label: 'Price (€)', name: 'price', type: 'number' },
-                    { label: 'Images (comma-separated)', name: 'images' },
-                    { label: 'Map Pin', name: 'mapPin' },
-                    { label: 'Guest Reviews (comma-separated)', name: 'guestReviews' },
-                  ].map(({ label, name, type = 'text' }) => (
-                    <div key={name}>
-                      <label className="block text-sm mb-1 font-medium">{label}</label>
-                      <input
-                        type={type}
-                        name={name}
-                        required={name !== 'mapPin' && name !== 'guestReviews'}
-                        className="w-full px-4 py-2 rounded-lg border border-[#dcd2c3] bg-white focus:outline-none focus:ring-2 focus:ring-[#8b6f47] shadow-sm"
-                      />
-                    </div>
-                  ))}
-                </div>
-            
-                {/* Textareas */}
-                <div className="grid grid-cols-1 gap-6">
-                  {[
-                    { label: 'Description', name: 'description' },
-                    { label: 'What’s Included', name: 'whatsIncluded' },
-                    { label: 'What to Bring', name: 'whatToBring' },
-                    { label: 'Why You’ll Love It', name: 'whyYoullLove' },
-                  ].map(({ label, name }) => (
-                    <div key={name}>
-                      <label className="block text-sm mb-1 font-medium">{label}</label>
-                      <textarea
-                        name={name}
-                        required
-                        rows={3}
-                        className="w-full px-4 py-2 rounded-lg border border-[#dcd2c3] bg-white focus:outline-none focus:ring-2 focus:ring-[#8b6f47] shadow-sm"
-                      />
-                    </div>
-                  ))}
-                </div>
-            
-                {/* Buttons */}
-                <div className="flex justify-end gap-4 pt-6">
-                  <button
-                    type="submit"
-                    className="px-6 py-3 bg-[#8b6f47] text-white rounded-full font-medium hover:bg-[#a78b62] transition-all shadow-sm"
-                  >
-                    Save Experience
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowAddForm(false)}
-                    className="px-6 py-3 bg-[#e6e1d5] text-[#5a4a3f] rounded-full font-medium hover:bg-[#dad2c4] transition-all"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
-            
-            )}
+        <div className="mb-6 text-center">
+              {!showAddForm ? (
+        <button
+          onClick={() => setShowAddForm(true)}
+          className="px-6 py-3 bg-[#8b6f47] text-white rounded-full font-medium font-serif shadow-sm hover:bg-[#a78b62] transition-all focus:outline-none focus:ring-2 focus:ring-[#c7b29e]"
+        >
+          + Add New Experience
+        </button>
+      ) : (
+        <div className="p-8 bg-[#fefcf9] rounded-2xl shadow-xl border border-[#e8e2d8] max-w-4xl mx-auto">
+          <h3 className="text-4xl font-serif font-semibold text-[#5a4a3f] mb-10 text-center">
+            Add New Experience
+          </h3>
+
+    <form
+      className="space-y-6 font-serif text-[#5a4a3f]"
+      onSubmit={(e) => {
+        e.preventDefault();
+        
+        // Collect selected frequency days
+        const selectedDays = Array.from(e.target.querySelectorAll('input[name="frequency"]:checked')).map((checkbox) => checkbox.value);
+
+        const newExperience = {
+          name: e.target.name.value,
+          description: e.target.description.value,
+          price: parseFloat(e.target.price.value),
+          location: e.target.location.value,
+          duration: e.target.duration.value,
+          whatsIncluded: e.target.whatsIncluded.value,
+          whatToBring: e.target.whatToBring.value,
+          whyYoullLove: e.target.whyYoullLove.value,
+          images: e.target.images.value.split(',').map((s) => s.trim()),
+          mapPin: e.target.mapPin.value,
+          guestReviews: e.target.guestReviews.value.split(',').map((s) => s.trim()),
+          frequency: selectedDays, // Array of selected days
+          visibility: e.target.visibility.checked, // visibility toggle (public/private)
+        };
+        
+        handleAddExperience(newExperience);
+        e.target.reset();
+        setShowAddForm(false);
+      }}
+    >
+      {/* Input fields */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {[
+          { label: 'Name', name: 'name' },
+          { label: 'Location', name: 'location' },
+          { label: 'Duration', name: 'duration' },
+          { label: 'Price (€)', name: 'price', type: 'number' },
+          { label: 'Images (comma-separated)', name: 'images' },
+          { label: 'Map Pin', name: 'mapPin' },
+          { label: 'Guest Reviews (comma-separated)', name: 'guestReviews' },
+        ].map(({ label, name, type = 'text' }) => (
+          <div key={name}>
+            <label className="block text-sm mb-1 font-medium">{label}</label>
+            <input
+              type={type}
+              name={name}
+              required={name !== 'mapPin' && name !== 'guestReviews'}
+              className="w-full px-4 py-2 rounded-lg border border-[#dcd2c3] bg-white focus:outline-none focus:ring-2 focus:ring-[#8b6f47] shadow-sm"
+            />
           </div>
+        ))}
+      </div>
+
+      {/* Textareas */}
+      <div className="grid grid-cols-1 gap-6">
+        {[
+          { label: 'Description', name: 'description' },
+          { label: 'What’s Included', name: 'whatsIncluded' },
+          { label: 'What to Bring', name: 'whatToBring' },
+          { label: 'Why You’ll Love It', name: 'whyYoullLove' },
+        ].map(({ label, name }) => (
+          <div key={name}>
+            <label className="block text-sm mb-1 font-medium">{label}</label>
+            <textarea
+              name={name}
+              required
+              rows={3}
+              className="w-full px-4 py-2 rounded-lg border border-[#dcd2c3] bg-white focus:outline-none focus:ring-2 focus:ring-[#8b6f47] shadow-sm"
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Frequency: Days of the Week */}
+      <div className="mb-6">
+        <label className="block text-sm mb-1 font-medium">Frequency (Select Days)</label>
+        <div className="grid grid-cols-2 gap-4">
+          {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((day) => (
+            <label key={day} className="inline-flex items-center">
+              <input
+                type="checkbox"
+                name="frequency"
+                value={day}
+                className="form-checkbox"
+              />
+              <span className="ml-2">{day}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* Visibility Toggle */}
+      <div className="mb-6">
+        <label className="inline-flex items-center">
+          <input
+            type="checkbox"
+            name="visibility"
+            className="form-checkbox"
+          />
+          <span className="ml-2">Public (visibility)</span>
+        </label>
+      </div>
+
+      {/* Buttons */}
+      <div className="flex justify-end gap-4 pt-6">
+        <button
+          type="submit"
+          className="px-6 py-3 bg-[#8b6f47] text-white rounded-full font-medium hover:bg-[#a78b62] transition-all shadow-sm"
+        >
+          Save Experience
+        </button>
+        <button
+          type="button"
+          onClick={() => setShowAddForm(false)}
+          className="px-6 py-3 bg-[#e6e1d5] text-[#5a4a3f] rounded-full font-medium hover:bg-[#dad2c4] transition-all"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+)}
+
+        </div>
+
 
 
             {/* Experiences List */}
@@ -276,118 +313,159 @@ const AdminExperiencesPage = () => {
 
 
 
-       {/* Edit Experience Form */}
-       {editingExperience && (
-          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 backdrop-blur-sm">
-            <div className="bg-white rounded-3xl shadow-xl w-full max-w-3xl p-8 overflow-y-auto max-h-[90vh] text-[#5a4a3f] font-serif space-y-6">
+  {/* Edit Experience Form */}
+    {editingExperience && (
+      <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 backdrop-blur-sm">
+        <div className="bg-white rounded-3xl shadow-xl w-full max-w-3xl p-8 overflow-y-auto max-h-[90vh] text-[#5a4a3f] font-serif space-y-6">
+          <h3 className="text-3xl font-semibold text-center">Edit Experience</h3>
 
-              <h3 className="text-3xl font-semibold text-center">Edit Experience</h3>
+          <form
+            className="grid grid-cols-1 sm:grid-cols-2 gap-6"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const form = e.target;
 
-              <form
-                className="grid grid-cols-1 sm:grid-cols-2 gap-6"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const form = e.target;
-                  const updatedExperience = {
-                    id: editingExperience.id,
-                    name: form.name.value,
-                    description: form.description.value,
-                    price: parseFloat(form.price.value),
-                    location: form.location.value,
-                    duration: form.duration.value,
-                    whatsIncluded: form.whatsIncluded.value,
-                    whatToBring: form.whatToBring.value,
-                    whyYoullLove: form.whyYoullLove.value,
-                    images: form.images.value.split(',').map(img => img.trim()),
-                    mapPin: form.mapPin.value,
-                    guestReviews: form.guestReviews.value.split(',').map(r => r.trim()),
-                  };
-                  handleUpdateExperience(updatedExperience);
-                }}
-              >
-                {/* Left column */}
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Name</label>
-                    <input type="text" name="name" defaultValue={editingExperience.name} required className="w-full p-3 border border-[#e0dcd4] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8b6f47]" />
-                  </div>
+              // Collect selected frequency days (checkboxes)
+              const selectedDays = Array.from(form.querySelectorAll('input[name="frequency"]:checked')).map(checkbox => checkbox.value);
 
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Location</label>
-                    <input type="text" name="location" defaultValue={editingExperience.location} required className="w-full p-3 border border-[#e0dcd4] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8b6f47]" />
-                  </div>
+              const updatedExperience = {
+                id: editingExperience.id,
+                name: form.name.value,
+                description: form.description.value,
+                price: parseFloat(form.price.value),
+                location: form.location.value,
+                duration: form.duration.value,
+                whatsIncluded: form.whatsIncluded.value,
+                whatToBring: form.whatToBring.value,
+                whyYoullLove: form.whyYoullLove.value,
+                images: form.images.value.split(',').map(img => img.trim()),
+                mapPin: form.mapPin.value,
+                guestReviews: form.guestReviews.value.split(',').map(r => r.trim()),
+                frequency: selectedDays,  // frequency handling
+                visibility: form.visibility.checked,  // visibility toggle (public/private)
+              };
 
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Duration</label>
-                    <input type="text" name="duration" defaultValue={editingExperience.duration} required className="w-full p-3 border border-[#e0dcd4] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8b6f47]" />
-                  </div>
+              handleUpdateExperience(updatedExperience);
+            }}
+          >
+            {/* Left column */}
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Name</label>
+                <input type="text" name="name" defaultValue={editingExperience.name} required className="w-full p-3 border border-[#e0dcd4] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8b6f47]" />
+              </div>
 
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Price (€)</label>
-                    <input type="number" name="price" defaultValue={editingExperience.price} required className="w-full p-3 border border-[#e0dcd4] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8b6f47]" />
-                  </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Location</label>
+                <input type="text" name="location" defaultValue={editingExperience.location} required className="w-full p-3 border border-[#e0dcd4] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8b6f47]" />
+              </div>
 
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Map Pin</label>
-                    <input type="text" name="mapPin" defaultValue={editingExperience.mapPin} className="w-full p-3 border border-[#e0dcd4] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8b6f47]" />
-                  </div>
-                </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Duration</label>
+                <input type="text" name="duration" defaultValue={editingExperience.duration} required className="w-full p-3 border border-[#e0dcd4] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8b6f47]" />
+              </div>
 
-                {/* Right column */}
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Description</label>
-                    <textarea name="description" defaultValue={editingExperience.description} required className="w-full p-3 border border-[#e0dcd4] rounded-lg h-24 focus:outline-none focus:ring-2 focus:ring-[#8b6f47]" />
-                  </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Price (€)</label>
+                <input type="number" name="price" defaultValue={editingExperience.price} required className="w-full p-3 border border-[#e0dcd4] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8b6f47]" />
+              </div>
 
-                  <div>
-                    <label className="block text-sm font-medium mb-1">What’s Included</label>
-                    <textarea name="whatsIncluded" defaultValue={editingExperience.whatsIncluded} className="w-full p-3 border border-[#e0dcd4] rounded-lg h-20 focus:outline-none focus:ring-2 focus:ring-[#8b6f47]" />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-1">What to Bring</label>
-                    <textarea name="whatToBring" defaultValue={editingExperience.whatToBring} className="w-full p-3 border border-[#e0dcd4] rounded-lg h-20 focus:outline-none focus:ring-2 focus:ring-[#8b6f47]" />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Why You’ll Love It</label>
-                    <textarea name="whyYoullLove" defaultValue={editingExperience.whyYoullLove} className="w-full p-3 border border-[#e0dcd4] rounded-lg h-20 focus:outline-none focus:ring-2 focus:ring-[#8b6f47]" />
-                  </div>
-                </div>
-
-                {/* Full width fields */}
-                <div className="col-span-1 sm:col-span-2 space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Images (comma-separated URLs)</label>
-                    <input type="text" name="images" defaultValue={editingExperience.images?.join(',')} className="w-full p-3 border border-[#e0dcd4] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8b6f47]" />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Guest Reviews (comma-separated)</label>
-                    <input type="text" name="guestReviews" defaultValue={editingExperience.guestReviews?.join(',')} className="w-full p-3 border border-[#e0dcd4] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8b6f47]" />
-                  </div>
-
-                  <div className="flex justify-end gap-3 pt-2">
-                    <button
-                      type="submit"
-                      className="px-6 py-2 rounded-full bg-[#8b6f47] text-white hover:bg-[#a78b62] transition-all shadow-sm"
-                    >
-                      Save
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setEditingExperience(null)}
-                      className="px-6 py-2 rounded-full bg-gray-300 text-[#5a4a3f] hover:bg-gray-400 transition-all"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              </form>
+              <div>
+                <label className="block text-sm font-medium mb-1">Map Pin</label>
+                <input type="text" name="mapPin" defaultValue={editingExperience.mapPin} className="w-full p-3 border border-[#e0dcd4] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8b6f47]" />
+              </div>
             </div>
-          </div>
-        )}
+
+            {/* Right column */}
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Description</label>
+                <textarea name="description" defaultValue={editingExperience.description} required className="w-full p-3 border border-[#e0dcd4] rounded-lg h-24 focus:outline-none focus:ring-2 focus:ring-[#8b6f47]" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">What’s Included</label>
+                <textarea name="whatsIncluded" defaultValue={editingExperience.whatsIncluded} className="w-full p-3 border border-[#e0dcd4] rounded-lg h-20 focus:outline-none focus:ring-2 focus:ring-[#8b6f47]" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">What to Bring</label>
+                <textarea name="whatToBring" defaultValue={editingExperience.whatToBring} className="w-full p-3 border border-[#e0dcd4] rounded-lg h-20 focus:outline-none focus:ring-2 focus:ring-[#8b6f47]" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Why You’ll Love It</label>
+                <textarea name="whyYoullLove" defaultValue={editingExperience.whyYoullLove} className="w-full p-3 border border-[#e0dcd4] rounded-lg h-20 focus:outline-none focus:ring-2 focus:ring-[#8b6f47]" />
+              </div>
+            </div>
+
+            {/* Full width fields */}
+            <div className="col-span-1 sm:col-span-2 space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Images (comma-separated URLs)</label>
+                <input type="text" name="images" defaultValue={editingExperience.images?.join(',')} className="w-full p-3 border border-[#e0dcd4] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8b6f47]" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Guest Reviews (comma-separated)</label>
+                <input type="text" name="guestReviews" defaultValue={editingExperience.guestReviews?.join(',')} className="w-full p-3 border border-[#e0dcd4] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8b6f47]" />
+              </div>
+
+              {/* Frequency: Days of the Week */}
+              <div className="mb-6">
+                <label className="block text-sm mb-1 font-medium">Frequency (Select Days)</label>
+                <div className="grid grid-cols-2 gap-4">
+                  {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((day) => (
+                    <label key={day} className="inline-flex items-center">
+                      <input
+                        type="checkbox"
+                        name="frequency"
+                        value={day}
+                        defaultChecked={editingExperience.frequency?.includes(day)}
+                        className="form-checkbox"
+                      />
+                      <span className="ml-2">{day}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Visibility Toggle */}
+              <div className="mb-6">
+                <label className="inline-flex items-center">
+                  <input
+                    type="checkbox"
+                    name="visibility"
+                    defaultChecked={editingExperience.visibility}
+                    className="form-checkbox"
+                  />
+                  <span className="ml-2">Public (visibility)</span>
+                </label>
+              </div>
+
+              {/* Buttons */}
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="submit"
+                  className="px-6 py-2 rounded-full bg-[#8b6f47] text-white hover:bg-[#a78b62] transition-all shadow-sm"
+                >
+                  Save
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditingExperience(null)}
+                  className="px-6 py-2 rounded-full bg-gray-300 text-[#5a4a3f] hover:bg-gray-400 transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    )}
+
+
 
 
 

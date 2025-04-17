@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
+import slugify from 'slugify'; // Import the slugify utility
 
 // Utility function to handle responses
 const handleResponse = (data, status = 200) => {
@@ -23,14 +24,32 @@ export async function GET(req) {
   if (auth.error) return auth.response;
 
   try {
-    const experiences = await prisma.experience.findMany();
+    const experiences = await prisma.experience.findMany({
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        location: true,
+        duration: true,
+        whatsIncluded: true,
+        whatToBring: true,
+        whyYoullLove: true,
+        images: true,
+        mapPin: true,
+        guestReviews: true,
+        frequency: true,  // Include frequency field
+        visibility: true, // Include visibility field
+        createdAt: true,
+        updatedAt: true,
+      }
+    });
     return handleResponse(experiences);
   } catch (error) {
     console.error("Error fetching experiences:", error);
     return handleResponse({ error: 'Failed to fetch experiences' }, 500);
   }
 }
-
 
 // POST /api/admin/experiences
 export async function POST(req) {
@@ -47,10 +66,14 @@ export async function POST(req) {
     return handleResponse({ error: 'Missing required fields' }, 400);
   }
 
+  // Generate slug from the name
+  const slug = slugify(name, { lower: true, strict: true });
+
   try {
     const newExperience = await prisma.experience.create({
       data: {
         name,
+        slug,  // Add the slug here
         description,
         price,
         location,
@@ -72,9 +95,7 @@ export async function POST(req) {
   }
 }
 
-
 // PUT /api/admin/experiences
-
 export async function PUT(req) {
   const auth = await requireAdmin(req);
   if (auth.error) return auth.response;
@@ -89,11 +110,15 @@ export async function PUT(req) {
     return handleResponse({ error: 'Missing required fields' }, 400);
   }
 
+  // Generate slug from the name, only if name is changed
+  const slug = slugify(name, { lower: true, strict: true });
+
   try {
     const updatedExperience = await prisma.experience.update({
       where: { id },
       data: {
         name,
+        slug,  // Update the slug here
         description,
         price,
         location,
@@ -117,7 +142,6 @@ export async function PUT(req) {
     return handleResponse({ error: 'Failed to update experience' }, 500);
   }
 }
-
 
 // DELETE /api/admin/experiences
 export async function DELETE(req) {

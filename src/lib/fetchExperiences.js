@@ -1,10 +1,9 @@
 // src/lib/fetchExperiences.js
-import prisma from '@/lib/prisma';
+import prisma from './prisma'; // ← assuming prisma.js uses singleton
 
-export async function getAllExperiences() {
-  const experiences = await prisma.experience.findMany({
-    orderBy: { id: 'desc' },
+export async function getExperienceBySlug(slug) {
+  if (!slug) return null;
+  return await prisma.experience.findUnique({
+    where: { slug },
   });
-
-  return experiences;
 }

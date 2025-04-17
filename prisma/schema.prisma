@@ -62,7 +62,8 @@ model Booking {
 
 model Experience {
   id            Int      @id @default(autoincrement()) // Unique identifier for an experience
-  name          String   // Experience name
+  name          String   @unique // Unique Experience name
+  slug          String   @unique // Unique, SEO-friendly slug for URL
   description   String?  // Optional description of the experience
   price         Float    @default(85) // Default value for price (€85)
   location      String   @default("Chania, Crete") // Default location

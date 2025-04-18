@@ -1,26 +1,22 @@
-// app/experiences/[slug]/page.js
+export const dynamic = 'force-dynamic';
 
 import { getExperienceBySlug } from '@/lib/fetchExperiences';
-import { notFound } from 'next/navigation';
 import LinkWithLoader from '@/app/components/LinkWithLoader';
 import { ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
 
-export default async function ExperienceDetailPage(props) {
-    // DO NOT assign slug yet
-  
-    // Check if params exists
-    if (!props.params || !props.params.slug) {
-      return notFound();
-    }
-  
-    // Now it's safe to assign
-    const slug = props.params.slug;
-  
-    const experience = await getExperienceBySlug(slug);
-  
-    if (!experience) return notFound();
-  
+export default async function ExperienceDetailPage({ params }) {
+  const { slug } = await params;
+
+  if (!slug) {
+    return <NotAvailable />;
+  }
+
+  const experience = await getExperienceBySlug(slug);
+  if (!experience) {
+    return <NotAvailable />;
+  }
+
   const {
     name,
     description,
@@ -44,7 +40,7 @@ export default async function ExperienceDetailPage(props) {
 
   return (
     <main className="pt-16 sm:pt-24 px-6 bg-[#f4f1ec] text-[#2f2f2f] min-h-screen">
-      {/* Back to Experiences Button */}
+      {/* Back Button */}
       <section className="text-center mb-8">
         <LinkWithLoader href="/experiences">
           <button className="flex items-center text-[#8b6f47] text-sm border border-[#8b6f47] rounded-full px-4 py-2 hover:bg-[#f4f1ec] hover:text-[#5a4a3f] transition-all">
@@ -54,13 +50,23 @@ export default async function ExperienceDetailPage(props) {
         </LinkWithLoader>
       </section>
 
-      {/* Hero Section */}
+      {/* Hero */}
       <section className="text-center mb-16">
         <h1 className="text-3xl sm:text-5xl font-serif text-[#5a4a3f] mb-4">{name}</h1>
         <p className="text-lg text-[#4a4a4a] italic mb-4">{duration}</p>
         <p className="text-2xl font-medium text-[#5a4a3f] mt-2">€{price}</p>
         <p className="text-sm text-[#8b6f47] mt-1">Location: {location}</p>
       </section>
+
+      <section className="text-center mb-16">
+        <div className="mt-6">
+          <LinkWithLoader href="/check-availability">
+            <button className="bg-[#8b6f47] text-white px-6 py-3 rounded-full font-medium hover:bg-[#a78b62] transition-all">
+              Check Availability
+            </button>
+          </LinkWithLoader>
+        </div>
+    </section>
 
       {/* Description */}
       <section className="max-w-5xl mx-auto mb-12 text-center">
@@ -112,23 +118,21 @@ export default async function ExperienceDetailPage(props) {
       )}
 
       {/* Map Section */}
- {/* Map Section */}
-{mapPin && (
-  <section className="max-w-5xl mx-auto mb-20">
-    <h3 className="text-3xl font-serif text-[#5a4a3f] mb-6 text-center">Where You'll Be</h3>
-    <div className="w-full h-[300px] rounded-xl overflow-hidden shadow-lg">
-      <iframe
-        src={`https://www.google.com/maps?q=${mapPin}&z=14&output=embed`}
-        width="100%"
-        height="100%"
-        style={{ border: 0 }}
-        allowFullScreen
-        loading="lazy"
-      ></iframe>
-    </div>
-  </section>
-)}
-
+      {mapPin && (
+        <section className="max-w-5xl mx-auto mb-20">
+          <h3 className="text-3xl font-serif text-[#5a4a3f] mb-6 text-center">Where You'll Be</h3>
+          <div className="w-full h-[300px] rounded-xl overflow-hidden shadow-lg">
+            <iframe
+              src={`https://www.google.com/maps?q=${mapPin}&z=14&output=embed`}
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+            ></iframe>
+          </div>
+        </section>
+      )}
 
       {/* Guest Reviews */}
       {parsedReviews.length > 0 && (
@@ -144,6 +148,23 @@ export default async function ExperienceDetailPage(props) {
           </div>
         </section>
       )}
+    </main>
+  );
+}
+
+// fallback when experience not found or private
+function NotAvailable() {
+  return (
+    <main className="min-h-screen flex items-center justify-center text-center px-6 bg-[#f4f1ec] text-[#5a4a3f]">
+      <div>
+        <h1 className="text-3xl font-serif mb-4">This experience is not available</h1>
+        <p className="text-lg mb-6">It might be private or has been removed. Please explore our other unique offerings.</p>
+        <LinkWithLoader href="/experiences">
+          <button className="bg-[#8b6f47] text-white px-6 py-3 rounded-full font-medium hover:bg-[#a78b62] transition-all">
+            Browse Experiences
+          </button>
+        </LinkWithLoader>
+      </div>
     </main>
   );
 }

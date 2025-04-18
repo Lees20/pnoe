@@ -1,9 +1,13 @@
 // src/lib/fetchExperiences.js
-import prisma from './prisma'; // ← assuming prisma.js uses singleton
+import prisma from './prisma';
 
 export async function getExperienceBySlug(slug) {
   if (!slug) return null;
-  return await prisma.experience.findUnique({
-    where: { slug },
+
+  return await prisma.experience.findFirst({
+    where: {
+      slug,
+      visibility: true,
+    },
   });
 }

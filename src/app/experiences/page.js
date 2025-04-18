@@ -1,20 +1,13 @@
 import Image from 'next/image';
-import Link from 'next/link';
-import { PrismaClient } from '@prisma/client';
 import LinkWithLoader from '@/app/components/LinkWithLoader';
-
-// Initialize Prisma Client
-const prisma = new PrismaClient();
+import prisma from '@/lib/prisma';
 
 export default async function Experiences() {
-  let experiences = [];
   try {
-    experiences = await prisma.experience.findMany({
+    const publicExperiences = await prisma.experience.findMany({
+      where: { visibility: true },
       orderBy: { createdAt: 'desc' }
     });
-
-    // Filter experiences to display only public ones
-    const publicExperiences = experiences.filter(exp => exp.visibility === true);
 
     return (
       <main className="min-h-screen bg-gradient-to-b from-[#f4f1ec] via-[#faf9f7] to-[#f4f1ec] text-[#2f2f2f] pt-32 px-6">
@@ -34,9 +27,9 @@ export default async function Experiences() {
                 key={exp.id}
                 className="bg-white rounded-[2rem] shadow-xl overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl flex flex-col"
               >
-                {/* Check if the images exist and are valid */}
-                {Array.isArray(exp.images) && exp.images.length > 0 && typeof exp.images[0] === 'string' && 
-                  (exp.images[0].startsWith('http') || exp.images[0].startsWith('/')) ? (
+                {Array.isArray(exp.images) && exp.images.length > 0 &&
+                typeof exp.images[0] === 'string' &&
+                (exp.images[0].startsWith('http') || exp.images[0].startsWith('/')) ? (
                   <Image
                     src={exp.images[0]}
                     alt={exp.name}
@@ -59,7 +52,7 @@ export default async function Experiences() {
                       {exp.description?.slice(0, 120)}...
                     </p>
                     <p className="text-sm text-[#8b6f47] font-medium mb-1 italic">
-                      Duration: {exp.duration + ' - '+ (exp.frequency ? exp.frequency.join(", ") : '—')}
+                      Duration: {exp.duration + ' - ' + (exp.frequency ? exp.frequency.join(', ') : '—')}
                     </p>
                     <p className="text-lg font-semibold text-[#5a4a3f] mb-6">
                       €{exp.price}
@@ -90,11 +83,17 @@ export default async function Experiences() {
   } catch (error) {
     console.error("Error fetching experiences:", error);
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-center text-red-600 font-semibold">An error occurred while fetching experiences. Please try again later.</p>
+      <div className="min-h-screen flex items-center justify-center text-center px-6 bg-[#f4f1ec] text-[#5a4a3f]">
+        <div>
+          <h1 className="text-3xl font-serif mb-4">Something went wrong</h1>
+          <p className="text-lg mb-6">We couldn’t load the experiences right now. Please try again later.</p>
+          <LinkWithLoader href="/">
+            <button className="bg-[#8b6f47] text-white px-6 py-3 rounded-full font-medium hover:bg-[#a78b62] transition-all">
+              Go Home
+            </button>
+          </LinkWithLoader>
+        </div>
       </div>
     );
-  } finally {
-   
   }
 }

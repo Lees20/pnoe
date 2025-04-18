@@ -3,7 +3,7 @@ import Header from './components/header';
 import Footer from './components/footer';
 import { RouteLoader } from './components/RouteLoader';
 import SessionWrapper from './components/SessionWrapper';
-
+import { Toaster } from 'react-hot-toast';
 export const metadata = {
   title: 'Oasis – Agrotourism & Wellness',
   description: 'Rooted, soulful, slow travel in Crete.',
@@ -26,6 +26,7 @@ export default function RootLayout({ children }) {
         <SessionWrapper>
           <RouteLoader>
             <Header />
+            <Toaster position="top-right" />
             <main className="flex-1">{children}</main>
             <Footer />
           </RouteLoader>

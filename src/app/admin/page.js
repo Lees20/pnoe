@@ -3,7 +3,7 @@
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Compass, CalendarDays, Users } from 'lucide-react';
+import { Compass, CalendarDays, Users, Clock } from 'lucide-react';
 
 export default function AdminDashboardPage() {
   const { data: session, status } = useSession();
@@ -65,6 +65,18 @@ export default function AdminDashboardPage() {
                 <h3 className="text-xl font-semibold text-[#5a4a3f]">Manage Clients</h3>
               </div>
               <p className="text-sm text-[#4a4a4a]">View and manage registered users.</p>
+            </div>
+           
+            {/* Schedule */}
+            <div
+              onClick={() => handleRedirect('/admin/schedule')}
+              className="cursor-pointer bg-white border border-[#e0dcd4] rounded-2xl p-6 shadow-sm hover:shadow-md hover:bg-[#f9f6f2] transition-all"
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <Clock className="text-[#8b6f47]" size={24} />
+                <h3 className="text-xl font-semibold text-[#5a4a3f]">Manage Schedule</h3>
+              </div>
+              <p className="text-sm text-[#4a4a4a]">Review and organize Experiences Schedule.</p>
             </div>
           </div>
         </div>

@@ -6,40 +6,25 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/experiences/page": [
+    "/admin/schedule/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/experiences/page.js"
-    ],
-    "/api/auth/[...nextauth]/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/auth/[...nextauth]/route.js"
-    ],
-    "/admin/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/admin/page.js"
-    ],
-    "/admin/experiences/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/admin/experiences/page.js"
+      "static/chunks/app/admin/schedule/page.js"
     ],
     "/api/admin/experiences/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/api/admin/experiences/route.js"
     ],
-    "/experiences/[slug]/page": [
+    "/api/auth/[...nextauth]/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/experiences/[slug]/page.js"
+      "static/chunks/app/api/auth/[...nextauth]/route.js"
     ],
-    "/check-availability/page": [
+    "/api/admin/schedule/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/check-availability/page.js"
+      "static/chunks/app/api/admin/schedule/route.js"
     ]
   }
 }

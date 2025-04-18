@@ -24,63 +24,72 @@ model User {
   bookings    Booking[]
 }
 
-
 model Session {
-  id            Int      @id @default(autoincrement()) // Unique identifier for session
-  userId        Int      // Foreign key to User model
-  sessionToken  String   @unique // Unique session token
-  expires       DateTime // Expiration date of the session
-  user          User     @relation(fields: [userId], references: [id]) // Relate session to user
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  sessionToken  String   @unique
+  expires       DateTime
+  user          User     @relation(fields: [userId], references: [id])
 }
 
 model Account {
-  id                    Int      @id @default(autoincrement()) // Unique identifier for account
-  userId                Int      // Foreign key to User model
-  provider              String   // Authentication provider (e.g., Google, Facebook)
-  providerAccountId     String   // Provider-specific account ID (e.g., Google user ID)
-  user                  User     @relation(fields: [userId], references: [id]) // Relate account to user
+  id                Int    @id @default(autoincrement())
+  userId            Int
+  provider          String
+  providerAccountId String
+  user              User   @relation(fields: [userId], references: [id])
 }
 
-// New model to store User's Favourites (experiences)
 model Favourite {
-  id            Int      @id @default(autoincrement()) // Unique identifier for the favourite
-  userId        Int      // Foreign key to User model
-  experienceId  Int      // Foreign key to Experience (or whatever you are storing for experiences)
-  user          User     @relation(fields: [userId], references: [id]) // Relate favourite to user
-  experience    Experience @relation(fields: [experienceId], references: [id]) // Relate favourite to experience
+  id            Int         @id @default(autoincrement())
+  userId        Int
+  experienceId  Int
+  user          User        @relation(fields: [userId], references: [id])
+  experience    Experience  @relation(fields: [experienceId], references: [id])
 }
 
-// New model to store Bookings made by Users
 model Booking {
-  id            Int      @id @default(autoincrement()) // Unique identifier for booking
-  userId        Int      // Foreign key to User model
-  experienceId  Int      // Foreign key to Experience (or whatever you are storing for experiences)
-  date          DateTime // Date of booking
-  user          User     @relation(fields: [userId], references: [id]) // Relate booking to user
-  experience    Experience @relation(fields: [experienceId], references: [id]) // Relate booking to experience
+  id            Int         @id @default(autoincrement())
+  userId        Int
+  experienceId  Int
+  date          DateTime
+  user          User        @relation(fields: [userId], references: [id])
+  experience    Experience  @relation(fields: [experienceId], references: [id])
 }
 
 model Experience {
-  id            Int      @id @default(autoincrement()) // Unique identifier for an experience
-  name          String   @unique // Unique Experience name
-  slug          String   @unique // Unique, SEO-friendly slug for URL
-  description   String?  // Optional description of the experience
-  price         Float    @default(85) // Default value for price (€85)
-  location      String   @default("Chania, Crete") // Default location
-  whatsIncluded String?  // "Hands-on olive harvesting..."
-  whatToBring   String?  // "Wear comfortable clothes..."
-  whyYoullLove  String?  // "Connect with nature..."
-  duration      String? 
-  // Use Json type for storing arrays
-  images        String[]    
-  mapPin        String?  // URL or coordinates for the map pin
-  guestReviews  Json?    // Store reviews as JSON array
-  favourites    Favourite[] // One-to-many relationship with favourites
-  bookings      Booking[]   // One-to-many relationship with bookings
+  id            Int           @id @default(autoincrement())
+  name          String        @unique
+  slug          String        @unique
+  description   String?
+  price         Float         @default(85)
+  location      String        @default("Chania, Crete")
+  whatsIncluded String?
+  whatToBring   String?
+  whyYoullLove  String?
+  duration      String?
+  images        String[]
+  mapPin        String?
+  guestReviews  Json?
+  frequency     String[]
+  visibility    Boolean       @default(true)
 
-  frequency     String[]  // New field: stores the days of the week (e.g., "Monday, Wednesday, Friday")
-  visibility    Boolean  @default(true)  // New field: true for public, false for private
+  favourites    Favourite[]
+  bookings      Booking[]
+  scheduleSlots ScheduleSlot[] // ✅ One-to-many relation with ScheduleSlot
 
-  createdAt     DateTime @default(now())  
-  updatedAt     DateTime @updatedAt   
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model ScheduleSlot {
+  id            Int         @id @default(autoincrement())
+  experience    Experience  @relation(fields: [experienceId], references: [id])
+  experienceId  Int
+  date          DateTime    // The actual calendar day (e.g. 2025-05-03)
+  totalSlots    Int         // Max people for that day
+  bookedSlots   Int         @default(0) // How many already booked
+
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 }

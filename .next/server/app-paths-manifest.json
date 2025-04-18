@@ -1,7 +1,4 @@
 {
   "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
-  "/experiences/page": "app/experiences/page.js",
-  "/admin/experiences/page": "app/admin/experiences/page.js",
-  "/experiences/[slug]/page": "app/experiences/[slug]/page.js",
-  "/check-availability/page": "app/check-availability/page.js"
+  "/admin/schedule/page": "app/admin/schedule/page.js"
 }

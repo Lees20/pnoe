@@ -9,9 +9,11 @@ export default function AdminSchedulePage() {
   const [selectedExperience, setSelectedExperience] = useState(null);
   const [slots, setSlots] = useState([]);
   const [newSlot, setNewSlot] = useState({ date: '', totalSlots: '' });
+  const [editingSlotId, setEditingSlotId] = useState(null);
+  const [editedAvailableSlots, setEditedAvailableSlots] = useState('');
+  const [editedBookedSlots, setEditedBookedSlots] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Fetch experiences initially
   useEffect(() => {
     fetch('/api/admin/experiences')
       .then(res => res.json())
@@ -19,7 +21,6 @@ export default function AdminSchedulePage() {
       .catch(() => toast.error('Failed to load experiences.'));
   }, []);
 
-  // Fetch selected experience data including frequency and slots
   useEffect(() => {
     if (selectedExperienceId) {
       const experience = experiences.find(exp => exp.id === Number(selectedExperienceId));
@@ -45,7 +46,7 @@ export default function AdminSchedulePage() {
 
     const slotDay = new Date(newSlot.date).toLocaleDateString('en-US', { weekday: 'long' });
     if (!selectedExperience.frequency.includes(slotDay)) {
-      toast.error(`The selected date (${slotDay}) is not within the frequency days.`);
+      toast.error(`The selected date (${slotDay}) is not within the allowed days.`);
       return;
     }
 
@@ -70,104 +71,211 @@ export default function AdminSchedulePage() {
   };
 
   const handleDeleteSlot = async (id) => {
-    const res = await fetch(`/api/admin/schedule?id=${id}`, { method: 'DELETE' });
+    const res = await fetch(`/api/admin/schedule?id=${id}`, {
+      method: 'DELETE',
+    });
 
     if (res.ok) {
       setSlots(slots.filter(slot => slot.id !== id));
-      toast.success('Slot deleted successfully.');
+      toast.success('Slot deleted.');
     } else {
       toast.error('Failed to delete slot.');
     }
   };
 
+  const handleEditClick = (slot) => {
+    setEditingSlotId(slot.id);
+    setEditedAvailableSlots(slot.totalSlots - slot.bookedSlots);
+    setEditedBookedSlots(slot.bookedSlots);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingSlotId(null);
+    setEditedAvailableSlots('');
+    setEditedBookedSlots('');
+  };
+
+  const handleSaveEdit = async () => {
+    const available = Number(editedAvailableSlots);
+    const booked = Number(editedBookedSlots);
+
+    if (available < 0 || booked < 0) {
+      toast.error("Slots can't be negative.");
+      return;
+    }
+
+    const totalSlots = available + booked;
+
+    const res = await fetch('/api/admin/schedule', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: editingSlotId,
+        totalSlots,
+        bookedSlots: booked,
+      }),
+    });
+
+    if (res.ok) {
+      const updatedSlot = await res.json();
+      setSlots(slots.map(slot => (slot.id === editingSlotId ? updatedSlot : slot)));
+      toast.success('Slot updated.');
+      handleCancelEdit();
+    } else {
+      toast.error('Failed to update slot.');
+    }
+  };
+
   return (
-    
-    <main className="max-w-4xl mx-auto pt-24 px-6">
-          <div className="mb-4">
+    <main className="max-w-5xl mx-auto pt-24 px-4 sm:px-6 lg:px-8">
+         {/* Back to Dashboard */}
          <button
           onClick={() => router.push('/admin/')}
-           className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#f4f1ec] text-[#5a4a3f] border border-[#d8cfc3] rounded-full shadow-sm hover:bg-[#eae5df] hover:text-[#8b6f47] transition-all font-medium text-sm"
-         >
-           ← Back to Dashboard
-         </button>
-        </div>
-      <h1 className="text-3xl font-bold mb-6 text-[#5a4a3f] font-serif text-center">
-        Manage Schedule
+          className="px-5 py-2.5 rounded-full bg-[#f4f1ec] text-[#5a4a3f] border border-[#d8cfc3] shadow-sm hover:bg-[#eae5df] transition-all text-sm font-medium"
+        >
+          ← Back to Dashboard
+        </button>
+     
+      <h1 className="text-4xl font-bold mb-10 text-center font-serif text-[#5a4a3f]">
+        Schedule Management
       </h1>
-        
-      <select
-        value={selectedExperienceId}
-        onChange={e => setSelectedExperienceId(e.target.value)}
-        className="w-full p-3 border border-[#d8cfc3] rounded-lg mb-6"
-      >
-        <option value="" disabled>Select an experience</option>
-        {experiences.map(exp => (
-          <option key={exp.id} value={exp.id}>{exp.name}</option>
-        ))}
-      </select>
 
-      {selectedExperience && (
-        <div className="mb-6">
-          <p className="text-lg font-semibold text-[#8b6f47]">
-            Available Days: {selectedExperience.frequency.join(', ')}
-          </p>
-        </div>
-      )}
+      <div className="bg-[#f8f6f1] p-6 rounded-lg shadow-md border border-[#e3dcd2]">
+        <label className="block text-sm font-medium text-[#5a4a3f] mb-2">Select Experience</label>
+        <select
+          value={selectedExperienceId}
+          onChange={e => setSelectedExperienceId(e.target.value)}
+          className="w-full p-3 rounded-md border border-[#d8cfc3] bg-white text-[#5a4a3f] mb-4"
+        >
+          <option value="" disabled>Select an experience</option>
+          {experiences.map(exp => (
+            <option key={exp.id} value={exp.id}>{exp.name}</option>
+          ))}
+        </select>
 
-      {selectedExperienceId && (
-        <>
-          <div className="space-y-4 mb-10">
-            <h2 className="text-xl font-semibold text-[#5a4a3f]">Add New Slot</h2>
-            <div className="flex items-center space-x-2">
-              <input
-                type="date"
-                value={newSlot.date}
-                onChange={e => setNewSlot({ ...newSlot, date: e.target.value })}
-                className="p-2 border rounded"
-              />
-              <input
-                type="number"
-                placeholder="Total Slots"
-                min={1}
-                value={newSlot.totalSlots}
-                onChange={e => setNewSlot({ ...newSlot, totalSlots: e.target.value })}
-                className="p-2 border rounded w-32"
-              />
-              <button
-                onClick={handleAddSlot}
-                className="bg-[#8b6f47] text-white px-4 py-2 rounded"
-              >
-                Add Slot
-              </button>
+        {selectedExperience && (
+          <div className="mb-6 text-sm text-[#6b5e53]">
+            <p><strong>Allowed Days:</strong></p>
+            <ul className="mt-1 flex flex-wrap gap-2">
+              {selectedExperience.frequency.map(day => (
+                <li
+                  key={day}
+                  className="bg-[#eae6de] text-[#5a4a3f] px-3 py-1 rounded-full text-xs font-semibold tracking-wide shadow-sm"
+                >
+                  {day}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {selectedExperienceId && (
+          <>
+            <div className="border-t border-[#e3dcd2] pt-6 mt-6">
+              <h2 className="text-lg font-semibold mb-4 text-[#5a4a3f]">Add New Slot</h2>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                <input
+                  type="date"
+                  value={newSlot.date}
+                  onChange={e => setNewSlot({ ...newSlot, date: e.target.value })}
+                  className="p-2 rounded border border-[#ccc] bg-white text-[#5a4a3f] shadow-sm w-full sm:w-auto"
+                />
+                <input
+                  type="number"
+                  min={1}
+                  placeholder="Total Slots"
+                  value={newSlot.totalSlots}
+                  onChange={e => setNewSlot({ ...newSlot, totalSlots: e.target.value })}
+                  className="p-2 rounded border border-[#ccc] bg-white text-[#5a4a3f] shadow-sm w-full sm:w-40"
+                />
+                <button
+                  onClick={handleAddSlot}
+                  className="bg-[#8b6f47] hover:bg-[#7a5f3a] text-white px-5 py-2 rounded-md transition-all shadow-md"
+                >
+                  Add Slot
+                </button>
+              </div>
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <h2 className="text-xl font-semibold text-[#5a4a3f] mb-4">Existing Slots</h2>
-            {loading ? (
-              <p>Loading slots...</p>
-            ) : slots.length > 0 ? (
-              slots.map(slot => (
-                <div key={slot.id} className="border p-4 rounded-lg bg-white shadow-sm flex justify-between items-center">
-                  <div>
-                    <p><strong>Date:</strong> {new Date(slot.date).toLocaleDateString()}</p>
-                    <p><strong>Total Slots:</strong> {slot.totalSlots}</p>
-                    <p><strong>Booked:</strong> {slot.bookedSlots}</p>
-                  </div>
-                  <button
-                    onClick={() => handleDeleteSlot(slot.id)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    Delete
-                  </button>
+            <div className="mt-10">
+              <h2 className="text-lg font-semibold text-[#5a4a3f] mb-4">Scheduled Slots</h2>
+              {loading ? (
+                <p className="text-sm text-gray-500">Loading slots...</p>
+              ) : slots.length > 0 ? (
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {slots.map(slot => {
+                    const available = slot.totalSlots - slot.bookedSlots;
+                    const dateLabel = new Date(slot.date).toLocaleDateString();
+                    const dayOfWeek = new Date(slot.date).toLocaleDateString('en-US', { weekday: 'long' });
+
+                    return (
+                      <div key={slot.id} className="bg-white border border-[#e3dcd2] rounded-lg p-4 shadow-sm">
+                        <p className="text-sm text-[#5a4a3f] font-medium mb-1">{dayOfWeek} – {dateLabel}</p>
+                        {editingSlotId === slot.id ? (
+                          <>
+                            <label className="block text-sm text-[#5a4a3f] mt-2">Available Slots</label>
+                            <input
+                              type="number"
+                              min={0}
+                              value={editedAvailableSlots}
+                              onChange={e => setEditedAvailableSlots(e.target.value)}
+                              className="p-2 rounded border w-full mb-2"
+                            />
+                            <label className="block text-sm text-[#5a4a3f]">Booked Slots</label>
+                            <input
+                              type="number"
+                              min={0}
+                              value={editedBookedSlots}
+                              onChange={e => setEditedBookedSlots(e.target.value)}
+                              className="p-2 rounded border w-full mb-2"
+                            />
+                            <div className="flex justify-end gap-2 mt-2">
+                              <button
+                                onClick={handleSaveEdit}
+                                className="bg-[#5a4a3f] text-white px-3 py-1 rounded hover:bg-[#473a30]"
+                              >
+                                Save
+                              </button>
+                              <button
+                                onClick={handleCancelEdit}
+                                className="text-gray-500 hover:text-gray-700"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <p className="text-sm text-[#5a4a3f]"><strong>Total:</strong> {slot.totalSlots}</p>
+                            <p className="text-sm text-[#5a4a3f]"><strong>Booked:</strong> {slot.bookedSlots}</p>
+                            <p className="text-sm text-[#5a4a3f]"><strong>Available:</strong> {available}</p>
+                            <div className="flex justify-end mt-2 gap-4 text-sm">
+                              <button
+                                onClick={() => handleEditClick(slot)}
+                                className="text-[#5a4a3f] hover:underline"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => handleDeleteSlot(slot.id)}
+                                className="text-red-600 hover:underline"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
-              ))
-            ) : (
-              <p>No slots found for this experience.</p>
-            )}
-          </div>
-        </>
-      )}
+              ) : (
+                <p className="text-sm text-gray-500">No slots found for this experience.</p>
+              )}
+            </div>
+          </>
+        )}
+      </div>
     </main>
   );
 }

@@ -95,6 +95,6 @@ export default async function Experiences() {
       </div>
     );
   } finally {
-    await prisma.$disconnect(); // Ensures Prisma disconnects after use
+   
   }
 }

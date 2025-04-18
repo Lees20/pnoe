@@ -7,9 +7,15 @@ import { ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
 
 export default async function ExperienceDetailPage(props) {
-    const slug = props.params?.slug;
+    // DO NOT assign slug yet
   
-    if (!slug) return notFound();
+    // Check if params exists
+    if (!props.params || !props.params.slug) {
+      return notFound();
+    }
+  
+    // Now it's safe to assign
+    const slug = props.params.slug;
   
     const experience = await getExperienceBySlug(slug);
   

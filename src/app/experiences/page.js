@@ -2,14 +2,19 @@ import Image from 'next/image';
 import LinkWithLoader from '@/app/components/LinkWithLoader';
 import prisma from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 export default async function Experiences() {
+  
   try {
     const publicExperiences = await prisma.experience.findMany({
       where: { visibility: true },
       orderBy: { createdAt: 'desc' }
     });
+    
 
     return (
+      
       <main className="min-h-screen bg-gradient-to-b from-[#f4f1ec] via-[#faf9f7] to-[#f4f1ec] text-[#2f2f2f] pt-32 px-6">
         <section className="max-w-6xl mx-auto text-center mb-20">
           <h1 className="text-5xl md:text-6xl font-serif text-[#5a4a3f] mb-6">

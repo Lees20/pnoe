@@ -18,6 +18,7 @@ model User {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   role        String    @default("user")
+
   sessions    Session[]
   accounts    Account[]
   favourites  Favourite[]
@@ -48,15 +49,6 @@ model Favourite {
   experience    Experience  @relation(fields: [experienceId], references: [id])
 }
 
-model Booking {
-  id            Int         @id @default(autoincrement())
-  userId        Int
-  experienceId  Int
-  date          DateTime
-  user          User        @relation(fields: [userId], references: [id])
-  experience    Experience  @relation(fields: [experienceId], references: [id])
-}
-
 model Experience {
   id            Int           @id @default(autoincrement())
   name          String        @unique
@@ -71,25 +63,38 @@ model Experience {
   images        String[]
   mapPin        String?
   guestReviews  Json?
-  frequency     String[]
+  frequency     String[]      // e.g. ["Friday", "Saturday"]
   visibility    Boolean       @default(true)
 
   favourites    Favourite[]
-  bookings      Booking[]
-  scheduleSlots ScheduleSlot[] // ✅ One-to-many relation with ScheduleSlot
-
+  scheduleSlots ScheduleSlot[]
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 }
 
 model ScheduleSlot {
-  id            Int         @id @default(autoincrement())
-  experience    Experience  @relation(fields: [experienceId], references: [id])
+  id            Int          @id @default(autoincrement())
   experienceId  Int
-  date          DateTime    // The actual calendar day (e.g. 2025-05-03)
-  totalSlots    Int         // Max people for that day
-  bookedSlots   Int         @default(0) // How many already booked
+  experience    Experience   @relation(fields: [experienceId], references: [id])
+  date          DateTime     // e.g. 2025-05-03
+  totalSlots    Int
+  bookedSlots   Int          @default(0)
+  isCancelled   Boolean      @default(false)
 
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  bookings      Booking[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+model Booking {
+  id             Int           @id @default(autoincrement())
+  userId         Int
+  scheduleSlotId Int
+  status         String        @default("confirmed") // "confirmed", "cancelled", etc.
+
+  user           User          @relation(fields: [userId], references: [id])
+  scheduleSlot   ScheduleSlot @relation(fields: [scheduleSlotId], references: [id])
+
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 }

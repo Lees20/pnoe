@@ -25,10 +25,33 @@ export async function GET(req) {
   try {
     const bookings = await prisma.booking.findMany({
       include: {
-        user: { select: { id: true, email: true, name: true, surname: true, phone: true } },
-        experience: { select: { id: true, name: true } },
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            surname: true,
+            phone: true,
+          },
+        },
+        scheduleSlot: {
+          select: {
+            id: true,
+            date: true,
+            experience: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
       },
-      orderBy: { date: 'desc' },
+      orderBy: {
+        scheduleSlot: {
+          date: 'desc',
+        },
+      },
     });
 
     return handleResponse(bookings);
@@ -38,24 +61,50 @@ export async function GET(req) {
   }
 }
 
-// POST: Create new reservation
+
 export async function POST(req) {
   const auth = await requireAdmin(req);
   if (auth.error) return auth.response;
 
-  const { userId, experienceId, date } = await req.json();
+  const { userId, scheduleSlotId } = await req.json();
 
   try {
+    // 1. Εύρεση του schedule slot
+    const slot = await prisma.scheduleSlot.findUnique({
+      where: { id: Number(scheduleSlotId) },
+    });
+
+    if (!slot) {
+      return handleResponse({ error: 'Schedule slot not found' }, 404);
+    }
+
+    // 2. Έλεγχος διαθεσιμότητας
+    if (slot.bookedSlots >= slot.totalSlots) {
+      return handleResponse({ error: 'No available slots for this date' }, 400);
+    }
+
+    // 3. Δημιουργία κράτησης
     const booking = await prisma.booking.create({
       data: {
         userId: Number(userId),
-        experienceId: Number(experienceId),
-        date: new Date(date),
+        scheduleSlotId: Number(scheduleSlotId),
       },
       include: {
         user: { select: { id: true, email: true, name: true, surname: true } },
-        experience: { select: { id: true, name: true } },
+        scheduleSlot: {
+          select: {
+            id: true,
+            date: true,
+            experience: { select: { id: true, name: true } },
+          },
+        },
       },
+    });
+
+    // 4. Ενημέρωση του bookedSlots
+    await prisma.scheduleSlot.update({
+      where: { id: Number(scheduleSlotId) },
+      data: { bookedSlots: { increment: 1 } },
     });
 
     return handleResponse(booking);
@@ -70,19 +119,46 @@ export async function PATCH(req) {
   const auth = await requireAdmin(req);
   if (auth.error) return auth.response;
 
-  const { id, userId, experienceId, date } = await req.json();
+  const { id, userId, scheduleSlotId } = await req.json();
 
   try {
+    const oldBooking = await prisma.booking.findUnique({
+      where: { id: Number(id) },
+      select: { scheduleSlotId: true },
+    });
+
+    if (!oldBooking) {
+      return handleResponse({ error: 'Booking not found' }, 404);
+    }
+
+    // Εάν αλλάζει το slot, μειώνουμε το bookedSlots στο παλιό
+    if (oldBooking.scheduleSlotId !== Number(scheduleSlotId)) {
+      await prisma.scheduleSlot.update({
+        where: { id: oldBooking.scheduleSlotId },
+        data: { bookedSlots: { decrement: 1 } },
+      });
+
+      await prisma.scheduleSlot.update({
+        where: { id: Number(scheduleSlotId) },
+        data: { bookedSlots: { increment: 1 } },
+      });
+    }
+
     const updatedBooking = await prisma.booking.update({
       where: { id: Number(id) },
       data: {
         userId: Number(userId),
-        experienceId: Number(experienceId),
-        date: new Date(date),
+        scheduleSlotId: Number(scheduleSlotId),
       },
       include: {
         user: { select: { id: true, email: true, name: true, surname: true } },
-        experience: { select: { id: true, name: true } },
+        scheduleSlot: {
+          select: {
+            id: true,
+            date: true,
+            experience: { select: { id: true, name: true } },
+          },
+        },
       },
     });
 
@@ -92,6 +168,7 @@ export async function PATCH(req) {
     return handleResponse({ error: 'Failed to update reservation' }, 500);
   }
 }
+
 
 // DELETE: Delete reservation
 export async function DELETE(req) {

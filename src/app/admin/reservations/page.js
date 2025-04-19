@@ -21,6 +21,7 @@ const AdminReservationsPage = () => {
   const [showForm, setShowForm] = useState(false);
   const [viewMode, setViewMode] = useState('today'); // today | all | upcoming | past
   const [isLoadingGrouped, setIsLoadingGrouped] = useState(true);
+  const [availableSlots, setAvailableSlots] = useState([]);
 
       const exportToExcel = () => {
         if (!bookings || bookings.length === 0) {
@@ -31,7 +32,7 @@ const AdminReservationsPage = () => {
         const now = new Date();
       
         const filteredBookings = bookings.filter(b => {
-          const date = new Date(b.date);
+          const date = new Date(b.scheduleSlot?.date);
           const isToday = date.toDateString() === now.toDateString();
           const isFuture = date > now && !isToday;
           const isPast = date < now && !isToday;
@@ -66,7 +67,7 @@ const AdminReservationsPage = () => {
             Name: `${b.user?.name ?? '—'} ${b.user?.surname ?? ''}`,
             Email: b.user?.email ?? '—',
             Phone: b.user?.phone ?? '—',
-            Date: new Date(b.date),
+            Date: new Date(b.scheduleSlot?.date),
           });
           return acc;
         }, {});
@@ -150,9 +151,40 @@ const AdminReservationsPage = () => {
         XLSX.writeFile(workbook, `reservations-${viewMode}-${new Date().toISOString().slice(0, 10)}.xlsx`);
       };
       
-
-  
-
+      useEffect(() => {
+        if (!showForm) return;
+      
+        const form = document.querySelector('form');
+        const experienceSelect = form?.experienceId;
+      
+        const loadSlots = async () => {
+          const selectedId = experienceSelect?.value;
+          if (!selectedId) {
+            setAvailableSlots([]);
+            return;
+          }
+      
+          const res = await fetch(`/api/admin/schedule?experienceId=${selectedId}`);
+          const data = await res.json();
+          const futureSlots = data.filter(slot => 
+            new Date(slot.date) >= new Date() &&
+            slot.totalSlots > slot.bookedSlots &&
+            !slot.isCancelled
+          );
+          setAvailableSlots(futureSlots);
+        };
+      
+        loadSlots();
+      
+        // Επίσης, κάνε re-fetch όταν αλλάζει η επιλογή experience
+        experienceSelect?.addEventListener('change', loadSlots);
+      
+        return () => {
+          experienceSelect?.removeEventListener('change', loadSlots);
+        };
+      }, [showForm]);
+      
+      
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -169,18 +201,19 @@ const AdminReservationsPage = () => {
         fetch('/api/admin/users'),
         fetch('/api/admin/experiences'),
       ]);
-      
+    
       const [bookingsData, usersData, experiencesData] = await Promise.all([
         bookingsRes.json(),
         usersRes.json(),
         experiencesRes.json(),
       ]);
-
-      setBookings(bookingsData);
-      setUsers(usersData);
-      setExperiences(experiencesData);
+    
+      setBookings(Array.isArray(bookingsData) ? bookingsData : []);
+      setUsers(Array.isArray(usersData) ? usersData : []);
+      setExperiences(Array.isArray(experiencesData) ? experiencesData : []);
       setIsLoadingGrouped(false);
     };
+    
    
     if (session?.user?.role === 'admin') {
       fetchAllData();
@@ -190,14 +223,15 @@ const AdminReservationsPage = () => {
     const now = new Date();
     setIsLoadingGrouped(true);
     const filtered = bookings.filter((b) => {
-      const bookingDate = new Date(b.date);
+      const bookingDate = new Date(b.scheduleSlot?.date);
+
   
       const matchesExperience = selectedExperience
-        ? b.experience?.id?.toString() === selectedExperience
-        : true;
-  
+      ? b.scheduleSlot?.experience?.id?.toString() === selectedExperience
+      : true;
+    
       const matchesDate = selectedDate
-        ? new Date(b.date).toISOString().slice(0, 10) === selectedDate
+        ? new Date(b.scheduleSlot?.date).toISOString().slice(0, 10) === selectedDate
         : true;
   
       if (!matchesExperience || !matchesDate) return false;
@@ -222,10 +256,10 @@ const AdminReservationsPage = () => {
     });
   
     const groupedByExperience = filtered.reduce((acc, booking) => {
-      const expId = booking.experience?.id;
+      const expId = booking.scheduleSlot?.experience?.id;
       if (!expId) return acc;
   
-      const bookingDate = new Date(booking.date);
+      const bookingDate = new Date(booking.scheduleSlot?.date);
       const isToday = bookingDate.toDateString() === now.toDateString();
       const isFuture = bookingDate > now && !isToday;
       const group = isToday
@@ -238,7 +272,7 @@ const AdminReservationsPage = () => {
   
       if (!acc[expId]) {
         acc[expId] = {
-          experience: booking.experience,
+          experience: booking.scheduleSlot?.experience,
           upcoming: [],
           past: [],
           future: []
@@ -278,9 +312,9 @@ const AdminReservationsPage = () => {
     const bookingData = {
       id: editingBooking?.id,
       userId: form.userId.value,
-      experienceId: form.experienceId.value,
-      date: form.date.value,
+      scheduleSlotId: form.slotId.value,
     };
+    
 
     const method = editingBooking ? 'PATCH' : 'POST'; // PATCH method
 
@@ -437,7 +471,7 @@ const AdminReservationsPage = () => {
                               <td className="p-3">{b.user?.name} {b.user?.surname}</td>
                               <td className="p-3">{b.user?.email}</td>
                               <td className="p-3">{b.user?.phone}</td>
-                              <td className="p-3">{new Date(b.date).toLocaleString()}</td>
+                              <td className="p-3">{new Date(b.scheduleSlot?.date).toLocaleString()}</td>
                               <td className="p-3 space-x-2 print:hidden">
                                 <button
                                   onClick={() => {
@@ -467,11 +501,6 @@ const AdminReservationsPage = () => {
           ))
         )}
       </div>
-
-
-
-
-
 
       {/* Add/Edit form modal */}
       {showForm && (
@@ -521,13 +550,20 @@ const AdminReservationsPage = () => {
       {/* Date */}
       <div>
         <label className="block text-sm text-[#5a4a3f] mb-1">Booking Date</label>
-        <input
-          type="datetime-local"
-          name="date"
-          required
-          defaultValue={editingBooking?.date?.slice(0, 16) || ''}
-          className="w-full border border-[#e0dcd4] rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
-        />
+        <select
+        name="slotId"
+        required
+        defaultValue={editingBooking?.scheduleSlot?.id || ''}
+        className="w-full border border-[#e0dcd4] rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
+      >
+        <option value="">Select Slot</option>
+        {availableSlots.map((slot) => (
+          <option key={slot.id} value={slot.id}>
+            {new Date(slot.date).toLocaleString()} — {slot.totalSlots - slot.bookedSlots} spots left
+          </option>
+        ))}
+      </select>
+
       </div>
 
       {/* Buttons */}

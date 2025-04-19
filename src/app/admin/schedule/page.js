@@ -1,5 +1,5 @@
 'use client';
-
+import { useRouter } from 'next/navigation';  
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
@@ -130,7 +130,7 @@ export default function AdminSchedulePage() {
     <main className="max-w-5xl mx-auto pt-24 px-4 sm:px-6 lg:px-8">
          {/* Back to Dashboard */}
          <button
-          onClick={() => router.push('/admin/')}
+          href="/admin/dashboard"
           className="px-5 py-2.5 rounded-full bg-[#f4f1ec] text-[#5a4a3f] border border-[#d8cfc3] shadow-sm hover:bg-[#eae5df] transition-all text-sm font-medium"
         >
           ← Back to Dashboard

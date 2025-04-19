@@ -15,7 +15,9 @@ export default function AdminSchedulePage() {
   const [editedAvailableSlots, setEditedAvailableSlots] = useState('');
   const [editedBookedSlots, setEditedBookedSlots] = useState('');
   const [loading, setLoading] = useState(false);
-
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  
   useEffect(() => {
     fetch('/api/admin/experiences')
       .then(res => res.json())
@@ -73,13 +75,19 @@ export default function AdminSchedulePage() {
   };
 
   const handleDeleteSlot = async (id) => {
+    const confirmed = window.confirm(
+      "⚠️ This will also delete all bookings related to this slot.\n\nAre you sure you want to proceed?"
+    );
+  
+    if (!confirmed) return;
+  
     const res = await fetch(`/api/admin/schedule?id=${id}`, {
       method: 'DELETE',
     });
-
+  
     if (res.ok) {
       setSlots(slots.filter(slot => slot.id !== id));
-      toast.success('Slot deleted.');
+      toast.success('Slot and related bookings deleted.');
     } else {
       toast.error('Failed to delete slot.');
     }
@@ -95,7 +103,24 @@ export default function AdminSchedulePage() {
     setEditedAvailableSlots('');
     setEditedBookedSlots('');
   };
-
+  const confirmDeleteSlot = async () => {
+    if (!confirmDeleteId) return;
+  
+    const res = await fetch(`/api/admin/schedule?id=${confirmDeleteId}`, {
+      method: 'DELETE',
+    });
+  
+    if (res.ok) {
+      setSlots(slots.filter(slot => slot.id !== confirmDeleteId));
+      toast.success('Slot deleted.');
+    } else {
+      toast.error('Failed to delete slot.');
+    }
+  
+    setShowDeleteModal(false);
+    setConfirmDeleteId(null);
+  };
+  
   const handleSaveEdit = async () => {
     const available = Number(editedAvailableSlots);
     const slot = slots.find((s) => s.id === editingSlotId);
@@ -130,9 +155,39 @@ export default function AdminSchedulePage() {
   };
   
   
+  
 
   return (
     <main className="max-w-5xl mx-auto pt-24 px-4 sm:px-6 lg:px-8">
+      {showDeleteModal && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
+            <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full border border-[#e5ded2]">
+              <h2 className="text-lg font-semibold text-[#5a4a3f] mb-4 text-center">
+                Are you sure you want to delete this slot?
+              </h2>
+              <p className="text-sm text-center text-[#6b5e53] mb-6">
+                This will <strong>also delete all related bookings</strong> for this slot.
+              </p>
+              <div className="flex justify-center gap-4">
+                <button
+                  onClick={confirmDeleteSlot}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-full font-medium"
+                >
+                  Yes, delete
+                </button>
+                <button
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setConfirmDeleteId(null);
+                  }}
+                  className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-[#5a4a3f] rounded-full font-medium"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
          {/* Back to Dashboard */}
          <main className="max-w-5xl mx-auto pt-24 px-4 sm:px-6 lg:px-8">
       {/* Back to Dashboard */}
@@ -259,11 +314,15 @@ export default function AdminSchedulePage() {
                                 Edit
                               </button>
                               <button
-                                onClick={() => handleDeleteSlot(slot.id)}
-                                className="text-red-600 hover:underline"
-                              >
-                                Delete
-                              </button>
+                                  onClick={() => {
+                                    setConfirmDeleteId(slot.id);
+                                    setShowDeleteModal(true);
+                                  }}
+                                  className="text-red-600 hover:underline"
+                                >
+                                  Delete
+                                </button>
+
                             </div>
                           </>
                         )}

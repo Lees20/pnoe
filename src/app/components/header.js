@@ -28,7 +28,7 @@ export default function Header() {
 
   return (
     <header
-      className={`fixed top-0 left-0 w-full z-50 transition-shadow duration-300 ${
+      className={`fixed top-0 left-0 w-full z-50 transition-shadow duration-300 print: hidden ${
         hasShadow ? 'shadow-xl' : 'shadow-none'
       } bg-[#f4f1ec]/90 backdrop-blur-lg border-b border-[#eae6e0]`}
     >
@@ -43,7 +43,7 @@ export default function Header() {
 
         {/* Desktop Nav */}
             
-        <nav className="hidden md:flex gap-6 items-center">
+        <nav className="hidden md:flex gap-6 items-center print:">
           {navLinks.map((link) => (
             <button
               key={link.name}
@@ -124,7 +124,7 @@ export default function Header() {
         </nav>
 
         {/* Hamburger and Account Icon for Mobile */}
-        <div className="md:hidden flex items-center gap-4">
+        <div className="md:hidden flex items-center gap-4 print:hidden">
           {/* Account Icon */}
           {session && (
             <button

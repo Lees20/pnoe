@@ -186,7 +186,6 @@ const openCloudinaryWidget = () => {
             >
               ← Back to Dashboard
             </button>
-
         </div>
         <div className="mb-6 text-center">
         {!showAddForm ? (

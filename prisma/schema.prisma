@@ -88,13 +88,14 @@ model ScheduleSlot {
 
 model Booking {
   id             Int           @id @default(autoincrement())
-  userId         Int
-  scheduleSlotId Int
-  status         String        @default("confirmed") // "confirmed", "cancelled", etc.
-
   user           User          @relation(fields: [userId], references: [id])
-  scheduleSlot   ScheduleSlot @relation(fields: [scheduleSlotId], references: [id])
-
+  userId         Int
+  scheduleSlot   ScheduleSlot  @relation(fields: [scheduleSlotId], references: [id])
+  scheduleSlotId Int
+  numberOfPeople Int           @default(1)
+  notes          String?       // ← optional field
+  status         String        @default("confirmed")
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 }
+

@@ -1,14 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState,useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import * as XLSX from 'xlsx';
 
 const AdminReservationsPage = () => {
+  const [isSaving, setIsSaving] = useState(false);
   const { data: session, status } = useSession();
   const router = useRouter();
-
+  const [selectedSlotId, setSelectedSlotId] = useState('');
+  const [selectedExperienceId, setSelectedExperienceId] = useState('');
+  const [numberOfPeople, setNumberOfPeople] = useState(1);
+  const [notes, setNotes] = useState('');  
   const [bookings, setBookings] = useState([]);
   const [users, setUsers] = useState([]);
   const [experiences, setExperiences] = useState([]);
@@ -22,7 +26,30 @@ const AdminReservationsPage = () => {
   const [viewMode, setViewMode] = useState('today'); // today | all | upcoming | past
   const [isLoadingGrouped, setIsLoadingGrouped] = useState(true);
   const [availableSlots, setAvailableSlots] = useState([]);
-
+  const [userSearch, setUserSearch] = useState('');
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [showUserList, setShowUserList] = useState(false);
+  const isFormValid = !!selectedUser && !!selectedExperienceId && !!selectedSlotId && numberOfPeople > 0;
+  const userSearchRef = useRef();
+  
+  const filteredUsers = users.filter((u) =>
+    `${u.name} ${u.surname}`.toLowerCase().includes(userSearch.toLowerCase()) ||
+    u.email.toLowerCase().includes(userSearch.toLowerCase())
+  );
+  
+  // Κλείσιμο dropdown όταν γίνεται click έξω
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (userSearchRef.current && !userSearchRef.current.contains(e.target)) {
+        setShowUserList(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+  
       const exportToExcel = () => {
         if (!bookings || bookings.length === 0) {
           alert("No bookings available to export.");
@@ -152,37 +179,36 @@ const AdminReservationsPage = () => {
       };
       
       useEffect(() => {
-        if (!showForm) return;
-      
-        const form = document.querySelector('form');
-        const experienceSelect = form?.experienceId;
+        if (!selectedExperienceId) {
+          setAvailableSlots([]);
+          return;
+        }
       
         const loadSlots = async () => {
-          const selectedId = experienceSelect?.value;
-          if (!selectedId) {
-            setAvailableSlots([]);
-            return;
-          }
-      
-          const res = await fetch(`/api/admin/schedule?experienceId=${selectedId}`);
+          const res = await fetch(`/api/admin/schedule?experienceId=${selectedExperienceId}`);
           const data = await res.json();
-          const futureSlots = data.filter(slot => 
+      
+          const futureSlots = data.filter(slot =>
             new Date(slot.date) >= new Date() &&
             slot.totalSlots > slot.bookedSlots &&
             !slot.isCancelled
           );
+      
+          // Include slot being edited if needed
+          if (editingBooking?.scheduleSlot?.experience?.id === selectedExperienceId) {
+            const currentSlot = editingBooking.scheduleSlot;
+            const alreadyIncluded = futureSlots.some(slot => slot.id === currentSlot.id);
+            if (!alreadyIncluded) futureSlots.push(currentSlot);
+          }
+      
+          futureSlots.sort((a, b) => new Date(a.date) - new Date(b.date));
           setAvailableSlots(futureSlots);
         };
       
         loadSlots();
+      }, [selectedExperienceId, editingBooking]);
       
-        // Επίσης, κάνε re-fetch όταν αλλάζει η επιλογή experience
-        experienceSelect?.addEventListener('change', loadSlots);
       
-        return () => {
-          experienceSelect?.removeEventListener('change', loadSlots);
-        };
-      }, [showForm]);
       
       
 
@@ -219,6 +245,7 @@ const AdminReservationsPage = () => {
       fetchAllData();
     }
   }, [session]);
+
   useEffect(() => {
     const now = new Date();
     setIsLoadingGrouped(true);
@@ -255,6 +282,8 @@ const AdminReservationsPage = () => {
       }
     });
   
+
+    
     const groupedByExperience = filtered.reduce((acc, booking) => {
       const expId = booking.scheduleSlot?.experience?.id;
       if (!expId) return acc;
@@ -307,15 +336,16 @@ const AdminReservationsPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    setIsSaving(true);
     const form = e.target;
     const bookingData = {
       id: editingBooking?.id,
       userId: form.userId.value,
       scheduleSlotId: form.slotId.value,
+      numberOfPeople: Number(form.numberOfPeople.value),
+      notes: form.notes.value || null,
     };
     
-
     const method = editingBooking ? 'PATCH' : 'POST'; // PATCH method
 
     const res = await fetch('/api/admin/reservations', {
@@ -326,13 +356,16 @@ const AdminReservationsPage = () => {
 
     if (res.ok) {
       const updated = await res.json();
-      setBookings((prev) => editingBooking
-        ? prev.map(b => b.id === updated.id ? updated : b)
-        : [...prev, updated]);
-
+      setBookings((prev) =>
+        editingBooking
+          ? prev.map((b) => (b.id === updated.id ? updated : b))
+          : [...prev, updated]
+      );
       setEditingBooking(null);
       setShowForm(false);
     }
+  
+    setIsSaving(false);
   };
 
   if (status === 'loading') return null;
@@ -355,7 +388,17 @@ const AdminReservationsPage = () => {
 
         {/* Add Reservation */}
         <button
-          onClick={() => { setEditingBooking(null); setShowForm(true); }}
+        onClick={() => {
+          setEditingBooking(null);
+          setSelectedUser(null);
+          setUserSearch('');
+          setSelectedExperienceId('');
+          setSelectedSlotId('');
+          setNumberOfPeople(1);
+          setNotes('');
+          setShowForm(true);
+        }}
+        
           className="px-5 py-2.5 rounded-full bg-[#8b6f47] text-white shadow hover:bg-[#a78b62] transition-all text-sm font-medium"
         >
           + Add Reservation
@@ -474,10 +517,16 @@ const AdminReservationsPage = () => {
                               <td className="p-3">{new Date(b.scheduleSlot?.date).toLocaleString()}</td>
                               <td className="p-3 space-x-2 print:hidden">
                                 <button
-                                  onClick={() => {
-                                    setEditingBooking(b);
-                                    setShowForm(true);
-                                  }}
+                                 onClick={() => {
+                                  setEditingBooking(b);
+                                  setSelectedUser(b.user);
+                                  setUserSearch(`${b.user?.name || ''} ${b.user?.surname || ''}`);
+                                  setSelectedExperienceId(b.scheduleSlot?.experience?.id || '');
+                                  setSelectedSlotId(b.scheduleSlot?.id || '');
+                                  setNumberOfPeople(b.numberOfPeople || 1);
+                                  setNotes(b.notes || '');
+                                  setShowForm(true);
+                                }}                                
                                   className="px-3 py-1 rounded-full bg-yellow-400 text-white hover:bg-yellow-500 transition-all text-sm"
                                 >
                                   Edit
@@ -505,55 +554,83 @@ const AdminReservationsPage = () => {
       {/* Add/Edit form modal */}
       {showForm && (
   <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50">
-    <form
-      onSubmit={handleSubmit}
-      className="bg-white p-8 rounded-2xl shadow-xl border border-[#e5ded2] w-full max-w-md space-y-5"
-    >
-      <h2 className="text-2xl font-semibold text-[#5a4a3f] mb-2 text-center">Manage Booking</h2>
+   <form
+  onSubmit={handleSubmit}
+  className="bg-white p-8 rounded-2xl shadow-xl border border-[#e5ded2] w-full max-w-md space-y-5"
+>
+  <h2 className="text-2xl font-semibold text-[#5a4a3f] mb-2 text-center">Manage Booking</h2>
 
-      {/* User Select */}
-      <div>
-        <label className="block text-sm text-[#5a4a3f] mb-1">Select User</label>
-        <select
-          name="userId"
-          required
-          defaultValue={editingBooking?.user?.id || ''}
-          className="w-full border border-[#e0dcd4] rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
-        >
-          <option value="">Select User</option>
-          {users.map((u) => (
-            <option key={u.id} value={u.id}>
-              {u.name} {u.surname}
-            </option>
+  {/* Search User */}
+  <div>
+    <label className="block text-sm text-[#5a4a3f] mb-1">Search User</label>
+    <div ref={userSearchRef} className="relative">
+      <input
+        type="text"
+        placeholder="Type to search user..."
+        value={userSearch}
+        onChange={(e) => {
+          setUserSearch(e.target.value);
+          setShowUserList(true);
+          setSelectedUser(null);
+        }}
+        className="w-full border border-[#e0dcd4] rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
+      />
+      {showUserList && (
+        <div className="absolute z-10 w-full max-h-40 overflow-y-auto border border-[#e0dcd4] rounded-md bg-white shadow-md">
+          {filteredUsers.map((u) => (
+            <div
+              key={u.id}
+              onClick={() => {
+                setSelectedUser(u);
+                setUserSearch(`${u.name} ${u.surname}`);
+                setShowUserList(false);
+              }}
+              className="px-4 py-2 hover:bg-[#f5f3ef] cursor-pointer text-sm text-[#5a4a3f]"
+            >
+              {u.name} {u.surname} ({u.email})
+            </div>
           ))}
-        </select>
-      </div>
+          {filteredUsers.length === 0 && userSearch.length > 0 && (
+            <div className="px-4 py-2 text-sm text-red-600 font-medium">
+              No users found with that name or email.
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+    <input type="hidden" name="userId" value={selectedUser?.id || ''} />
+  </div>
 
-      {/* Experience Select */}
-      <div>
-        <label className="block text-sm text-[#5a4a3f] mb-1">Select Experience</label>
-        <select
-          name="experienceId"
-          required
-          defaultValue={editingBooking?.experience?.id || ''}
-          className="w-full border border-[#e0dcd4] rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
-        >
-          <option value="">Select Experience</option>
-          {experiences.map((e) => (
-            <option key={e.id} value={e.id}>
-              {e.name}
-            </option>
-          ))}
-        </select>
-      </div>
+  {/* Experience and Slot */}
+  <div className="grid grid-cols-1 gap-4">
+    <div>
+      <label className="block text-sm text-[#5a4a3f] mb-1">Experience</label>
+      <select
+        name="experienceId"
+        required
+        value={selectedExperienceId}
+        onChange={(e) => {
+          setSelectedExperienceId(e.target.value);
+          setSelectedSlotId('');
+        }}
+        className="w-full border border-[#e0dcd4] rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
+      >
+        <option value="">Select Experience</option>
+        {experiences.map((e) => (
+          <option key={e.id} value={e.id}>
+            {e.name}
+          </option>
+        ))}
+      </select>
+    </div>
 
-      {/* Date */}
-      <div>
-        <label className="block text-sm text-[#5a4a3f] mb-1">Booking Date</label>
-        <select
+    <div>
+      <label className="block text-sm text-[#5a4a3f] mb-1">Slot</label>
+      <select
         name="slotId"
         required
-        defaultValue={editingBooking?.scheduleSlot?.id || ''}
+        value={selectedSlotId}
+        onChange={(e) => setSelectedSlotId(e.target.value)}
         className="w-full border border-[#e0dcd4] rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
       >
         <option value="">Select Slot</option>
@@ -563,29 +640,61 @@ const AdminReservationsPage = () => {
           </option>
         ))}
       </select>
+    </div>
+  </div>
 
-      </div>
+  {/* Number of People */}
+  <div>
+    <label className="block text-sm text-[#5a4a3f] mb-1">Number of People</label>
+    <input
+      type="number"
+      name="numberOfPeople"
+      min={1}
+      value={numberOfPeople}
+      onChange={(e) => setNumberOfPeople(Number(e.target.value))}
+      required
+      className="w-full border border-[#e0dcd4] rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
+    />
+  </div>
 
-      {/* Buttons */}
-      <div className="flex justify-end gap-2 pt-2">
-        <button
-          type="submit"
-          className="px-4 py-2 bg-[#8b6f47] text-white rounded-full hover:bg-[#a78b62] transition-all"
-        >
-          Save
-        </button>
-        <button
-          type="button"
-          onClick={() => setShowForm(false)}
-          className="px-4 py-2 bg-gray-300 text-[#5a4a3f] rounded-full hover:bg-gray-400 transition-all"
-        >
-          Cancel
-        </button>
-      </div>
-    </form>
+  {/* Notes */}
+  <div>
+    <label className="block text-sm text-[#5a4a3f] mb-1">Notes (optional)</label>
+    <textarea
+      name="notes"
+      rows={3}
+      value={notes}
+      onChange={(e) => setNotes(e.target.value)}
+      className="w-full border border-[#e0dcd4] rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-[#8b6f47]"
+      placeholder="e.g. Vegetarian meal, accessibility needs..."
+    />
+  </div>
+
+  {/* Buttons */}
+  <div className="flex justify-end gap-2 pt-2">
+    <button
+      type="submit"
+      disabled={!isFormValid}
+      className={`px-4 py-2 rounded-full transition-all ${
+        !isFormValid
+          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          : 'bg-[#8b6f47] text-white hover:bg-[#a78b62]'
+      }`}
+    >
+      Save
+    </button>
+    <button
+      type="button"
+      onClick={() => setShowForm(false)}
+      className="px-4 py-2 bg-gray-300 text-[#5a4a3f] rounded-full hover:bg-gray-400 transition-all"
+    >
+      Cancel
+    </button>
+  </div>
+</form>
+
   </div>
 )}
-
     </div>
   );
 };

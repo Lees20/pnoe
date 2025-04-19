@@ -61,15 +61,14 @@ export async function GET(req) {
   }
 }
 
-
+// POST: Create reservation
 export async function POST(req) {
   const auth = await requireAdmin(req);
   if (auth.error) return auth.response;
 
-  const { userId, scheduleSlotId } = await req.json();
+  const { userId, scheduleSlotId, numberOfPeople = 1, notes = '' } = await req.json();
 
   try {
-    // 1. Εύρεση του schedule slot
     const slot = await prisma.scheduleSlot.findUnique({
       where: { id: Number(scheduleSlotId) },
     });
@@ -78,19 +77,20 @@ export async function POST(req) {
       return handleResponse({ error: 'Schedule slot not found' }, 404);
     }
 
-    // 2. Έλεγχος διαθεσιμότητας
-    if (slot.bookedSlots >= slot.totalSlots) {
-      return handleResponse({ error: 'No available slots for this date' }, 400);
+    // Check if enough availability exists
+    if (slot.bookedSlots + numberOfPeople > slot.totalSlots) {
+      return handleResponse({ error: 'Not enough available slots for this date' }, 400);
     }
 
-    // 3. Δημιουργία κράτησης
     const booking = await prisma.booking.create({
       data: {
         userId: Number(userId),
         scheduleSlotId: Number(scheduleSlotId),
+        numberOfPeople: Number(numberOfPeople),
+        notes,
       },
       include: {
-        user: { select: { id: true, email: true, name: true, surname: true } },
+        user: { select: { id: true, email: true, name: true, surname: true, phone: true } },
         scheduleSlot: {
           select: {
             id: true,
@@ -101,10 +101,9 @@ export async function POST(req) {
       },
     });
 
-    // 4. Ενημέρωση του bookedSlots
     await prisma.scheduleSlot.update({
       where: { id: Number(scheduleSlotId) },
-      data: { bookedSlots: { increment: 1 } },
+      data: { bookedSlots: { increment: numberOfPeople } },
     });
 
     return handleResponse(booking);
@@ -119,28 +118,49 @@ export async function PATCH(req) {
   const auth = await requireAdmin(req);
   if (auth.error) return auth.response;
 
-  const { id, userId, scheduleSlotId } = await req.json();
+  const {
+    id,
+    userId,
+    scheduleSlotId,
+    numberOfPeople = 1,
+    notes = '',
+  } = await req.json();
 
   try {
     const oldBooking = await prisma.booking.findUnique({
       where: { id: Number(id) },
-      select: { scheduleSlotId: true },
     });
 
     if (!oldBooking) {
       return handleResponse({ error: 'Booking not found' }, 404);
     }
 
-    // Εάν αλλάζει το slot, μειώνουμε το bookedSlots στο παλιό
-    if (oldBooking.scheduleSlotId !== Number(scheduleSlotId)) {
+    const isSlotChanged = oldBooking.scheduleSlotId !== Number(scheduleSlotId);
+    const isPeopleChanged = oldBooking.numberOfPeople !== Number(numberOfPeople);
+
+    if (isSlotChanged || isPeopleChanged) {
+      // Restore slots from old booking
       await prisma.scheduleSlot.update({
         where: { id: oldBooking.scheduleSlotId },
-        data: { bookedSlots: { decrement: 1 } },
+        data: { bookedSlots: { decrement: oldBooking.numberOfPeople } },
       });
+
+      // Check availability on new slot
+      const newSlot = await prisma.scheduleSlot.findUnique({
+        where: { id: Number(scheduleSlotId) },
+      });
+
+      if (!newSlot) {
+        return handleResponse({ error: 'Schedule slot not found' }, 404);
+      }
+
+      if (newSlot.bookedSlots + numberOfPeople > newSlot.totalSlots) {
+        return handleResponse({ error: 'Not enough availability on new slot' }, 400);
+      }
 
       await prisma.scheduleSlot.update({
         where: { id: Number(scheduleSlotId) },
-        data: { bookedSlots: { increment: 1 } },
+        data: { bookedSlots: { increment: numberOfPeople } },
       });
     }
 
@@ -149,9 +169,11 @@ export async function PATCH(req) {
       data: {
         userId: Number(userId),
         scheduleSlotId: Number(scheduleSlotId),
+        numberOfPeople: Number(numberOfPeople),
+        notes,
       },
       include: {
-        user: { select: { id: true, email: true, name: true, surname: true } },
+        user: { select: { id: true, email: true, name: true, surname: true, phone: true } },
         scheduleSlot: {
           select: {
             id: true,
@@ -169,7 +191,6 @@ export async function PATCH(req) {
   }
 }
 
-
 // DELETE: Delete reservation
 export async function DELETE(req) {
   const auth = await requireAdmin(req);
@@ -180,7 +201,7 @@ export async function DELETE(req) {
   try {
     const booking = await prisma.booking.findUnique({
       where: { id: Number(id) },
-      select: { scheduleSlotId: true },
+      select: { scheduleSlotId: true, numberOfPeople: true },
     });
 
     if (!booking) {
@@ -194,7 +215,7 @@ export async function DELETE(req) {
     await prisma.scheduleSlot.update({
       where: { id: booking.scheduleSlotId },
       data: {
-        bookedSlots: { decrement: 1 },
+        bookedSlots: { decrement: booking.numberOfPeople },
       },
     });
 

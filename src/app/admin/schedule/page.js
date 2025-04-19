@@ -88,7 +88,6 @@ export default function AdminSchedulePage() {
   const handleEditClick = (slot) => {
     setEditingSlotId(slot.id);
     setEditedAvailableSlots(slot.totalSlots - slot.bookedSlots);
-    setEditedBookedSlots(slot.bookedSlots);
   };
 
   const handleCancelEdit = () => {
@@ -99,25 +98,27 @@ export default function AdminSchedulePage() {
 
   const handleSaveEdit = async () => {
     const available = Number(editedAvailableSlots);
-    const booked = Number(editedBookedSlots);
-
-    if (available < 0 || booked < 0) {
-      toast.error("Slots can't be negative.");
+    const slot = slots.find((s) => s.id === editingSlotId);
+  
+    if (!slot) {
+      toast.error("Slot not found.");
       return;
     }
-
+  
+    const booked = slot.bookedSlots;
     const totalSlots = available + booked;
-
-    const res = await fetch('/api/admin/schedule', {
+  
+    if (available < 0) {
+      toast.error("Available slots cannot be negative.");
+      return;
+    }
+  
+    const res = await fetch(`/api/admin/schedule/${editingSlotId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        id: editingSlotId,
-        totalSlots,
-        bookedSlots: booked,
-      }),
+      body: JSON.stringify({ totalSlots }),
     });
-
+  
     if (res.ok) {
       const updatedSlot = await res.json();
       setSlots(slots.map(slot => (slot.id === editingSlotId ? updatedSlot : slot)));
@@ -127,6 +128,8 @@ export default function AdminSchedulePage() {
       toast.error('Failed to update slot.');
     }
   };
+  
+  
 
   return (
     <main className="max-w-5xl mx-auto pt-24 px-4 sm:px-6 lg:px-8">
@@ -227,14 +230,7 @@ export default function AdminSchedulePage() {
                               onChange={e => setEditedAvailableSlots(e.target.value)}
                               className="p-2 rounded border w-full mb-2"
                             />
-                            <label className="block text-sm text-[#5a4a3f]">Booked Slots</label>
-                            <input
-                              type="number"
-                              min={0}
-                              value={editedBookedSlots}
-                              onChange={e => setEditedBookedSlots(e.target.value)}
-                              className="p-2 rounded border w-full mb-2"
-                            />
+                            
                             <div className="flex justify-end gap-2 mt-2">
                               <button
                                 onClick={handleSaveEdit}

@@ -1,40 +1,41 @@
-import { prisma } from '@/lib/prisma';
+import prisma from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
-// PUT: Update totalSlots and bookedSlots only
-export async function PUT(req, context) {
-  const { id } = context.params;
+export async function PUT(req, { params }) {
+  // eslint-disable-next-line no-restricted-syntax
+  const id = parseInt(params.id, 10);
 
-  if (!id || isNaN(Number(id))) {
+  if (!id || isNaN(id)) {
     return NextResponse.json({ error: 'Missing or invalid ID' }, { status: 400 });
   }
 
-  const { totalSlots, bookedSlots } = await req.json();
+  const { totalSlots } = await req.json();
 
   if (typeof totalSlots !== 'number' || totalSlots < 0) {
     return NextResponse.json({ error: 'Invalid totalSlots' }, { status: 400 });
   }
 
-  if (typeof bookedSlots !== 'number' || bookedSlots < 0) {
-    return NextResponse.json({ error: 'Invalid bookedSlots' }, { status: 400 });
-  }
-
-  if (bookedSlots > totalSlots) {
-    return NextResponse.json({ error: 'Booked slots cannot exceed total slots' }, { status: 400 });
-  }
-
   try {
+    const existing = await prisma.scheduleSlot.findUnique({ where: { id } });
+
+    if (!existing) {
+      return NextResponse.json({ error: 'Slot not found' }, { status: 404 });
+    }
+
+    if (existing.bookedSlots > totalSlots) {
+      return NextResponse.json({
+        error: `Cannot set total slots below currently booked (${existing.bookedSlots}).`,
+      }, { status: 400 });
+    }
+
     const updated = await prisma.scheduleSlot.update({
-      where: { id: Number(id) },
-      data: {
-        totalSlots,
-        bookedSlots,
-      },
+      where: { id },
+      data: { totalSlots },
     });
 
     return NextResponse.json(updated);
   } catch (error) {
-    console.error('PUT slot error:', error);
+    console.error('PUT /schedule/[id] error:', error);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }

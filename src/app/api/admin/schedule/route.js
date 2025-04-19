@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-// GET: slots for an experience
+// GET: Get all slots for a given experience
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const experienceId = parseInt(searchParams.get('experienceId'), 10);
@@ -23,11 +23,11 @@ export async function GET(req) {
   }
 }
 
-// POST: create a new slot
+// POST: Create a new schedule slot
 export async function POST(req) {
   const { experienceId, date, totalSlots } = await req.json();
 
-  if (!experienceId || !date || !totalSlots) {
+  if (!experienceId || !date || totalSlots == null) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
@@ -36,7 +36,8 @@ export async function POST(req) {
       data: {
         experienceId: parseInt(experienceId, 10),
         date: new Date(date),
-        totalSlots,
+        totalSlots: Number(totalSlots),
+        bookedSlots: 0, // ensure consistency
       },
     });
 
@@ -47,15 +48,44 @@ export async function POST(req) {
   }
 }
 
-// PUT: block direct update here to avoid modifying date by mistake
-export async function PUT() {
-  return NextResponse.json(
-    { error: "Use /api/admin/schedule/[id] for updates" },
-    { status: 405 }
-  );
+// PUT: Only allow updating totalSlots (bookedSlots via reservations only)
+export async function PUT(req) {
+  try {
+    const { id, totalSlots } = await req.json();
+
+    if (!id || totalSlots == null) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    if (typeof totalSlots !== 'number' || totalSlots < 0) {
+      return NextResponse.json({ error: "Invalid totalSlots" }, { status: 400 });
+    }
+
+    const existing = await prisma.scheduleSlot.findUnique({ where: { id } });
+
+    if (!existing) {
+      return NextResponse.json({ error: "Slot not found" }, { status: 404 });
+    }
+
+    if (existing.bookedSlots > totalSlots) {
+      return NextResponse.json({
+        error: `Cannot set total slots below currently booked (${existing.bookedSlots}).`,
+      }, { status: 400 });
+    }
+
+    const updatedSlot = await prisma.scheduleSlot.update({
+      where: { id },
+      data: { totalSlots },
+    });
+
+    return NextResponse.json(updatedSlot);
+  } catch (error) {
+    console.error("PUT /schedule error:", error);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  }
 }
 
-// DELETE: remove a slot (optional)
+// DELETE: Remove a slot
 export async function DELETE(req) {
   const { searchParams } = new URL(req.url);
   const id = parseInt(searchParams.get('id'), 10);

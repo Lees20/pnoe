@@ -6,7 +6,8 @@ import { useRouter } from 'next/navigation';
 import * as XLSX from 'xlsx';
 
 const AdminReservationsPage = () => {
-  const [isSaving, setIsSaving] = useState(false);
+  const [isLoadingSlots, setIsLoadingSlots] = useState(false);
+ const [isSaving, setIsSaving] = useState(false);
   const { data: session, status } = useSession();
   const router = useRouter();
   const [selectedSlotId, setSelectedSlotId] = useState('');
@@ -31,7 +32,8 @@ const AdminReservationsPage = () => {
   const [showUserList, setShowUserList] = useState(false);
   const isFormValid = !!selectedUser && !!selectedExperienceId && !!selectedSlotId && numberOfPeople > 0;
   const userSearchRef = useRef();
-  
+  const [formError, setFormError] = useState('');
+
   const filteredUsers = users.filter((u) =>
     `${u.name} ${u.surname}`.toLowerCase().includes(userSearch.toLowerCase()) ||
     u.email.toLowerCase().includes(userSearch.toLowerCase())
@@ -185,6 +187,7 @@ const AdminReservationsPage = () => {
         }
       
         const loadSlots = async () => {
+          setIsLoadingSlots(true); // 👈 Start
           const res = await fetch(`/api/admin/schedule?experienceId=${selectedExperienceId}`);
           const data = await res.json();
       
@@ -194,7 +197,6 @@ const AdminReservationsPage = () => {
             !slot.isCancelled
           );
       
-          // Include slot being edited if needed
           if (editingBooking?.scheduleSlot?.experience?.id === selectedExperienceId) {
             const currentSlot = editingBooking.scheduleSlot;
             const alreadyIncluded = futureSlots.some(slot => slot.id === currentSlot.id);
@@ -203,10 +205,12 @@ const AdminReservationsPage = () => {
       
           futureSlots.sort((a, b) => new Date(a.date) - new Date(b.date));
           setAvailableSlots(futureSlots);
+          setIsLoadingSlots(false);
         };
       
         loadSlots();
       }, [selectedExperienceId, editingBooking]);
+      
       
       
       
@@ -336,37 +340,65 @@ const AdminReservationsPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setFormError('');
     setIsSaving(true);
+  
     const form = e.target;
+    const people = Number(form.numberOfPeople.value);
+  
+    const selectedSlot = availableSlots.find(slot => slot.id === selectedSlotId);
+  
+    if (selectedSlot) {
+      const remaining = selectedSlot.totalSlots - selectedSlot.bookedSlots;
+      if (people > remaining) {
+        setFormError(`Only ${remaining} spot${remaining > 1 ? 's' : ''} left for this slot.`);
+        setIsSaving(false);
+        return;
+      }
+    }
+  
     const bookingData = {
       id: editingBooking?.id,
       userId: form.userId.value,
       scheduleSlotId: form.slotId.value,
-      numberOfPeople: Number(form.numberOfPeople.value),
+      numberOfPeople: people,
       notes: form.notes.value || null,
     };
-    
-    const method = editingBooking ? 'PATCH' : 'POST'; // PATCH method
-
-    const res = await fetch('/api/admin/reservations', {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(bookingData),
-    });
-
-    if (res.ok) {
-      const updated = await res.json();
+  
+    const method = editingBooking ? 'PATCH' : 'POST';
+  
+    try {
+      const res = await fetch('/api/admin/reservations', {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingData),
+      });
+  
+      const result = await res.json();
+  
+      if (!res.ok) {
+        setFormError(result?.error || 'Something went wrong while saving the reservation.');
+        setIsSaving(false);
+        return;
+      }
+  
       setBookings((prev) =>
         editingBooking
-          ? prev.map((b) => (b.id === updated.id ? updated : b))
-          : [...prev, updated]
+          ? prev.map((b) => (b.id === result.id ? result : b))
+          : [...prev, result]
       );
+  
       setEditingBooking(null);
       setShowForm(false);
+    } catch (err) {
+      console.error(err);
+      setFormError('Unexpected error. Please try again.');
     }
   
     setIsSaving(false);
   };
+  
+  
 
   if (status === 'loading') return null;
 
@@ -669,20 +701,27 @@ const AdminReservationsPage = () => {
       placeholder="e.g. Vegetarian meal, accessibility needs..."
     />
   </div>
+ 
+      {formError && (
+      <p className="text-sm text-red-600 font-medium text-center -mt-2">
+        {formError}
+      </p>
+    )}
 
   {/* Buttons */}
-  <div className="flex justify-end gap-2 pt-2">
-    <button
+      <div className="flex justify-end gap-2 pt-2">
+      <button
       type="submit"
-      disabled={!isFormValid}
+      disabled={!isFormValid || isSaving || isLoadingSlots}
       className={`px-4 py-2 rounded-full transition-all ${
-        !isFormValid
+        !isFormValid || isSaving || isLoadingSlots
           ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
           : 'bg-[#8b6f47] text-white hover:bg-[#a78b62]'
       }`}
     >
-      Save
+      {isSaving ? 'Saving...' : 'Save'}
     </button>
+
     <button
       type="button"
       onClick={() => setShowForm(false)}

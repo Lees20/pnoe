@@ -178,13 +178,30 @@ export async function DELETE(req) {
   const { id } = await req.json();
 
   try {
-    const deletedBooking = await prisma.booking.delete({
+    const booking = await prisma.booking.findUnique({
+      where: { id: Number(id) },
+      select: { scheduleSlotId: true },
+    });
+
+    if (!booking) {
+      return handleResponse({ error: 'Booking not found' }, 404);
+    }
+
+    await prisma.booking.delete({
       where: { id: Number(id) },
     });
 
-    return handleResponse(deletedBooking);
+    await prisma.scheduleSlot.update({
+      where: { id: booking.scheduleSlotId },
+      data: {
+        bookedSlots: { decrement: 1 },
+      },
+    });
+
+    return handleResponse({ success: true });
   } catch (error) {
     console.error('Error deleting reservation:', error);
     return handleResponse({ error: 'Failed to delete reservation' }, 500);
   }
 }
+

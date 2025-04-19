@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 export default function AdminSchedulePage() {
+  const router = useRouter();
+
   const [experiences, setExperiences] = useState([]);
   const [selectedExperienceId, setSelectedExperienceId] = useState('');
   const [selectedExperience, setSelectedExperience] = useState(null);
@@ -129,13 +131,17 @@ export default function AdminSchedulePage() {
   return (
     <main className="max-w-5xl mx-auto pt-24 px-4 sm:px-6 lg:px-8">
          {/* Back to Dashboard */}
-         <button
-          href="/admin/dashboard"
+         <main className="max-w-5xl mx-auto pt-24 px-4 sm:px-6 lg:px-8">
+      {/* Back to Dashboard */}
+      <div>
+        <button
+          onClick={() => router.push('/admin')} // ✅ Χρήση του hook εδώ
           className="px-5 py-2.5 rounded-full bg-[#f4f1ec] text-[#5a4a3f] border border-[#d8cfc3] shadow-sm hover:bg-[#eae5df] transition-all text-sm font-medium"
         >
           ← Back to Dashboard
         </button>
-     
+      </div>
+    </main>
       <h1 className="text-4xl font-bold mb-10 text-center font-serif text-[#5a4a3f]">
         Schedule Management
       </h1>

@@ -59,14 +59,15 @@ export default async function ExperienceDetailPage({ params }) {
       </section>
 
       <section className="text-center mb-16">
-        <div className="mt-6">
-          <LinkWithLoader href="/check-availability/${exp.slug}">
-            <button className="bg-[#8b6f47] text-white px-6 py-3 rounded-full font-medium hover:bg-[#a78b62] transition-all">
-              Check Availability
-            </button>
-          </LinkWithLoader>
-        </div>
+      <div className="mt-6">
+        <LinkWithLoader href={`/check-availability/${slug}`}>
+          <button className="bg-[#8b6f47] text-white px-6 py-3 rounded-full font-medium hover:bg-[#a78b62] transition-all">
+            Check Availability
+          </button>
+        </LinkWithLoader>
+      </div>
     </section>
+
 
       {/* Description */}
       <section className="max-w-5xl mx-auto mb-12 text-center">

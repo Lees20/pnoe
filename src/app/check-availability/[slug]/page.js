@@ -258,7 +258,7 @@ export default function CheckAvailabilityPage() {
   <div className="space-y-2">
     <label className="block text-sm font-medium text-[#5a4a3f] flex items-center gap-2">
       <StickyNote className="w-4 h-4 text-[#8b6f47]" />
-      Notes / Allergies
+      Notes / Allergies / Special Requests
     </label>
     <textarea
       rows={3}

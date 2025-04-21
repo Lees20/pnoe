@@ -1,9 +1,1 @@
-{
-  "/api/admin/schedule/route": "app/api/admin/schedule/route.js",
-  "/admin/page": "app/admin/page.js",
-  "/page": "app/page.js",
-  "/bookings/page": "app/bookings/page.js",
-  "/login/page": "app/login/page.js",
-  "/admin/schedule/page": "app/admin/schedule/page.js",
-  "/experiences/page": "app/experiences/page.js"
-}
+{}

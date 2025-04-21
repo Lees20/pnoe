@@ -6,41 +6,6 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/page.js"
-    ],
-    "/admin/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/admin/page.js"
-    ],
-    "/api/auth/[...nextauth]/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/auth/[...nextauth]/route.js"
-    ],
-    "/admin/schedule/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/admin/schedule/page.js"
-    ],
-    "/api/admin/experiences/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/admin/experiences/route.js"
-    ],
-    "/api/admin/schedule/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/admin/schedule/route.js"
-    ],
-    "/experiences/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/experiences/page.js"
-    ],
     "/check-availability/[slug]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -52,6 +17,31 @@
       "static/chunks/main-app.js",
       "static/chunks/app/api/experiences/[slug]/route.js"
     ],
+    "/api/auth/[...nextauth]/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/auth/[...nextauth]/route.js"
+    ],
+    "/api/admin/schedule/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/admin/schedule/route.js"
+    ],
+    "/api/admin/reservations/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/admin/reservations/route.js"
+    ],
+    "/booking-confirmed/[id]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/booking-confirmed/[id]/page.js"
+    ],
+    "/api/admin/reservations/[id]/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/admin/reservations/[id]/route.js"
+    ],
     "/bookings/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -62,25 +52,35 @@
       "static/chunks/main-app.js",
       "static/chunks/app/api/my-bookings/route.js"
     ],
-    "/admin/reservations/page": [
+    "/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/admin/reservations/page.js"
+      "static/chunks/app/page.js"
     ],
-    "/api/admin/reservations/route": [
+    "/login/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/api/admin/reservations/route.js"
+      "static/chunks/app/login/page.js"
     ],
-    "/api/admin/users/route": [
+    "/admin/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/api/admin/users/route.js"
+      "static/chunks/app/admin/page.js"
     ],
-    "/admin/experiences/page": [
+    "/admin/schedule/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/admin/experiences/page.js"
+      "static/chunks/app/admin/schedule/page.js"
+    ],
+    "/api/admin/experiences/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/admin/experiences/route.js"
+    ],
+    "/experiences/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/experiences/page.js"
     ]
   }
 }

@@ -15,6 +15,7 @@ import {
   Loader2,
   Minus,
   Plus,
+  ArrowLeft,
 } from 'lucide-react';
 
 const slugify = (str) =>
@@ -98,6 +99,7 @@ export default function CheckAvailabilityPage() {
 
     return (
       <div className="max-w-3xl mx-auto px-6 py-12 bg-[#fdfaf5] rounded-3xl shadow-xl border border-[#e5e0d8]">
+      
       {/* Session Info */}
       {status === 'loading' ? (
         <p className="text-[#5a4a3f] text-center mb-4">Loading session...</p>
@@ -120,7 +122,16 @@ export default function CheckAvailabilityPage() {
           Logged in as: <span className="font-medium">{session.user.name || session.user.email}</span>
         </div>
       )}
-    
+    <div className="absolute top-6 left-6">
+  <button
+    onClick={() => router.back()}
+    className="flex items-center text-[#8b6f47] text-sm border border-[#8b6f47] rounded-full px-4 py-2 hover:bg-[#f4f1ec] hover:text-[#5a4a3f] transition-all"
+  >
+    <ArrowLeft size={18} className="mr-2" />
+    Back
+  </button>
+</div>
+
       {/* Header */}
       <div className="mb-10 text-center">
         <h1 className="text-4xl font-serif font-bold text-[#5a4a3f] mb-2 flex items-center justify-center gap-2">

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { format, parseISO } from 'date-fns';
-import { CheckCircle, CalendarDays, MapPin, Users, StickyNote, Home } from 'lucide-react';
+import { ArrowLeft,CheckCircle, CalendarDays, MapPin, Users, StickyNote, Home } from 'lucide-react';
 
 export default function BookingConfirmedPage() {
   const { id } = useParams();
@@ -52,7 +52,16 @@ export default function BookingConfirmedPage() {
   return (
     <div className="min-h-screen bg-[#f4f1ec] flex items-center justify-center px-6 py-16">
       <div className="max-w-2xl w-full bg-[#fffaf4] border border-[#e8e4db] shadow-xl rounded-3xl p-8 text-[#5a4a3f]">
-  
+      <div className="absolute top-6 left-6">
+  <button
+    onClick={() => router.back()}
+    className="flex items-center text-[#8b6f47] text-sm border border-[#8b6f47] rounded-full px-4 py-2 hover:bg-[#f4f1ec] hover:text-[#5a4a3f] transition-all"
+  >
+    <ArrowLeft size={18} className="mr-2" />
+    Back
+  </button>
+</div>
+
         {/* Header */}
         <div className="text-center mb-10">
           <CheckCircle className="w-12 h-12 mx-auto text-[#8b6f47]" />
@@ -76,8 +85,6 @@ export default function BookingConfirmedPage() {
             )}
           </div>
         </div>
-
-          
           <div className="flex items-start gap-3">
             <MapPin className="w-5 h-5 mt-1 text-[#8b6f47]" />
             <div>

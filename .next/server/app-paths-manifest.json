@@ -1,12 +1,11 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
-  "/api/admin/reservations/[id]/route": "app/api/admin/reservations/[id]/route.js",
-  "/api/experiences/[slug]/route": "app/api/experiences/[slug]/route.js",
   "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
   "/api/admin/schedule/route": "app/api/admin/schedule/route.js",
-  "/experiences/[slug]/page": "app/experiences/[slug]/page.js",
+  "/api/experiences/[slug]/route": "app/api/experiences/[slug]/route.js",
   "/check-availability/[slug]/page": "app/check-availability/[slug]/page.js",
-  "/login/page": "app/login/page.js",
+  "/admin/schedule/page": "app/admin/schedule/page.js",
+  "/bookings/page": "app/bookings/page.js",
   "/page": "app/page.js",
-  "/booking-confirmed/[id]/page": "app/booking-confirmed/[id]/page.js"
+  "/experiences/page": "app/experiences/page.js",
+  "/admin/experiences/page": "app/admin/experiences/page.js"
 }

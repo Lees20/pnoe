@@ -2,13 +2,14 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
+import { transporter } from '@/lib/email/nodemailer';
+import { generateBookingConfirmationEmail } from '@/lib/email/bookingConfirmationEmail';
 
-// Utility function to handle API responses
+// === Utilities ===
 const handleResponse = (data, status = 200) => {
   return NextResponse.json(data, { status });
 };
 
-// Utility function to protect routes
 const requireAdmin = async (req) => {
   const session = await getServerSession({ req, ...authOptions });
   if (!session || session.user.role !== 'admin') {
@@ -17,7 +18,15 @@ const requireAdmin = async (req) => {
   return { error: false };
 };
 
-// GET: Fetch all reservations
+const requireUser = async (req) => {
+  const session = await getServerSession({ req, ...authOptions });
+  if (!session || !session.user) {
+    return { error: true, response: handleResponse({ error: 'Unauthorized' }, 401) };
+  }
+  return { error: false, user: session.user };
+};
+
+// === GET: Fetch all reservations (Admin only) ===
 export async function GET(req) {
   const auth = await requireAdmin(req);
   if (auth.error) return auth.response;
@@ -61,12 +70,13 @@ export async function GET(req) {
   }
 }
 
-// POST: Create reservation
+// === POST: Create reservation (User) ===
 export async function POST(req) {
-  const auth = await requireAdmin(req);
+  const auth = await requireUser(req);
   if (auth.error) return auth.response;
 
-  const { userId, scheduleSlotId, numberOfPeople = 1, notes = '' } = await req.json();
+  const { user } = auth;
+  const { scheduleSlotId, numberOfPeople = 1, notes = '' } = await req.json();
 
   try {
     const slot = await prisma.scheduleSlot.findUnique({
@@ -77,25 +87,26 @@ export async function POST(req) {
       return handleResponse({ error: 'Schedule slot not found' }, 404);
     }
 
-    // Check if enough availability exists
     if (slot.bookedSlots + numberOfPeople > slot.totalSlots) {
       return handleResponse({ error: 'Not enough available slots for this date' }, 400);
     }
 
     const booking = await prisma.booking.create({
       data: {
-        userId: Number(userId),
+        userId: user.id,
         scheduleSlotId: Number(scheduleSlotId),
         numberOfPeople: Number(numberOfPeople),
         notes,
       },
       include: {
-        user: { select: { id: true, email: true, name: true, surname: true, phone: true } },
+        user: {
+          select: { name: true, email: true },
+        },
         scheduleSlot: {
-          select: {
-            id: true,
-            date: true,
-            experience: { select: { id: true, name: true } },
+          include: {
+            experience: {
+              select: { name: true, location: true },
+            },
           },
         },
       },
@@ -103,17 +114,33 @@ export async function POST(req) {
 
     await prisma.scheduleSlot.update({
       where: { id: Number(scheduleSlotId) },
-      data: { bookedSlots: { increment: numberOfPeople } },
+      data: {
+        bookedSlots: {
+          increment: Number(numberOfPeople),
+        },
+      },
     });
 
-    return handleResponse(booking);
+    // ✉️ Send confirmation email
+    const { subject, html } = generateBookingConfirmationEmail(booking);
+    await transporter.sendMail({
+      from: `"Oasis Group" <${process.env.EMAIL_USER}>`,
+      to: booking.user.email,
+      subject,
+      html,
+    });
+    
+
+    return handleResponse({ id: booking.id });
+
   } catch (error) {
     console.error('Error creating reservation:', error);
     return handleResponse({ error: 'Failed to create reservation' }, 500);
   }
 }
 
-// PATCH: Update reservation
+
+// === PATCH: Update reservation (Admin only) ===
 export async function PATCH(req) {
   const auth = await requireAdmin(req);
   if (auth.error) return auth.response;
@@ -139,13 +166,12 @@ export async function PATCH(req) {
     const isPeopleChanged = oldBooking.numberOfPeople !== Number(numberOfPeople);
 
     if (isSlotChanged || isPeopleChanged) {
-      // Restore slots from old booking
+      // Restore old
       await prisma.scheduleSlot.update({
         where: { id: oldBooking.scheduleSlotId },
         data: { bookedSlots: { decrement: oldBooking.numberOfPeople } },
       });
 
-      // Check availability on new slot
       const newSlot = await prisma.scheduleSlot.findUnique({
         where: { id: Number(scheduleSlotId) },
       });
@@ -160,7 +186,7 @@ export async function PATCH(req) {
 
       await prisma.scheduleSlot.update({
         where: { id: Number(scheduleSlotId) },
-        data: { bookedSlots: { increment: numberOfPeople } },
+        data: { bookedSlots: { increment: Number(numberOfPeople) } },
       });
     }
 
@@ -172,16 +198,6 @@ export async function PATCH(req) {
         numberOfPeople: Number(numberOfPeople),
         notes,
       },
-      include: {
-        user: { select: { id: true, email: true, name: true, surname: true, phone: true } },
-        scheduleSlot: {
-          select: {
-            id: true,
-            date: true,
-            experience: { select: { id: true, name: true } },
-          },
-        },
-      },
     });
 
     return handleResponse(updatedBooking);
@@ -191,7 +207,7 @@ export async function PATCH(req) {
   }
 }
 
-// DELETE: Delete reservation
+// === DELETE: Delete reservation (Admin only) ===
 export async function DELETE(req) {
   const auth = await requireAdmin(req);
   if (auth.error) return auth.response;
@@ -225,4 +241,3 @@ export async function DELETE(req) {
     return handleResponse({ error: 'Failed to delete reservation' }, 500);
   }
 }
-

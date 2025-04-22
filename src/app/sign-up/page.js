@@ -32,49 +32,62 @@ export default function Register() {
       router.push('/dashboard'); // Redirect to dashboard if already signed in
     }
   }, [session, router]);
-
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = `https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`;
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
+  
   
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true); // Set loading to true when the form is submitting
-    console.log({
-      email,
-      password,
-      name,
-      surname,
-      phone,
-      dateOfBirth,
-    });
-    
-    const res = await fetch('/api/auth/signup', {
-      method: 'POST',
-      body: JSON.stringify({ email, password, name, surname, phone, dateOfBirth }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-
-    
-    const data = await res.json();
-
-    setIsLoading(false); // Set loading to false after form submission
-
+    setIsLoading(true);
+  
     if (!isLegalAge(dateOfBirth)) {
       setError('You must be at least 18 years old to register.');
       setIsLoading(false);
       return;
     }
   
-    if (res.ok) {
-      setIsSuccess(true);  // Show success message
-      setError('');  // Clear any previous errors
-      setTimeout(() => router.push('/login'), 2000);  // Redirect to sign-in after 2 seconds
-    } else {
-      setError(data.error || 'Something went wrong');
-      setIsSuccess(false);  // Hide success message if error occurs
+    try {
+      const token = await window.grecaptcha.execute(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY, {
+        action: 'submit',
+      });
+  
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        body: JSON.stringify({
+          email,
+          password,
+          name,
+          surname,
+          phone,
+          dateOfBirth,
+          recaptchaToken: token,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      const data = await res.json();
+      setIsLoading(false);
+  
+      if (res.ok) {
+        setIsSuccess(true);
+        setError('');
+        setTimeout(() => router.push('/login'), 2000);
+      } else {
+        setError(data.error || 'Something went wrong');
+      }
+    } catch (err) {
+      console.error(err);
+      setError('Something went wrong. Please try again.');
+      setIsLoading(false);
     }
   };
+  
 
   // Loading state while session is being fetched
   if (status === 'loading') return <p>Loading...</p>;

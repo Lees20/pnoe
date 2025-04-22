@@ -16,51 +16,30 @@
       "static/chunks/main-app.js",
       "static/chunks/app/admin/page.js"
     ],
+    "/admin/reservations/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/admin/reservations/page.js"
+    ],
+    "/api/admin/reservations/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/admin/reservations/route.js"
+    ],
     "/api/admin/experiences/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/api/admin/experiences/route.js"
     ],
-    "/admin/schedule/page": [
+    "/api/admin/users/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/admin/schedule/page.js"
+      "static/chunks/app/api/admin/users/route.js"
     ],
     "/api/admin/schedule/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/api/admin/schedule/route.js"
-    ],
-    "/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/page.js"
-    ],
-    "/bookings/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/bookings/page.js"
-    ],
-    "/api/my-bookings/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/my-bookings/route.js"
-    ],
-    "/experiences/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/experiences/page.js"
-    ],
-    "/check-availability/[slug]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/check-availability/[slug]/page.css",
-      "static/chunks/app/check-availability/[slug]/page.js"
-    ],
-    "/api/experiences/[slug]/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/experiences/[slug]/route.js"
     ]
   }
 }

@@ -1,10 +1,8 @@
 {
+  "/api/admin/reservations/route": "app/api/admin/reservations/route.js",
   "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
-  "/api/my-bookings/route": "app/api/my-bookings/route.js",
-  "/api/experiences/[slug]/route": "app/api/experiences/[slug]/route.js",
+  "/api/admin/experiences/route": "app/api/admin/experiences/route.js",
+  "/api/admin/users/route": "app/api/admin/users/route.js",
   "/api/admin/schedule/route": "app/api/admin/schedule/route.js",
-  "/page": "app/page.js",
-  "/bookings/page": "app/bookings/page.js",
-  "/experiences/page": "app/experiences/page.js",
-  "/check-availability/[slug]/page": "app/check-availability/[slug]/page.js"
+  "/admin/reservations/page": "app/admin/reservations/page.js"
 }

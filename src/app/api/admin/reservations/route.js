@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { transporter } from '@/lib/email/nodemailer';
 import { generateBookingConfirmationEmail } from '@/lib/email/bookingConfirmationEmail';
+import { generateCancellationEmail } from '@/lib/email/cancellationEmail';
 
 // === Utilities ===
 const handleResponse = (data, status = 200) => {
@@ -121,10 +122,10 @@ export async function POST(req) {
       },
     });
 
-    // ✉️ Send confirmation email
+    // Send confirmation email
     const { subject, html } = generateBookingConfirmationEmail(booking);
     await transporter.sendMail({
-      from: `"Oasis Group" <${process.env.EMAIL_USER}>`,
+      from: `"Oasis" <${process.env.EMAIL_USER}>`,
       to: booking.user.email,
       subject,
       html,
@@ -215,24 +216,45 @@ export async function DELETE(req) {
   const { id } = await req.json();
 
   try {
-    const booking = await prisma.booking.findUnique({
+    // Get full booking details before deletion
+    const bookingDetails = await prisma.booking.findUnique({
       where: { id: Number(id) },
-      select: { scheduleSlotId: true, numberOfPeople: true },
+      include: {
+        user: true,
+        scheduleSlot: {
+          include: {
+            experience: true,
+          },
+        },
+      },
     });
 
-    if (!booking) {
+    if (!bookingDetails) {
       return handleResponse({ error: 'Booking not found' }, 404);
     }
 
+    // Delete the booking
     await prisma.booking.delete({
       where: { id: Number(id) },
     });
 
+    // Decrease the booked slots count
     await prisma.scheduleSlot.update({
-      where: { id: booking.scheduleSlotId },
+      where: { id: bookingDetails.scheduleSlotId },
       data: {
-        bookedSlots: { decrement: booking.numberOfPeople },
+        bookedSlots: {
+          decrement: bookingDetails.numberOfPeople,
+        },
       },
+    });
+
+    // Send cancellation email
+    const emailContent = generateCancellationEmail(bookingDetails);
+    await transporter.sendMail({
+      to: bookingDetails.user.email,
+      from: `"Oasis" <${process.env.EMAIL_USER}>`,
+      subject: emailContent.subject,
+      html: emailContent.html,
     });
 
     return handleResponse({ success: true });

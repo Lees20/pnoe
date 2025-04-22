@@ -4,20 +4,37 @@ import Link from 'next/link';
 
 export default function Footer() {
   return (
-    <footer className="relative z-10 w-full border-t border-white/10 bg-background/30 backdrop-blur-sm text-muted-foreground text-xs">
-      <div className="max-w-5xl mx-auto px-4 py-4 flex flex-col items-center justify-center gap-2 text-center">
-        <p className="text-[12px]">
-          © {new Date().getFullYear()} Oasis. All rights reserved.
+    <footer className="w-full border-t border-[#e5e0d8] dark:border-[#2a2824] bg-[#fdfaf5]/60 dark:bg-[#13110f]/60 backdrop-blur-md text-xs text-[#5a4a3f] dark:text-[#dcd8d1]">
+      <div className="max-w-6xl mx-auto px-6 py-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        
+        {/* Left - Copyright */}
+        <p className="tracking-tight opacity-70">
+          © {new Date().getFullYear()} Oasis
         </p>
 
-        <div className="text-[12px]">
+        {/* Center - Minimal Links */}
+        <div className="flex gap-4">
           <Link
-            href="/legal"
-            className="text-muted-foreground hover:text-primary transition"
+            href="/privacy"
+            className="hover:opacity-100 opacity-70 transition-opacity"
           >
-            Legal
+            Privacy
+          </Link>
+          <Link
+            href="/terms"
+            className="hover:opacity-100 opacity-70 transition-opacity"
+          >
+            Terms
           </Link>
         </div>
+
+        {/* Right - Credit */}
+        <button
+          onClick={() => window.open('https://panteliskarabetsos.com', '_blank')}
+          className="opacity-70 hover:opacity-100 transition-opacity"
+        >
+         Developed by Pantelis.dev
+        </button>
       </div>
     </footer>
   );

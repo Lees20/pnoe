@@ -217,15 +217,19 @@ export default function CheckAvailabilityPage() {
           </div>
     
           {/* Form */}
-          <div className="bg-white rounded-2xl shadow-md border border-[#e5e0d8] px-6 py-8 space-y-8">
+            <div className="bg-white rounded-2xl shadow-md border border-[#e5e0d8] px-6 py-8 space-y-8 transition-all duration-300">
+
             {/* Number of People */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-[#5a4a3f] flex items-center gap-2">
                 <Users className="w-4 h-4 text-[#8b6f47]" />
                 Number of People
               </label>
-              <div className="flex items-center justify-between gap-3 bg-[#faf7f2] border border-[#e2ddd2] rounded-lg w-full max-w-[180px] px-2 py-2 shadow-inner">
 
+              <div className={`flex items-center justify-between gap-3 bg-[#faf7f2] border border-[#e2ddd2] rounded-lg w-full max-w-[200px] px-2 py-2 shadow-inner transition-all duration-200 ease-in-out ${
+                numberOfPeople >= 8 ? 'ring-2 ring-[#d97706]/60 animate-pulse' : ''
+              }`}>
+                {/* Decrease */}
                 <button
                   onClick={() => setNumberOfPeople((prev) => Math.max(1, prev - 1))}
                   className="text-[#8b6f47] hover:text-[#5a4a3f] transition p-1"
@@ -235,24 +239,84 @@ export default function CheckAvailabilityPage() {
                   <Minus className="w-4 h-4" />
                 </button>
 
+                {/* Input */}
                 <input
                   type="number"
                   min={1}
+                  max={8}
                   value={numberOfPeople}
-                  onChange={(e) => setNumberOfPeople(Number(e.target.value))}
-                  className="w-12 text-center text-[#5a4a3f] bg-transparent border-0 focus:outline-none"
+                  onChange={(e) => {
+                    const val = Math.min(8, Math.max(1, Number(e.target.value)));
+                    setNumberOfPeople(val);
+                  }}
+                  className="w-12 text-center text-[#5a4a3f] bg-transparent border-0 focus:outline-none font-semibold"
                 />
 
+                {/* Increase */}
                 <button
-                  onClick={() => setNumberOfPeople((prev) => prev + 1)}
-                  className="text-[#8b6f47] hover:text-[#5a4a3f] transition p-1"
+                  onClick={() => setNumberOfPeople((prev) => Math.min(8, prev + 1))}
+                  className={`text-[#8b6f47] hover:text-[#5a4a3f] transition p-1 ${
+                    numberOfPeople >= 8 ? 'opacity-40 cursor-not-allowed' : ''
+                  }`}
                   type="button"
                   aria-label="Increase"
+                  disabled={numberOfPeople >= 8}
                 >
                   <Plus className="w-4 h-4" />
                 </button>
               </div>
+
+              {numberOfPeople >= 8 && (
+                <p className="text-xs text-[#d97706] mt-1 animate-fade-in">
+                  Maximum number of people allowed per booking is 8. For larger groups, please contact us directly.
+                </p>
+              )}
             </div>
+
+
+
+            
+          {/* Total Price */}
+          {experience && (
+          <div
+            className="mt-6 border border-[#e5e0d8] rounded-xl bg-[#faf7f2] px-6 py-4 shadow-inner transition-all duration-300 ease-in-out"
+          >
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-2 text-[#5a4a3f]">
+                <svg
+                  className="w-5 h-5 text-[#8b6f47]"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 8c-1.657 0-3 1.567-3 3.5S10.343 15 12 15s3-1.567 3-3.5S13.657 8 12 8z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 3v1m0 16v1m8.66-13.66l-.71.71M4.05 19.95l-.71.71m0-16.97l.71.71m15.14 15.14l.71.71M21 12h1M2 12H1"
+                  />
+                </svg>
+                <span className="text-sm font-medium">Price Breakdown</span>
+              </div>
+              <span className="text-sm text-[#5a4a3f] opacity-75">
+                €{experience.price.toFixed(2)} × {numberOfPeople} {numberOfPeople > 1 ? 'people' : 'person'}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span className="text-lg font-semibold text-[#5a4a3f]">Total Price</span>
+              <span className="text-2xl font-bold text-[#8b6f47] tracking-wide transition-colors duration-200">
+                €{(experience.price * numberOfPeople).toFixed(2)}
+              </span>
+            </div>
+          </div>
+        )}
+
 
             {/* Notes / Allergies */}
             <div className="space-y-2">

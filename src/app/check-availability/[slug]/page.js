@@ -98,8 +98,8 @@ export default function CheckAvailabilityPage() {
     };
 
     return (
-      <div className="max-w-3xl mx-auto px-6 py-12 bg-[#fdfaf5] rounded-3xl shadow-xl border border-[#e5e0d8]">
-      
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 bg-[#fdfaf5] rounded-3xl shadow-xl border border-[#e5e0d8]">
+
       {/* Session Info */}
       {status === 'loading' ? (
         <p className="text-[#5a4a3f] text-center mb-4">Loading session...</p>
@@ -122,15 +122,15 @@ export default function CheckAvailabilityPage() {
           Logged in as: <span className="font-medium">{session.user.name || session.user.email}</span>
         </div>
       )}
-    <div className="absolute top-6 left-6">
-  <button
-    onClick={() => router.back()}
-    className="flex items-center text-[#8b6f47] text-sm border border-[#8b6f47] rounded-full px-4 py-2 hover:bg-[#f4f1ec] hover:text-[#5a4a3f] transition-all"
-  >
-    <ArrowLeft size={18} className="mr-2" />
-    Back
-  </button>
-</div>
+    <div className="mb-6 sm:absolute sm:top-6 sm:left-6">
+        <button
+          onClick={() => router.back()}
+          className="flex items-center text-[#8b6f47] text-sm border border-[#8b6f47] rounded-full px-4 py-2 hover:bg-[#f4f1ec] hover:text-[#5a4a3f] transition-all"
+        >
+          <ArrowLeft size={18} className="mr-2" />
+          Back
+        </button>
+      </div>
 
       {/* Header */}
       <div className="mb-10 text-center">
@@ -170,7 +170,7 @@ export default function CheckAvailabilityPage() {
               <Clock className="w-5 h-5 text-[#8b6f47]" />
               Available Time Slots for {format(selectedDate, 'PPP')}:
             </h3>
-            <div className="grid sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {availableSlots
               .filter((slot) => isSameDay(parseISO(slot.date), selectedDate))
               .map((slot) => {
@@ -214,79 +214,79 @@ export default function CheckAvailabilityPage() {
                 );
               })}
           </div>
-
           </div>
     
           {/* Form */}
           <div className="bg-white rounded-2xl shadow-md border border-[#e5e0d8] px-6 py-8 space-y-8">
-  {/* Number of People */}
-  <div className="space-y-2">
-    <label className="block text-sm font-medium text-[#5a4a3f] flex items-center gap-2">
-      <Users className="w-4 h-4 text-[#8b6f47]" />
-      Number of People
-    </label>
-    <div className="flex items-center gap-3 bg-[#faf7f2] border border-[#e2ddd2] rounded-lg w-fit px-2 py-2 shadow-inner">
-      <button
-        onClick={() => setNumberOfPeople((prev) => Math.max(1, prev - 1))}
-        className="text-[#8b6f47] hover:text-[#5a4a3f] transition p-1"
-        type="button"
-        aria-label="Decrease"
-      >
-        <Minus className="w-4 h-4" />
-      </button>
+            {/* Number of People */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-[#5a4a3f] flex items-center gap-2">
+                <Users className="w-4 h-4 text-[#8b6f47]" />
+                Number of People
+              </label>
+              <div className="flex items-center justify-between gap-3 bg-[#faf7f2] border border-[#e2ddd2] rounded-lg w-full max-w-[180px] px-2 py-2 shadow-inner">
 
-      <input
-        type="number"
-        min={1}
-        value={numberOfPeople}
-        onChange={(e) => setNumberOfPeople(Number(e.target.value))}
-        className="w-12 text-center text-[#5a4a3f] bg-transparent border-0 focus:outline-none"
-      />
+                <button
+                  onClick={() => setNumberOfPeople((prev) => Math.max(1, prev - 1))}
+                  className="text-[#8b6f47] hover:text-[#5a4a3f] transition p-1"
+                  type="button"
+                  aria-label="Decrease"
+                >
+                  <Minus className="w-4 h-4" />
+                </button>
 
-      <button
-        onClick={() => setNumberOfPeople((prev) => prev + 1)}
-        className="text-[#8b6f47] hover:text-[#5a4a3f] transition p-1"
-        type="button"
-        aria-label="Increase"
-      >
-        <Plus className="w-4 h-4" />
-      </button>
-    </div>
-  </div>
+                <input
+                  type="number"
+                  min={1}
+                  value={numberOfPeople}
+                  onChange={(e) => setNumberOfPeople(Number(e.target.value))}
+                  className="w-12 text-center text-[#5a4a3f] bg-transparent border-0 focus:outline-none"
+                />
 
-  {/* Notes / Allergies */}
-  <div className="space-y-2">
-    <label className="block text-sm font-medium text-[#5a4a3f] flex items-center gap-2">
-      <StickyNote className="w-4 h-4 text-[#8b6f47]" />
-      Notes / Allergies / Special Requests
-    </label>
-    <textarea
-      rows={3}
-      value={notes}
-      onChange={(e) => setNotes(e.target.value)}
-      placeholder="E.g. vegan, nut allergy..."
-      className="w-full p-3 rounded-lg border border-[#d7d2c6] bg-[#fafafa] focus:outline-none focus:ring focus:ring-[#c4b89f] text-[#5a4a3f]"
-    />
-  </div>
+                <button
+                  onClick={() => setNumberOfPeople((prev) => prev + 1)}
+                  className="text-[#8b6f47] hover:text-[#5a4a3f] transition p-1"
+                  type="button"
+                  aria-label="Increase"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
 
-  {/* Submit Button */}
-  <div className="pt-2">
-    <button
-      onClick={handleReserve}
-      disabled={isSubmitting}
-      className="w-full py-3 rounded-lg bg-[#8b6f47] text-white font-semibold text-lg hover:bg-[#7a5f3a] transition-all flex items-center justify-center gap-2 shadow-md"
-    >
-      {isSubmitting ? (
-        <>
-          <Loader2 className="w-5 h-5 animate-spin" />
-          Reserving...
-        </>
-      ) : (
-        'Reserve Now'
-      )}
-    </button>
-  </div>
-</div>
+            {/* Notes / Allergies */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-[#5a4a3f] flex items-center gap-2">
+                <StickyNote className="w-4 h-4 text-[#8b6f47]" />
+                Notes / Allergies / Special Requests
+              </label>
+              <textarea
+                rows={3}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="E.g. vegan, nut allergy..."
+                className="w-full p-3 rounded-lg border border-[#d7d2c6] bg-[#fafafa] focus:outline-none focus:ring focus:ring-[#c4b89f] text-[#5a4a3f]"
+              />
+            </div>
+
+            {/* Submit Button */}
+            <div className="pt-2">
+              <button
+                onClick={handleReserve}
+                disabled={isSubmitting}
+                className="w-full py-3 rounded-lg bg-[#8b6f47] text-white font-semibold text-lg hover:bg-[#7a5f3a] transition-all flex items-center justify-center gap-2 shadow-md"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Reserving...
+                  </>
+                ) : (
+                  'Reserve Now'
+                )}
+              </button>
+            </div>
+          </div>
 
         </div>
       )}

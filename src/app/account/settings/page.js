@@ -12,7 +12,45 @@ export default function SettingsPage() {
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLockedOut, setIsLockedOut] = useState(false);
+  const [daysRemaining, setDaysRemaining] = useState(null);
+  
+  useEffect(() => {
+    if (session) {
+      setEmail(session.user.email || '');
+      setName(session.user.name || '');
+      setPhone(session.user.phone || '');
+      setDateOfBirth(
+        session.user.dateOfBirth
+          ? new Date(session.user.dateOfBirth).toISOString().split('T')[0]
+          : ''
+      );
+    }
+  
+    const locked = localStorage.getItem('passwordLockedOut');
+    const dateStr = localStorage.getItem('passwordLockedOutDate');
+  
+    if (locked === 'true' && dateStr) {
+      const lockedDate = new Date(dateStr);
+      const now = new Date();
+      const diffInMs = now - lockedDate;
+      const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+  
+      if (diffInDays >= 30) {
+        // ✅ Unlock
+        localStorage.removeItem('passwordLockedOut');
+        localStorage.removeItem('passwordLockedOutDate');
+        setIsLockedOut(false);
+        setDaysRemaining(null);
+      } else {
+        setIsLockedOut(true);
+        setDaysRemaining(30 - diffInDays);
+      }
+    }
+  }, [session]);
+  
+  
   useEffect(() => {
     if (session) {
       console.log("Session user:", session.user);
@@ -30,10 +68,11 @@ export default function SettingsPage() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
+    setIsSubmitting(true);
     if (!email || !password) {
       setErrorMessage('Email and password are required.');
       setSuccessMessage('');
+      setIsSubmitting(false);
       return;
     }
 
@@ -45,8 +84,13 @@ export default function SettingsPage() {
       });
 
       const data = await response.json();
-
-      if (response.ok) {
+      if (response.status === 403) {
+        setErrorMessage(data.message || 'Too many password changes this month.');
+        setIsLockedOut(true);
+      
+        localStorage.setItem('passwordLockedOut', 'true');
+        localStorage.setItem('passwordLockedOutDate', new Date().toISOString());
+      }else if (response.ok) {
         setSuccessMessage(data.message || 'Account updated successfully.');
         setErrorMessage('');
       } else {
@@ -56,6 +100,9 @@ export default function SettingsPage() {
     } catch (error) {
       setErrorMessage('Something went wrong. Please try again later.');
       setSuccessMessage('');
+    } finally
+    {
+      setIsSubmitting(false);
     }
   };
 
@@ -147,10 +194,21 @@ export default function SettingsPage() {
           {/* Submit */}
           <button
             type="submit"
-            className="w-full py-3 rounded-full text-lg text-white bg-[#8b6f47] hover:bg-[#a78b62] transition-all"
+            disabled={isLockedOut}
+            className={`w-full py-3 rounded-full text-lg text-white transition-all ${
+              isLockedOut ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#8b6f47] hover:bg-[#a78b62]'
+            }`}
           >
             Update Settings
           </button>
+
+
+          {isLockedOut && daysRemaining !== null && (
+            <p className="text-sm text-[#b25e00] text-center mt-2">
+              You will be able to update your settings again in <strong>{daysRemaining} day{daysRemaining !== 1 ? 's' : ''}</strong>.
+            </p>
+          )}
+
         </form>
       </div>
     </div>

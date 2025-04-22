@@ -100,15 +100,14 @@ export default function LoginPage() {
               </button>
             </form>
 
-            <div className="my-6 text-center text-[#888]">or</div>
-
+            {/* <div className="my-6 text-center text-[#888]">or</div>
             <button
               onClick={() => signIn('google')}
               className="w-full border border-[#ccc] py-2 rounded-full flex items-center justify-center gap-2 hover:bg-[#fafafa] transition-all"
             >
               <img src="/google-ico.svg" alt="Google" className="w-5 h-5" />
               <span className="text-sm text-[#333] font-medium">Sign in with Google</span>
-            </button>
+            </button> */}
 
             <div className="mt-6 text-center">
               <p className="text-sm text-[#5a4a3f]">
@@ -121,6 +120,16 @@ export default function LoginPage() {
                 </button>
               </p>
             </div>
+            <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => router.push('/forgot-password')}
+                  className="text-sm text-[#8b6f47] hover:underline"
+                >
+                  Forgot your password?
+                </button>
+              </div>
+
           </>
         )}
       </div>

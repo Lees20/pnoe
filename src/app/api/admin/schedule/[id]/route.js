@@ -1,8 +1,15 @@
 import prisma from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { NextResponse } from 'next/server';
 
 export async function PUT(req, { params }) {
-  // eslint-disable-next-line no-restricted-syntax
+  const session = await getServerSession({ req, ...authOptions });
+
+  if (!session || session.user?.role !== 'admin') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const id = parseInt(params.id, 10);
 
   if (!id || isNaN(id)) {

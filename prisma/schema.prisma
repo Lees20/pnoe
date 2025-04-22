@@ -18,11 +18,14 @@ model User {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   role        String    @default("user")
+  passwordChangeHistory  Json?     // Array of timestamps
 
   sessions    Session[]
   accounts    Account[]
   favourites  Favourite[]
   bookings    Booking[]
+
+  passwordResetTokens PasswordResetToken[]
 }
 
 model Session {
@@ -99,3 +102,11 @@ model Booking {
   updatedAt      DateTime      @updatedAt
 }
 
+model PasswordResetToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}

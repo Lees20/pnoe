@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma'; // Adjust the path as needed
 import bcrypt from 'bcryptjs';
 
+
 export async function POST(req) {
   try {
     const { email, password, name, surname, phone, dateOfBirth } = await req.json();
@@ -9,6 +10,18 @@ export async function POST(req) {
     if (!email || !password || !dateOfBirth) {
       return new Response(
         JSON.stringify({ error: 'Email, password, and date of birth are required' }),
+        { status: 400 }
+      );
+    }
+
+    // ✅ Password validation: 8+ characters, must include letters & numbers
+    const isStrongPassword = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    if (!isStrongPassword.test(password)) {
+      return new Response(
+        JSON.stringify({
+          error:
+            'Password must be at least 8 characters long and include both letters and numbers.',
+        }),
         { status: 400 }
       );
     }
@@ -50,7 +63,7 @@ export async function POST(req) {
         name,
         surname,
         phone,
-        dateOfBirth: new Date(dateOfBirth), // ✅ save as Date object
+        dateOfBirth: new Date(dateOfBirth),
       },
     });
 

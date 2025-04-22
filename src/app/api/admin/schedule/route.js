@@ -1,8 +1,42 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+
+const requireAdmin = async (req) => {
+  const session = await getServerSession({ req, ...authOptions });
+
+  if (!session) {
+    console.warn(`[ADMIN ROUTE BLOCKED] Unauthorized access: No session`);
+    return {
+      error: true,
+      response: NextResponse.json(
+        { error: 'Unauthorized – No active session' },
+        { status: 401 }
+      ),
+    };
+  }
+
+  if (session.user?.role !== 'admin') {
+    console.warn(`[ADMIN ROUTE BLOCKED] User ${session.user.email} attempted admin access without permission`);
+    return {
+      error: true,
+      response: NextResponse.json(
+        { error: 'Unauthorized – Admin access required' },
+        { status: 403 }
+      ),
+    };
+  }
+
+  return { error: false };
+};
+
 
 // GET: Get all slots for a given experience
 export async function GET(req) {
+  const auth = await requireAdmin(req);
+  if (auth.error) return auth.response;
+
   const { searchParams } = new URL(req.url);
   const experienceId = parseInt(searchParams.get('experienceId'), 10);
 
@@ -25,6 +59,9 @@ export async function GET(req) {
 
 // POST: Create a new schedule slot
 export async function POST(req) {
+  const auth = await requireAdmin(req);
+  if (auth.error) return auth.response;
+
   const { experienceId, date, totalSlots } = await req.json();
 
   if (!experienceId || !date || totalSlots == null) {
@@ -37,7 +74,7 @@ export async function POST(req) {
         experienceId: parseInt(experienceId, 10),
         date: new Date(date),
         totalSlots: Number(totalSlots),
-        bookedSlots: 0, // ensure consistency
+        bookedSlots: 0,
       },
     });
 
@@ -50,6 +87,9 @@ export async function POST(req) {
 
 // PUT: Only allow updating totalSlots (bookedSlots via reservations only)
 export async function PUT(req) {
+  const auth = await requireAdmin(req);
+  if (auth.error) return auth.response;
+
   try {
     const { id, totalSlots } = await req.json();
 
@@ -87,6 +127,9 @@ export async function PUT(req) {
 
 // DELETE: Remove a slot
 export async function DELETE(req) {
+  const auth = await requireAdmin(req);
+  if (auth.error) return auth.response;
+
   const { searchParams } = new URL(req.url);
   const id = parseInt(searchParams.get('id'), 10);
 

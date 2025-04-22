@@ -1,67 +1,52 @@
-// src/app/login/page.js
+import { NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
-'use client';
+export async function POST(req) {
+  try {
+    const { email, password, recaptchaToken } = await req.json();
 
-import { useState } from 'react';
-import { signIn } from 'next-auth/react';  // Import NextAuth's signIn method
-
-export default function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');  // Clear any previous errors
-
-    const res = await signIn('credentials', {
-      redirect: false,
-      email,
-      password,
-    });
-
-    if (res?.error) {
-      setError(res.error); // Set error message if authentication fails
-    } else {
-      // Redirect to a protected page after successful login (e.g., dashboard)
-      window.location.href = '/dashboard';  // Replace with your desired path
+    if (!email || !password) {
+      return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
     }
-    setLoading(false);
-  };
 
-  return (
-    <div className="login-form">
-      <form onSubmit={handleSubmit}>
-        <h2>Login</h2>
-        <div>
-          <label htmlFor="email">Email:</label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <button type="submit" disabled={loading}>
-            {loading ? 'Logging in...' : 'Log In'}
-          </button>
-        </div>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-      </form>
-    </div>
-  );
+    // Optional: reCAPTCHA verification
+    if (process.env.NODE_ENV !== 'development') {
+      const verifyRes = await fetch(`https://www.google.com/recaptcha/api/siteverify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${recaptchaToken}`,
+      });
+
+      const data = await verifyRes.json();
+      if (!data.success || data.score < 0.5) {
+        return NextResponse.json({ error: 'reCAPTCHA verification failed' }, { status: 403 });
+      }
+    }
+
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
+    }
+
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) {
+      return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
+    }
+
+    // Example: return JWT token (if you're not using next-auth)
+    const token = jwt.sign(
+      { userId: user.id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    return NextResponse.json({ token });
+
+  } catch (err) {
+    console.error('[LOGIN ERROR]', err);
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
 }

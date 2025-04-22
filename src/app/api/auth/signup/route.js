@@ -35,6 +35,17 @@ export async function POST(req) {
       if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
       return age >= 18;
     };
+    const { captchaToken } = await req.json();
+
+      const captchaRes = await fetch(
+        `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${captchaToken}`,
+        { method: 'POST' }
+      );
+
+      const captchaData = await captchaRes.json();
+      if (!captchaData.success) {
+        return new Response(JSON.stringify({ error: 'CAPTCHA verification failed' }), { status: 400 });
+      }
 
     if (!isLegalAge(dateOfBirth)) {
       return new Response(

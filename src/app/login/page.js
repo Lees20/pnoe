@@ -21,7 +21,13 @@ export default function LoginPage() {
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
-
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = `https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`;
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
+  
   async function handleSubmit(event) {
     event.preventDefault();
     setLoading(true);
@@ -29,15 +35,23 @@ export default function LoginPage() {
 
     const { email, password } = form;
 
+    const token = await window.grecaptcha.execute(
+      process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
+      { action: 'login' }
+    );
+  
     // Use NextAuth's signIn method to send a POST request
     const result = await signIn('credentials', {
       redirect: false, // Do not redirect automatically
       email,
       password,
+      recaptchaToken: token,
     });
 
     setLoading(false);
-
+    if (process.env.NODE_ENV !== 'development') {
+      // Έλεγχος reCAPTCHA εδώ
+    }
     if (result?.error) {
       // Display a user-friendly error message if login fails
       if (result.error === 'CredentialsSignin') {
@@ -49,6 +63,7 @@ export default function LoginPage() {
       router.push('/dashboard'); // Redirect to a protected page after login
     }
   }
+  
 
   if (status === 'loading') return <p>Loading...</p>;  // While loading session, show loading state
 

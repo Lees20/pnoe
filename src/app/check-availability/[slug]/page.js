@@ -297,6 +297,7 @@ export default function CheckAvailabilityPage() {
                   className="w-12 text-center text-[#5a4a3f] bg-transparent border-0 focus:outline-none font-semibold"
                 />
 
+
                 {/* Increase */}
                 <button
                  onClick={() => setNumberOfPeople((prev) => Math.min(maxPeopleAllowed, prev + 1))}
@@ -311,6 +312,11 @@ export default function CheckAvailabilityPage() {
                   <Plus className="w-4 h-4" />
                 </button>
               </div>
+              {selectedSlotId && (
+                <p className="text-xs text-[#5a4a3f] mt-2">
+                  Only <span className="font-semibold">{maxPeopleAllowed}</span> slot{maxPeopleAllowed > 1 ? 's' : ''} available for this time.
+                </p>
+              )}
 
               {numberOfPeople >= 8 && (
                 <p className="text-xs text-[#d97706] mt-1 animate-fade-in">

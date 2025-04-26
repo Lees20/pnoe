@@ -37,7 +37,7 @@ export default function CheckAvailabilityPage() {
   const selectedSlot = availableSlots.find((slot) => slot.id === selectedSlotId);
   const availablePlaces = selectedSlot ? (selectedSlot.totalSlots - selectedSlot.bookedSlots) : 8;
   const maxPeopleAllowed = Math.min(8, availablePlaces);
-  
+  const [agreedToTerms, setAgreedToTerms] = useState(false); 
   const fetchAvailableSlots = async (experienceId) => {
     const res = await fetch(`/api/public/schedule?experienceId=${experienceId}`);
     const data = await res.json();
@@ -78,6 +78,10 @@ export default function CheckAvailabilityPage() {
 
     if (!session?.user?.id) {
       toast.error('User not authenticated.');
+      return;
+    }
+    if (!agreedToTerms) {
+      toast.error('You must agree to the Terms of Use to proceed.');
       return;
     }
 
@@ -391,7 +395,19 @@ export default function CheckAvailabilityPage() {
                 className="w-full p-3 rounded-lg border border-[#d7d2c6] bg-[#fafafa] focus:outline-none focus:ring focus:ring-[#c4b89f] text-[#5a4a3f]"
               />
             </div>
-
+      {/* Terms of Use Checkbox */}
+      <div className="flex items-center justify-start gap-2 mt-6">
+            <input
+              type="checkbox"
+              id="agreeTerms"
+              checked={agreedToTerms}
+              onChange={(e) => setAgreedToTerms(e.target.checked)}
+              className="accent-[#8b6f47]"
+            />
+            <label htmlFor="agreeTerms" className="text-sm text-[#5a4a3f]">
+              I agree to the <a href="/terms-of-use" className="underline text-[#8b6f47]">Terms of Use</a>
+            </label>
+          </div>
             {/* Submit Button */}
             <div className="pt-2">
               <button

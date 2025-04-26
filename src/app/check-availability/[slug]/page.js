@@ -41,8 +41,8 @@ export default function CheckAvailabilityPage() {
   };
 
   useEffect(() => {
-    if (!slug) return;
-  
+    if (!slug || status !== 'authenticated') return; // <-- Μόνο αν είναι authenticated
+    
     const fetchExperienceAndSlots = async () => {
       try {
         const res = await fetch(`/api/experiences/${slug}`);
@@ -58,7 +58,8 @@ export default function CheckAvailabilityPage() {
     };
   
     fetchExperienceAndSlots();
-  }, [slug]);
+  }, [slug, status]); // <-- προστέθηκε και το status
+  
   
 
   const handleReserve = async () => {
@@ -146,18 +147,49 @@ export default function CheckAvailabilityPage() {
       {/* Calendar */}
       <div className="mb-12 flex justify-center">
         <div className="bg-white rounded-xl border border-[#e8e5df] shadow-inner p-4">
-          <DayPicker
-            mode="single"
-            selected={selectedDate}
-            onSelect={setSelectedDate}
-            modifiers={{ available: availableSlots.map(s => parseISO(s.date)) }}
-            modifiersClassNames={{
-              available: 'bg-[#e5dfd2] text-[#5a4a3f] font-semibold rounded-full',
-            }}
-            disabled={(date) =>
-              !availableSlots.some(s => isSameDay(parseISO(s.date), date))
-            }
-          />
+        <DayPicker
+          mode="single"
+          selected={selectedDate}
+          onSelect={setSelectedDate}
+          fromMonth={new Date()}
+          toMonth={new Date(new Date().setMonth(new Date().getMonth() + 6))}
+          modifiers={{
+            available: availableSlots.map((s) => parseISO(s.date)),
+          }}
+          modifiersClassNames={{
+            available: 'bg-[#e5dfd2] text-[#5a4a3f] font-semibold rounded-full',
+          }}
+          disabled={[
+            {
+              before: new Date(), // Disable days before today
+            },
+            (date) => {
+              const today = new Date();
+              
+              // Μπλοκάρουμε αν δεν υπάρχει διαθέσιμο slot για εκείνη την ημέρα
+              const slotsOnDay = availableSlots.filter((s) => isSameDay(parseISO(s.date), date));
+              if (slotsOnDay.length === 0) {
+                return true;
+              }
+
+              // Ειδικός έλεγχος μόνο για σήμερα:
+              if (isSameDay(date, today)) {
+                const oneHourLater = new Date(today.getTime() + 60 * 60 * 1000); // τώρα + 1 ώρα
+
+                const hasValidSlot = slotsOnDay.some((slot) => {
+                  const slotDate = parseISO(slot.date);
+                  return slotDate > oneHourLater; // Slot πρέπει να είναι τουλάχιστον 1 ώρα μπροστά
+                });
+
+                return !hasValidSlot; // Αν δεν υπάρχει κανένα valid, μπλοκάρουμε όλη τη μέρα
+              }
+
+              return false; // Διαφορετικά η μέρα είναι οκ
+            },
+          ]}
+        />
+
+
         </div>
       </div>
     

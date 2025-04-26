@@ -14,7 +14,8 @@ const AdminExperiencesPage = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [uploadedImages, setUploadedImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]); 
-  
+  const [previewExperience, setPreviewExperience] = useState(null);
+
 // Delete an image from the existing experience (this will update the images for both old and new images)
 const handleDeleteImage = (index, isNewImage = false) => {
   if (isNewImage) {
@@ -173,8 +174,7 @@ const openCloudinaryWidget = () => {
 
   if (!isClient) return null; // Ensure it doesn't render until the client-side is confirmed
 
-  return (
-    
+  return ( 
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold text-center mb-6">Manage Experiences</h1>
       {session && session.user.role === "admin" ? (
@@ -362,15 +362,7 @@ const openCloudinaryWidget = () => {
             </form>
           </div>
         )}
-
-
         </div>
-
-
-
-
-
-
             {/* Experiences List */}
             {!experiences ? (
             <div className="flex flex-col items-center justify-center mt-12 text-[#5a4a3f] font-serif text-lg">
@@ -424,11 +416,12 @@ const openCloudinaryWidget = () => {
                     </button>
 
                     <button
-                      onClick={() => router.push(`/admin/experiences/${experience.id}`)}
-                      className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#8b6f47] text-white hover:bg-[#a78b62] transition-all shadow-sm"
-                    >
-                      <Eye size={18} /> View
-                    </button>
+                        onClick={() => setPreviewExperience(experience)}
+                        className="flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition-all shadow-sm"
+                      >
+                        <Eye size={18} /> Preview
+                      </button>
+
                   </div>
                 </div>
               ))}
@@ -627,9 +620,127 @@ const openCloudinaryWidget = () => {
                 </div>
               </div>
             )}
+           {previewExperience && (
+                  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm overflow-y-auto">
+                    <div className="bg-[#f4f1ec] rounded-3xl shadow-2xl w-full max-w-6xl p-8 overflow-y-auto max-h-[95vh] text-[#2f2f2f] font-serif space-y-10 relative">
 
+                      {/* Close Button */}
+                      <button
+                        onClick={() => setPreviewExperience(null)}
+                        className="absolute top-6 right-6 text-3xl font-bold text-gray-500 hover:text-gray-700"
+                      >
+                        &times;
+                      </button>
 
+                      {/* Hero Info */}
+                      <div className="text-center space-y-2">
+                      <div className="flex flex-col items-center gap-2 mb-4">
+                          <h1 className="text-3xl sm:text-5xl font-serif text-[#5a4a3f]">{previewExperience.name}</h1>
+                          <span
+                            className={`inline-block px-4 py-1 rounded-full text-xs font-semibold tracking-wider ${
+                              previewExperience.visibility
+                                ? 'bg-green-200 text-green-800'
+                                : 'bg-red-200 text-red-800'
+                            }`}
+                          >
+                            {previewExperience.visibility ? 'Public' : 'Private'}
+                          </span>
+                        </div>
 
+                        <p className="text-lg text-[#4a4a4a] italic">{previewExperience.duration}</p>
+                        <p className="text-2xl font-medium text-[#5a4a3f]">€{previewExperience.price}</p>
+                        <p className="text-sm text-[#8b6f47]">Location: {previewExperience.location}</p>
+                      </div>
+
+                      {/* Description */}
+                      {previewExperience.description && (
+                        <section className="max-w-4xl mx-auto text-center">
+                          <p className="text-lg sm:text-xl leading-relaxed text-[#4a4a4a] whitespace-pre-line">
+                            {previewExperience.description}
+                          </p>
+                        </section>
+                      )}
+
+                      {/* Image Gallery */}
+                      {previewExperience.images?.length > 0 && (
+                        <section className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                          {previewExperience.images.map((img, i) => (
+                            <div key={i} className="relative aspect-video rounded-xl overflow-hidden border-2 border-[#e0dcd4] shadow-lg">
+                              <img
+                                src={img}
+                                alt={`Experience Image ${i + 1}`}
+                                className="w-full h-full object-cover rounded-xl"
+                              />
+                            </div>
+                          ))}
+                        </section>
+                      )}
+
+                      {/* What's Included */}
+                      {previewExperience.whatsIncluded && (
+                        <section className="max-w-4xl mx-auto text-center">
+                          <h3 className="text-3xl font-serif text-[#5a4a3f] mb-6">What’s Included</h3>
+                          <ul className="list-disc list-inside text-md sm:text-lg text-[#4a4a4a] space-y-2 text-left">
+                            {previewExperience.whatsIncluded.split('\n').map((item, i) => (
+                              <li key={i} className="text-lg sm:text-xl">{item}</li>
+                            ))}
+                          </ul>
+                        </section>
+                      )}
+
+                      {/* What to Bring */}
+                      {previewExperience.whatToBring && (
+                        <section className="max-w-4xl mx-auto text-center">
+                          <h3 className="text-3xl font-serif text-[#5a4a3f] mb-6">What to Bring</h3>
+                          <p className="text-lg sm:text-xl text-[#4a4a4a]">{previewExperience.whatToBring}</p>
+                        </section>
+                      )}
+
+                      {/* Why You’ll Love It */}
+                      {previewExperience.whyYoullLove && (
+                        <section className="max-w-4xl mx-auto text-center">
+                          <h3 className="text-3xl font-serif text-[#5a4a3f] mb-6">Why You’ll Love It</h3>
+                          <p className="text-lg sm:text-xl text-[#4a4a4a] whitespace-pre-line">{previewExperience.whyYoullLove}</p>
+                        </section>
+                      )}
+                      {/* Map Section */}
+                        {previewExperience.mapPin && (
+                          <section className="max-w-5xl mx-auto text-center">
+                            <h3 className="text-3xl font-serif text-[#5a4a3f] mb-6">Where You'll Be</h3>
+                            <div className="w-full h-[300px] rounded-xl overflow-hidden shadow-lg">
+                              <iframe
+                                src={`https://www.google.com/maps?q=${previewExperience.mapPin}&z=14&output=embed`}
+                                width="100%"
+                                height="100%"
+                                style={{ border: 0 }}
+                                allowFullScreen
+                                loading="lazy"
+                              ></iframe>
+                            </div>
+                          </section>
+                        )}
+
+                      {/* Guest Reviews */}
+                      {previewExperience.guestReviews?.length > 0 && (
+                        <section className="max-w-4xl mx-auto text-center">
+                          <h3 className="text-3xl font-serif text-[#5a4a3f] mb-6">Guest Reviews</h3>
+                          <div className="grid gap-6 sm:grid-cols-2">
+                            {previewExperience.guestReviews.map((review, i) => (
+                              <div
+                                key={i}
+                                className="bg-white p-6 rounded-2xl shadow-xl border-2 border-[#e0dcd4]"
+                              >
+                                <p className="font-semibold text-lg text-[#5a4a3f]">Guest</p>
+                                <p className="italic text-[#4a4a4a] mt-2">“{review}”</p>
+                              </div>
+                            ))}
+                          </div>
+                        </section>
+                      )}
+
+                    </div>
+                  </div>
+                )}
 
 
         </div>

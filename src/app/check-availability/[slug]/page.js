@@ -35,17 +35,18 @@ export default function CheckAvailabilityPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const selectedSlot = availableSlots.find((slot) => slot.id === selectedSlotId);
-  const maxPeopleAllowed = selectedSlot ? (selectedSlot.totalSlots - selectedSlot.bookedSlots) : 8;
-
-
+  const availablePlaces = selectedSlot ? (selectedSlot.totalSlots - selectedSlot.bookedSlots) : 8;
+  const maxPeopleAllowed = Math.min(8, availablePlaces);
+  
   const fetchAvailableSlots = async (experienceId) => {
-    const res = await fetch(`/api/admin/schedule?experienceId=${experienceId}`);
+    const res = await fetch(`/api/public/schedule?experienceId=${experienceId}`);
     const data = await res.json();
     setAvailableSlots(data);
   };
+  
 
   useEffect(() => {
-    if (!slug || status !== 'authenticated') return; // <-- Μόνο αν είναι authenticated
+    if (!slug || status !== 'loading') return; 
     
     const fetchExperienceAndSlots = async () => {
       try {
@@ -65,7 +66,7 @@ export default function CheckAvailabilityPage() {
     };
   
     fetchExperienceAndSlots();
-  }, [slug, status]); // <-- προστέθηκε και το status
+  }, [slug, status]); 
   
   
 
@@ -272,9 +273,11 @@ export default function CheckAvailabilityPage() {
                 Number of People
               </label>
 
-              <div className={`flex items-center justify-between gap-3 bg-[#faf7f2] border border-[#e2ddd2] rounded-lg w-full max-w-[200px] px-2 py-2 shadow-inner transition-all duration-200 ease-in-out ${
-                numberOfPeople >= 8 ? 'ring-2 ring-[#d97706]/60 animate-pulse' : ''
-              }`}>
+              <div
+                className={`flex items-center justify-between gap-3 bg-[#faf7f2] border border-[#e2ddd2] rounded-lg w-full max-w-[200px] px-2 py-2 shadow-inner transition-all duration-200 ease-in-out ${
+                  numberOfPeople >= maxPeopleAllowed ? 'ring-2 ring-[#d97706]/60 animate-pulse' : ''
+                }`}
+              >
                 {/* Decrease */}
                 <button
                   onClick={() => setNumberOfPeople((prev) => Math.max(1, prev - 1))}
@@ -287,31 +290,29 @@ export default function CheckAvailabilityPage() {
 
                 {/* Input */}
                 <input
-                  type="number"
-                  min={1}
-                  max={maxPeopleAllowed}
-                  value={numberOfPeople}
-                  onChange={(e) => {
-                    const val = Math.min(maxPeopleAllowed, Math.max(1, Number(e.target.value)));
-                    setNumberOfPeople(val);
-                  }}
-                  className="w-12 text-center text-[#5a4a3f] bg-transparent border-0 focus:outline-none font-semibold"
-                />
-
+                    type="number"
+                    min={1}
+                    max={maxPeopleAllowed}
+                    value={numberOfPeople}
+                    onChange={(e) => {
+                      const val = Math.min(maxPeopleAllowed, Math.max(1, Number(e.target.value)));
+                      setNumberOfPeople(val);
+                    }}
+                    className="w-12 text-center text-[#5a4a3f] bg-transparent border-0 focus:outline-none font-semibold"
+                  />
 
                 {/* Increase */}
                 <button
-                 onClick={() => setNumberOfPeople((prev) => Math.min(maxPeopleAllowed, prev + 1))}
-                 disabled={numberOfPeople >= maxPeopleAllowed}
-                  className={`text-[#8b6f47] hover:text-[#5a4a3f] transition p-1 ${
-                    numberOfPeople >= 8 ? 'opacity-40 cursor-not-allowed' : ''
-                  }`}
-                  type="button"
-                  aria-label="Increase"
-                  
-                >
-                  <Plus className="w-4 h-4" />
-                </button>
+                    onClick={() => setNumberOfPeople((prev) => Math.min(maxPeopleAllowed, prev + 1))}
+                    disabled={numberOfPeople >= maxPeopleAllowed}
+                    className={`text-[#8b6f47] hover:text-[#5a4a3f] transition p-1 ${
+                      numberOfPeople >= maxPeopleAllowed ? 'opacity-40 cursor-not-allowed' : ''
+                    }`}
+                    type="button"
+                    aria-label="Increase"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
               </div>
               {selectedSlotId && (
                 <p className="text-xs text-[#5a4a3f] mt-2">
@@ -319,11 +320,14 @@ export default function CheckAvailabilityPage() {
                 </p>
               )}
 
-              {numberOfPeople >= 8 && (
-                <p className="text-xs text-[#d97706] mt-1 animate-fade-in">
-                  Maximum number of people allowed per booking is 8. For larger groups, please contact us directly.
-                </p>
-              )}
+            {numberOfPeople >= maxPeopleAllowed && (
+              <p className="text-xs text-[#d97706] mt-1 animate-fade-in">
+                {maxPeopleAllowed === 8
+                  ? 'Maximum number of people allowed per booking is 8. For larger groups, please contact us directly.'
+                  : `Only ${maxPeopleAllowed} slots are available for this time.`}
+              </p>
+            )}
+
             </div>
 
 
@@ -389,19 +393,22 @@ export default function CheckAvailabilityPage() {
             {/* Submit Button */}
             <div className="pt-2">
               <button
-                onClick={handleReserve}
-                disabled={isSubmitting}
-                className="w-full py-3 rounded-lg bg-[#8b6f47] text-white font-semibold text-lg hover:bg-[#7a5f3a] transition-all flex items-center justify-center gap-2 shadow-md"
+              onClick={handleReserve}
+              disabled={!session || isSubmitting}
+              className={`w-full py-3 rounded-lg font-semibold text-lg transition-all flex items-center justify-center gap-2 shadow-md ${
+                !session ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#8b6f47] hover:bg-[#7a5f3a] text-white'
+              }`}
               >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Reserving...
-                  </>
-                ) : (
-                  'Reserve Now'
-                )}
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Reserving...
+                </>
+              ) : (
+                !session ? 'Log in to Reserve' : 'Reserve Now'
+              )}
               </button>
+
             </div>
           </div>
 

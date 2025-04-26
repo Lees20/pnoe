@@ -106,8 +106,9 @@ export default function CheckAvailabilityPage() {
     };
 
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#fdfaf5] to-[#f4f1ec] px-6 py-12">
-    <div className="w-full max-w-5xl bg-[#fcf9f4] rounded-3xl shadow-2xl border border-[#e5e0d8] p-10 sm:p-16 flex flex-col gap-12">
+  <div className="min-h-screen flex items-start justify-center bg-gradient-to-br from-[#fdfaf5] to-[#f4f1ec] px-6 pt-24 pb-12">
+
+    <div className="w-full max-w-4xl bg-[#fcf9f4] rounded-3xl shadow-2xl border border-[#e5e0d8] p-10 sm:p-16 flex flex-col gap-12">
 
       {/* Back Button */}
       <div className="w-full">

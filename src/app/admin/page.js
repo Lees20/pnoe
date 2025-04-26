@@ -3,7 +3,7 @@
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Compass, CalendarDays, Users, Clock } from 'lucide-react';
+import { Compass, CalendarDays, Users, Clock, LifeBuoy } from 'lucide-react';
 
 export default function AdminDashboardPage() {
   const { data: session, status } = useSession();
@@ -78,6 +78,23 @@ export default function AdminDashboardPage() {
               </div>
               <p className="text-sm text-[#4a4a4a]">Review and organize Experiences Schedule.</p>
             </div>
+
+          <div className="fixed bottom-10 right-8 group z-50">
+            <button
+              onClick={() => router.push('/admin/help')}
+              className="bg-white text-[#8b6f47] border border-[#e0dcd4] p-5 rounded-full shadow-lg hover:bg-[#f8f6f2] hover:text-[#5a4a3f] transition-all flex items-center justify-center"
+              aria-label="Help and Support"
+            >
+              <LifeBuoy className="w-8 h-8" strokeWidth={1.5} />
+            </button>
+
+
+            <div className="absolute bottom-16 right-1/2 translate-x-1/2 hidden group-hover:flex bg-[#5a4a3f] text-white text-xs py-1 px-4 rounded-full shadow-md">
+              Need Help?
+            </div>
+          </div>
+
+
           </div>
         </div>
       </div>

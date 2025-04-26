@@ -22,7 +22,10 @@ export default function AdminSchedulePage() {
   const [loading, setLoading] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  
+  const now = new Date();
+  const upcomingSlots = slots.filter(slot => new Date(slot.date) >= now);
+  const pastSlots = slots.filter(slot => new Date(slot.date) < now);
+
   useEffect(() => {
     fetch('/api/admin/experiences')
       .then(res => res.json())
@@ -162,9 +165,7 @@ export default function AdminSchedulePage() {
       toast.error('Failed to update slot.');
     }
   };
-  
-  
-  
+
 
   return (
     <main className="max-w-5xl mx-auto pt-24 px-4 sm:px-6 lg:px-8">
@@ -199,7 +200,7 @@ export default function AdminSchedulePage() {
         )}
          {/* Back to Dashboard */}
          <main className="max-w-5xl mx-auto pt-24 px-4 sm:px-6 lg:px-8">
-      {/* Back to Dashboard */}
+
       <div className="sticky top-20 z-10 mb-6">
         <button
           onClick={() => router.push('/admin')}
@@ -282,84 +283,122 @@ export default function AdminSchedulePage() {
             </button>
           </div>
         </div>
-                    
 
+        <div className="mt-10">
+       <h2 className="text-lg font-semibold text-[#5a4a3f] mb-6">Scheduled Slots</h2>
 
-            <div className="mt-10">
-              <h2 className="text-lg font-semibold text-[#5a4a3f] mb-4">Scheduled Slots</h2>
-              {loading ? (
-                <p className="text-sm text-gray-500">Loading slots...</p>
-              ) : slots.length > 0 ? (
-                <div className="grid sm:grid-cols-2 gap-6">
-                {slots.map(slot => {
-                  const available = slot.totalSlots - slot.bookedSlots;
-                  const dateLabel = new Date(slot.date).toLocaleDateString();
-                  const dayOfWeek = new Date(slot.date).toLocaleDateString('en-US', { weekday: 'long' });
-              
-                  return (
-                    <div key={slot.id} className="bg-white rounded-xl border border-[#e4ddd3] shadow-md p-5 space-y-2">
-                      <div className="text-[#5a4a3f] font-semibold text-sm">
-                        {dayOfWeek} — <span className="font-normal">{dateLabel}</span>
+      {loading ? (
+        <p className="text-sm text-gray-500">Loading slots...</p>
+      ) : slots.length > 0 ? (
+        <>
+          {/* Split slots into upcoming and past */}
+          {(() => {
+            const now = new Date();
+            const upcomingSlots = slots.filter(slot => new Date(slot.date) >= now);
+            const pastSlots = slots.filter(slot => new Date(slot.date) < now);
+
+            const renderSlot = (slot) => {
+              const available = slot.totalSlots - slot.bookedSlots;
+              const dateLabel = new Date(slot.date).toLocaleDateString();
+              const dayOfWeek = new Date(slot.date).toLocaleDateString('en-US', { weekday: 'long' });
+
+              return (
+                <div key={slot.id} className="bg-white rounded-xl border border-[#e4ddd3] shadow-md p-5 space-y-2 relative">
+                  <div className="absolute top-4 right-4 text-xs px-3 py-1 rounded-full bg-[#8b6f47] text-white">
+                    {new Date(slot.date) >= now ? 'Upcoming' : 'Past'}
+                  </div>
+
+                  <div className="text-[#5a4a3f] font-semibold text-sm">
+                    {dayOfWeek} — <span className="font-normal">{dateLabel}</span>
+                  </div>
+
+                  {editingSlotId === slot.id ? (
+                    <>
+                      <label className="block text-xs mt-2 text-[#5a4a3f]">Available Slots</label>
+                      <input
+                        type="number"
+                        min={0}
+                        value={editedAvailableSlots}
+                        onChange={e => setEditedAvailableSlots(e.target.value)}
+                        className="p-2 rounded border w-full border-[#ccc] bg-[#fdfcf9]"
+                      />
+                      <div className="flex justify-end gap-2 mt-3">
+                        <button
+                          onClick={handleSaveEdit}
+                          className="bg-[#5a4a3f] text-white px-4 py-1.5 rounded-lg text-sm hover:bg-[#473a30]"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={handleCancelEdit}
+                          className="text-[#7a6a5a] hover:text-[#5a4a3f] text-sm"
+                        >
+                          Cancel
+                        </button>
                       </div>
-              
-                      {editingSlotId === slot.id ? (
-                        <>
-                          <label className="block text-xs mt-2 text-[#5a4a3f]">Available Slots</label>
-                          <input
-                            type="number"
-                            min={0}
-                            value={editedAvailableSlots}
-                            onChange={e => setEditedAvailableSlots(e.target.value)}
-                            className="p-2 rounded border w-full border-[#ccc] bg-[#fdfcf9]"
-                          />
-                          <div className="flex justify-end gap-2 mt-3">
-                            <button
-                              onClick={handleSaveEdit}
-                              className="bg-[#5a4a3f] text-white px-4 py-1.5 rounded-lg text-sm hover:bg-[#473a30]"
-                            >
-                              Save
-                            </button>
-                            <button
-                              onClick={handleCancelEdit}
-                              className="text-[#7a6a5a] hover:text-[#5a4a3f] text-sm"
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <p className="text-sm"><strong>Total:</strong> {slot.totalSlots}</p>
-                          <p className="text-sm"><strong>Booked:</strong> {slot.bookedSlots}</p>
-                          <p className="text-sm"><strong>Available:</strong> {available}</p>
-                          <div className="flex justify-end gap-4 mt-3 text-sm">
-                            <button
-                              onClick={() => handleEditClick(slot)}
-                              className="text-[#5a4a3f] hover:underline"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => {
-                                setConfirmDeleteId(slot.id);
-                                setShowDeleteModal(true);
-                              }}
-                              className="text-red-600 hover:underline"
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </>
-                      )}
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-sm"><strong>Total:</strong> {slot.totalSlots}</p>
+                      <p className="text-sm"><strong>Booked:</strong> {slot.bookedSlots}</p>
+                      <p className="text-sm"><strong>Available:</strong> {available}</p>
+                      <div className="flex justify-end gap-4 mt-3 text-sm">
+                        <button
+                          onClick={() => handleEditClick(slot)}
+                          className="text-[#5a4a3f] hover:underline"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => {
+                            setConfirmDeleteId(slot.id);
+                            setShowDeleteModal(true);
+                          }}
+                          className="text-red-600 hover:underline"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              );
+            };
+
+            return (
+              <>
+                {/* Upcoming Slots */}
+                <div className="mb-12">
+                  <h3 className="text-2xl font-semibold text-[#5a4a3f] mb-4">Upcoming Slots</h3>
+                  {upcomingSlots.length > 0 ? (
+                    <div className="grid sm:grid-cols-2 gap-6">
+                      {upcomingSlots.map(renderSlot)}
                     </div>
-                  );
-                })}
-              </div>
-              
-              ) : (
-                <p className="text-sm text-gray-500">No slots found for this experience.</p>
-              )}
-            </div>
+                  ) : (
+                    <p className="text-sm text-gray-500">No upcoming slots.</p>
+                  )}
+                </div>
+
+                {/* Past Slots */}
+                <div className="mt-12">
+                  <h3 className="text-2xl font-semibold text-[#5a4a3f] mb-4">Past Slots</h3>
+                  {pastSlots.length > 0 ? (
+                    <div className="grid sm:grid-cols-2 gap-6">
+                      {pastSlots.map(renderSlot)}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500">No past slots.</p>
+                  )}
+                </div>
+              </>
+            );
+          })()}
+        </>
+      ) : (
+        <p className="text-sm text-gray-500">No slots found for this experience.</p>
+      )}
+    </div>
+
           </>
         )}
       </div>

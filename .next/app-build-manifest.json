@@ -6,16 +6,6 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/experiences/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/experiences/page.js"
-    ],
-    "/api/auth/[...nextauth]/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/auth/[...nextauth]/route.js"
-    ],
     "/check-availability/[slug]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -27,20 +17,30 @@
       "static/chunks/main-app.js",
       "static/chunks/app/api/experiences/[slug]/route.js"
     ],
-    "/api/admin/schedule/route": [
+    "/api/auth/[...nextauth]/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/api/admin/schedule/route.js"
+      "static/chunks/app/api/auth/[...nextauth]/route.js"
+    ],
+    "/api/public/schedule/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/public/schedule/route.js"
     ],
     "/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/page.js"
     ],
-    "/api/public/schedule/route": [
+    "/experiences/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/api/public/schedule/route.js"
+      "static/chunks/app/experiences/page.js"
+    ],
+    "/sign-up/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/sign-up/page.js"
     ]
   }
 }

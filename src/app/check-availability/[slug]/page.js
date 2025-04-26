@@ -107,10 +107,9 @@ export default function CheckAvailabilityPage() {
     };
 
     return (
-  <div className="min-h-screen flex items-start justify-center bg-gradient-to-br from-[#fdfaf5] to-[#f4f1ec] px-6 pt-24 pb-12">
+      <div className="min-h-screen flex flex-col items-center justify-start bg-gradient-to-br from-[#fdfaf5] to-[#f4f1ec] px-4 sm:px-6 pt-20 pb-10">
 
-    <div className="w-full max-w-4xl bg-[#fcf9f4] rounded-3xl shadow-2xl border border-[#e5e0d8] p-10 sm:p-16 flex flex-col gap-12">
-
+     <div className="w-full max-w-4xl bg-[#fcf9f4] rounded-3xl shadow-2xl border border-[#e5e0d8] p-6 sm:p-10 flex flex-col gap-10 sm:gap-12">
       {/* Back Button */}
       <div className="w-full">
         <button
@@ -163,7 +162,7 @@ export default function CheckAvailabilityPage() {
           )}
 
           {/* Calendar Container */}
-          <div className="w-full max-w-md bg-white rounded-2xl border border-[#e8e5df] shadow-inner p-6 flex items-center justify-center">
+          <div className="w-full max-w-full sm:max-w-md bg-white rounded-2xl border border-[#e8e5df] shadow-inner p-4 sm:p-6 flex items-center justify-center">
             {loadingSlots ? (
               <div className="flex flex-col items-center gap-3 animate-pulse text-[#5a4a3f]">
                 <Loader2 className="w-8 h-8 animate-spin text-[#8b6f47]" />
@@ -218,6 +217,7 @@ export default function CheckAvailabilityPage() {
               Available Time Slots for {format(selectedDate, 'PPP')}:
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
             {availableSlots
               .filter((slot) => isSameDay(parseISO(slot.date), selectedDate))
               .map((slot) => {
@@ -264,7 +264,7 @@ export default function CheckAvailabilityPage() {
           </div>
     
           {/* Form */}
-            <div className="bg-white rounded-2xl shadow-md border border-[#e5e0d8] px-6 py-8 space-y-8 transition-all duration-300">
+          <div className="bg-white rounded-2xl shadow-md border border-[#e5e0d8] px-4 sm:px-6 py-6 sm:py-8 space-y-8 transition-all duration-300">
 
             {/* Number of People */}
             <div className="space-y-2">

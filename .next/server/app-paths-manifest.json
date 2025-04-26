@@ -2,7 +2,8 @@
   "/api/admin/schedule/route": "app/api/admin/schedule/route.js",
   "/api/experiences/[slug]/route": "app/api/experiences/[slug]/route.js",
   "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
-  "/page": "app/page.js",
   "/check-availability/[slug]/page": "app/check-availability/[slug]/page.js",
-  "/experiences/page": "app/experiences/page.js"
+  "/page": "app/page.js",
+  "/experiences/page": "app/experiences/page.js",
+  "/account/settings/page": "app/account/settings/page.js"
 }

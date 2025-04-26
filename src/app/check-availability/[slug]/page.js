@@ -33,6 +33,10 @@ export default function CheckAvailabilityPage() {
   const [numberOfPeople, setNumberOfPeople] = useState(1);
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  const selectedSlot = availableSlots.find((slot) => slot.id === selectedSlotId);
+  const maxPeopleAllowed = selectedSlot ? (selectedSlot.totalSlots - selectedSlot.bookedSlots) : 8;
+
 
   const fetchAvailableSlots = async (experienceId) => {
     const res = await fetch(`/api/admin/schedule?experienceId=${experienceId}`);
@@ -45,6 +49,7 @@ export default function CheckAvailabilityPage() {
     
     const fetchExperienceAndSlots = async () => {
       try {
+        setLoadingSlots(true); 
         const res = await fetch(`/api/experiences/${slug}`);
         if (!res.ok) throw new Error('Experience not found');
         const matched = await res.json();
@@ -54,6 +59,8 @@ export default function CheckAvailabilityPage() {
       } catch (error) {
         console.error(error);
         toast.error('Failed to load experience or availability.');
+      } finally{
+        setLoadingSlots(false);
       }
     };
   
@@ -99,103 +106,109 @@ export default function CheckAvailabilityPage() {
     };
 
     return (
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 bg-[#fdfaf5] rounded-3xl shadow-xl border border-[#e5e0d8]">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#fdfaf5] to-[#f4f1ec] px-6 py-12">
+    <div className="w-full max-w-5xl bg-[#fcf9f4] rounded-3xl shadow-2xl border border-[#e5e0d8] p-10 sm:p-16 flex flex-col gap-12">
+
+      {/* Back Button */}
+      <div className="w-full">
+        <button
+          onClick={() => router.back()}
+          className="inline-flex items-center gap-2 text-[#8b6f47] text-sm border border-[#8b6f47] rounded-full px-5 py-2 hover:bg-[#f4f1ec] hover:text-[#5a4a3f] transition-all font-medium shadow-sm hover:shadow-md"
+        >
+          <ArrowLeft size={18} className="text-[#8b6f47]" />
+          Back
+        </button>
+      </div>
 
       {/* Session Info */}
       {status === 'loading' ? (
         <p className="text-[#5a4a3f] text-center mb-4">Loading session...</p>
       ) : !session ? (
-        <div className="bg-[#fff8f5] border border-[#f5d0c5] rounded-xl p-6 text-center text-[#5a4a3f] mb-10 shadow-sm">
-        <h2 className="text-xl font-semibold mb-3">Please Log In or Register</h2>
-        <p className="text-sm mb-4">
-          You need to be logged in to make a reservation.
-        </p>
-        <button
-          onClick={() => router.push('/login')} // or your login page route
-          className="inline-block bg-[#8b6f47] text-white px-6 py-2 rounded-full font-medium hover:bg-[#7a5f3a] transition"
-        >
-          Log In to Continue
-        </button>
-      </div>
-      
+        <div className="bg-[#fff8f5] border border-[#f5d0c5] rounded-xl p-6 text-center text-[#5a4a3f] shadow-sm">
+          <h2 className="text-2xl font-semibold mb-3">Please Log In or Register</h2>
+          <p className="text-sm mb-4">
+            You need to be logged in to make a reservation.
+          </p>
+          <button
+            onClick={() => router.push('/login')}
+            className="inline-block bg-[#8b6f47] text-white px-6 py-2 rounded-full font-medium hover:bg-[#7a5f3a] transition"
+          >
+            Log In to Continue
+          </button>
+        </div>
       ) : (
-        <div className="mb-8 text-sm text-center text-[#5a4a3f]">
-          Logged in as: <span className="font-medium">{session.user.name || session.user.email}</span>
+        <div className="text-sm text-center text-[#5a4a3f]">
+          Logged in as: <span className="font-medium">{session.user.name  || session.user.email}</span>
         </div>
       )}
-    <div className="mb-6 sm:absolute sm:top-6 sm:left-6">
-        <button
-          onClick={() => router.back()}
-          className="flex items-center text-[#8b6f47] text-sm border border-[#8b6f47] rounded-full px-4 py-2 hover:bg-[#f4f1ec] hover:text-[#5a4a3f] transition-all"
-        >
-          <ArrowLeft size={18} className="mr-2" />
-          Back
-        </button>
-      </div>
 
-      {/* Header */}
-      <div className="mb-10 text-center">
-        <h1 className="text-4xl font-serif font-bold text-[#5a4a3f] mb-2 flex items-center justify-center gap-2">
-          <CalendarDays className="w-6 h-6 text-[#8b6f47]" />
-          Check Availability
-        </h1>
-        {experience && (
-          <p className="text-xl text-[#8b6f47] font-medium">{experience.name}</p>
-        )}
-      </div>
-    
-      {/* Calendar */}
-      <div className="mb-12 flex justify-center">
-        <div className="bg-white rounded-xl border border-[#e8e5df] shadow-inner p-4">
-        <DayPicker
-          mode="single"
-          selected={selectedDate}
-          onSelect={setSelectedDate}
-          fromMonth={new Date()}
-          toMonth={new Date(new Date().setMonth(new Date().getMonth() + 6))}
-          modifiers={{
-            available: availableSlots.map((s) => parseISO(s.date)),
-          }}
-          modifiersClassNames={{
-            available: 'bg-[#e5dfd2] text-[#5a4a3f] font-semibold rounded-full',
-          }}
-          disabled={[
-            {
-              before: new Date(), // Disable days before today
-            },
-            (date) => {
-              const today = new Date();
-              
-              // Μπλοκάρουμε αν δεν υπάρχει διαθέσιμο slot για εκείνη την ημέρα
-              const slotsOnDay = availableSlots.filter((s) => isSameDay(parseISO(s.date), date));
-              if (slotsOnDay.length === 0) {
-                return true;
-              }
+      {/* Content (Header + Calendar + Form) */}
+      <div className="flex flex-col lg:flex-row gap-16 items-start justify-center">
 
-              // Ειδικός έλεγχος μόνο για σήμερα:
-              if (isSameDay(date, today)) {
-                const oneHourLater = new Date(today.getTime() + 60 * 60 * 1000); // τώρα + 1 ώρα
+        {/* Left Section (Calendar) */}
+        <div className="flex-1 w-full flex flex-col items-center text-center">
+          {/* Title */}
+          <h1 className="text-4xl font-serif font-bold text-[#5a4a3f] mb-4 flex items-center justify-center gap-2">
+            <CalendarDays className="w-7 h-7 text-[#8b6f47]" />
+            Check Availability
+          </h1>
 
-                const hasValidSlot = slotsOnDay.some((slot) => {
-                  const slotDate = parseISO(slot.date);
-                  return slotDate > oneHourLater; // Slot πρέπει να είναι τουλάχιστον 1 ώρα μπροστά
-                });
+          {/* Experience Name */}
+          {experience && (
+            <p className="text-lg sm:text-xl text-[#8b6f47] font-medium mb-8 tracking-wide">
+              {experience.name}
+            </p>
+          )}
 
-                return !hasValidSlot; // Αν δεν υπάρχει κανένα valid, μπλοκάρουμε όλη τη μέρα
-              }
-
-              return false; // Διαφορετικά η μέρα είναι οκ
-            },
-          ]}
-        />
-
+          {/* Calendar Container */}
+          <div className="w-full max-w-md bg-white rounded-2xl border border-[#e8e5df] shadow-inner p-6 flex items-center justify-center">
+            {loadingSlots ? (
+              <div className="flex flex-col items-center gap-3 animate-pulse text-[#5a4a3f]">
+                <Loader2 className="w-8 h-8 animate-spin text-[#8b6f47]" />
+                <span className="text-sm">Loading availability...</span>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center mb-4">
+              <DayPicker
+                mode="single"
+                selected={selectedDate}
+                onSelect={setSelectedDate}
+                fromMonth={new Date()}
+                toMonth={new Date(new Date().setMonth(new Date().getMonth() + 6))}
+                modifiers={{
+                  available: availableSlots.map((s) => parseISO(s.date)),
+                }}
+                modifiersClassNames={{
+                  available: 'bg-[#e5dfd2] text-[#5a4a3f] font-semibold rounded-full hover:bg-[#efe9db] hover:text-[#3d2b1f] transition-all duration-300',
+                }}
+                disabled={[
+                  { before: new Date() },
+                  (date) => {
+                    const today = new Date();
+                    const slotsOnDay = availableSlots.filter((s) => isSameDay(parseISO(s.date), date));
+                    if (slotsOnDay.length === 0) return true;
+                    if (isSameDay(date, today)) {
+                      const oneHourLater = new Date(today.getTime() + 60 * 60 * 1000);
+                      const hasValidSlot = slotsOnDay.some((slot) => parseISO(slot.date) > oneHourLater);
+                      return !hasValidSlot;
+                    }
+                    return false;
+                  }
+                ]}
+                className="w-full"
+              />
+              </div>
+            )}
+          </div>
+        </div>
 
         </div>
-      </div>
-    
+
+
+            
       {/* Slots and Form */}
       {selectedDate && (
-        <div className="space-y-12">
+         <div className="flex-1 space-y-8 w-full">
           {/* Slots */}
           <div>
             <h3 className="text-lg font-semibold text-[#5a4a3f] mb-3 text-center flex items-center justify-center gap-2">
@@ -275,10 +288,10 @@ export default function CheckAvailabilityPage() {
                 <input
                   type="number"
                   min={1}
-                  max={8}
+                  max={maxPeopleAllowed}
                   value={numberOfPeople}
                   onChange={(e) => {
-                    const val = Math.min(8, Math.max(1, Number(e.target.value)));
+                    const val = Math.min(maxPeopleAllowed, Math.max(1, Number(e.target.value)));
                     setNumberOfPeople(val);
                   }}
                   className="w-12 text-center text-[#5a4a3f] bg-transparent border-0 focus:outline-none font-semibold"
@@ -286,13 +299,14 @@ export default function CheckAvailabilityPage() {
 
                 {/* Increase */}
                 <button
-                  onClick={() => setNumberOfPeople((prev) => Math.min(8, prev + 1))}
+                 onClick={() => setNumberOfPeople((prev) => Math.min(maxPeopleAllowed, prev + 1))}
+                 disabled={numberOfPeople >= maxPeopleAllowed}
                   className={`text-[#8b6f47] hover:text-[#5a4a3f] transition p-1 ${
                     numberOfPeople >= 8 ? 'opacity-40 cursor-not-allowed' : ''
                   }`}
                   type="button"
                   aria-label="Increase"
-                  disabled={numberOfPeople >= 8}
+                  
                 >
                   <Plus className="w-4 h-4" />
                 </button>
@@ -387,6 +401,6 @@ export default function CheckAvailabilityPage() {
         </div>
       )}
     </div>
-    
+    </div>
     );
   }

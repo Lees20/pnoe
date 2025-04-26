@@ -42,14 +42,29 @@ export default function AdminHelpPage() {
       `
     },
     {
-      question: 'How does the scheduling system work?',
-      answer: `
-        The scheduling system allows you to define available dates and times for each experience.
-        Under "Manage Schedule," select an experience and add slots by picking a date, time, and setting the maximum number of participants.
-        Only days matching the experience's allowed frequency (e.g., Monday, Thursday) are accepted.
-        If you try to add a slot outside the allowed days, the system will warn you.
-      `
-    },
+        question: 'How do I add a new schedule slot for an experience?',
+        answer: `
+          To add a new slot, go to "Manage Schedule" in the Admin Dashboard, select the experience, 
+          and use the form provided to choose the date, time, and number of total available slots. 
+          The date must match the allowed days of the experience (e.g., only weekends if specified).
+          Once submitted, the slot is immediately available for users to book.
+        `
+      },
+      {
+        question: 'What happens if I delete a schedule slot?',
+        answer: `
+          When you delete a schedule slot, all reservations linked to that slot are automatically deleted as well.
+          Before confirming deletion, a warning is shown explaining this.
+          This ensures that users do not keep reservations for unavailable times.
+        `
+      },
+      {
+        question: 'Can I manually create a reservation for a user?',
+        answer: `
+          Yes, from the Admin Reservations page, you can create a new booking by selecting the user, experience and available slot.
+          This is useful if you want to handle manual bookings from phone calls, emails or direct requests.
+        `
+      },
     {
       question: 'When are old slots and bookings deleted automatically?',
       answer: `

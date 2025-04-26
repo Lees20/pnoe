@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, CalendarCheck, Heart, Settings } from 'lucide-react';
+import { ArrowLeft, CalendarCheck, Settings } from 'lucide-react';
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
@@ -13,59 +13,91 @@ export default function Dashboard() {
   }
 
   if (!session) {
-    window.location.href = '/login';
+    if (typeof window !== 'undefined') window.location.href = '/login';
     return null;
   }
 
   const handleRedirect = (path) => router.push(path);
 
-  return (
-    <div className="min-h-screen bg-[#f4f1ec] flex items-center justify-center px-4 py-8 font-serif">
-      <div className="bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl w-full max-w-xl p-10 relative border border-[#e6e0d6]">
+  const formatDate = (dateStr) => {
+    if (!dateStr) return 'Not provided';
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(dateStr).toLocaleDateString(undefined, options);
+  };
 
-        {/* Return Home Button */}
+  const calculateMemberStatus = (createdAt) => {
+    if (!createdAt) return 'Member';
+    const now = new Date();
+    const createdDate = new Date(createdAt);
+    const diffDays = (now - createdDate) / (1000 * 60 * 60 * 24);
+
+    if (diffDays < 30) return 'Newcomer';
+    if (diffDays >= 365) return 'Loyal Member';
+    return 'Member';
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-[#f4f1ec] to-[#e9e4dc] flex items-center justify-center px-4 py-10 font-serif">
+      <div className="relative bg-white/80 backdrop-blur-lg border border-[#e0dcd4] rounded-3xl shadow-2xl w-full max-w-2xl p-10 space-y-10">
+
+        {/* Back Button */}
         <button
           onClick={() => handleRedirect('/')}
-          className="absolute top-4 left-4 inline-flex items-center gap-2 text-sm text-[#8b6f47] border border-[#d8cfc3] px-3 py-1.5 rounded-full hover:bg-[#f4f1ec] hover:text-[#5a4a3f] transition-all shadow-sm"
+          className="absolute top-5 left-5 flex items-center gap-2 text-[#8b6f47] text-sm border border-[#d8cfc3] px-4 py-2 rounded-full hover:bg-[#f4f1ec] hover:text-[#5a4a3f] transition-all shadow-sm"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft size={18} />
           Home
         </button>
 
         {/* Welcome Title */}
-        <h1 className="text-4xl font-semibold text-[#5a4a3f] text-center mb-8">
-          Welcome, {session.user.name}
-        </h1>
-
-        {/* Info Card */}
-        <div className="bg-[#f8f6f2] border border-[#e0dcd4] p-6 rounded-xl shadow-inner space-y-2 text-sm text-[#5a4a3f] mb-8">
-          <div>
-            <span className="font-semibold">Email:</span> {session.user.email}
-          </div>
-          <div>
-            <span className="font-semibold">Phone:</span> {session.user.phone || 'Not provided'}
-          </div>
+        <div className="text-center space-y-3">
+          <h1 className="text-4xl md:text-5xl font-bold text-[#5a4a3f]">
+            Welcome, {session.user.name} {session.user.surname}
+          </h1>
+          <p className="text-[#7a6a5f] text-md">{calculateMemberStatus(session.user.createdAt)}</p>
         </div>
 
-        {/* Dashboard Actions */}
-        <div className="grid gap-4">
+        {/* Info Card */}
+      <div className="bg-[#f8f6f2] border border-[#e0dcd4] p-6 rounded-xl shadow-inner space-y-4 text-[#5a4a3f] mb-10">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-semibold uppercase tracking-wide">Email</span>
+          <span className="text-md">{session.user.email}</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-semibold uppercase tracking-wide">Phone</span>
+          <span className="text-md">{session.user.phone || 'Not Provided'}</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-semibold uppercase tracking-wide">Date of Birth</span>
+          <span className="text-md">
+            {session.user.dateOfBirth ? new Date(session.user.dateOfBirth).toLocaleDateString() : 'Not Provided'}
+          </span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-semibold uppercase tracking-wide">Member Since</span>
+          <span className="text-md">
+            {session.user.createdAt ? new Date(session.user.createdAt).toLocaleDateString() : 'Not Provided'}
+          </span>
+        </div>
+      </div>
+
+
+        {/* Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <button
             onClick={() => handleRedirect('/bookings')}
-            className="w-full py-3 rounded-xl text-[#8b6f47] border border-[#8b6f47] hover:bg-[#8b6f47] hover:text-white transition-all font-medium tracking-wide flex items-center justify-center gap-2"
+            className="flex flex-col items-center justify-center bg-[#fdfaf7] border border-[#d8cfc3] hover:bg-[#8b6f47] hover:text-white text-[#5a4a3f] rounded-2xl p-6 transition-all shadow-lg hover:shadow-2xl"
           >
-            <CalendarCheck className="w-5 h-5" /> My Bookings
+            <CalendarCheck size={28} className="mb-2" />
+            <span className="font-medium">My Bookings</span>
           </button>
-          <button
-            onClick={() => handleRedirect('/favourites')}
-            className="w-full py-3 rounded-xl text-[#8b6f47] border border-[#8b6f47] hover:bg-[#8b6f47] hover:text-white transition-all font-medium tracking-wide flex items-center justify-center gap-2"
-          >
-            <Heart className="w-5 h-5" /> My Favourites
-          </button>
+
           <button
             onClick={() => handleRedirect('/account/settings')}
-            className="w-full py-3 rounded-xl text-[#8b6f47] border border-[#8b6f47] hover:bg-[#8b6f47] hover:text-white transition-all font-medium tracking-wide flex items-center justify-center gap-2"
+            className="flex flex-col items-center justify-center bg-[#fdfaf7] border border-[#d8cfc3] hover:bg-[#8b6f47] hover:text-white text-[#5a4a3f] rounded-2xl p-6 transition-all shadow-lg hover:shadow-2xl"
           >
-            <Settings className="w-5 h-5" /> Account Settings
+            <Settings size={28} className="mb-2" />
+            <span className="font-medium">Account Settings</span>
           </button>
         </div>
       </div>

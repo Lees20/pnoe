@@ -47,6 +47,7 @@ export const authOptions = {
             phone: user.phone,
             role: user.role,
             dateOfBirth: user.dateOfBirth?.toISOString() ?? null,
+            createdAt: user.createdAt?.toISOString() ?? null,
           };
         } catch (error) {
           throw new Error('An unexpected error occurred. Please try again.');
@@ -67,6 +68,7 @@ export const authOptions = {
         token.phone = user.phone;
         token.role = user.role;
         token.dateOfBirth = user.dateOfBirth ?? null;
+        token.createdAt = user.createdAt ?? null;  
       }
       return token;
     },
@@ -79,10 +81,12 @@ export const authOptions = {
         session.user.phone = token.phone;
         session.user.role = token.role;
         session.user.dateOfBirth = token.dateOfBirth ?? null;
+        session.user.createdAt = token.createdAt ?? null;  
       }
       return session;
     },
   },
+  
   secret: process.env.JWT_SECRET,
   pages: {
     error: '/auth/error',

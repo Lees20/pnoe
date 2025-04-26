@@ -125,56 +125,65 @@ export default function Home() {
 
 
       {/* Sustainability Section */}
-      <section className="bg-[#faf9f7] py-24 px-6">
-        <motion.div
-          className="max-w-6xl mx-auto text-center space-y-8"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1 }}
-        >
-          <h3 className="text-3xl md:text-4xl font-serif text-[#5a4a3f]">
-            Rooted in Sustainability
-          </h3>
-          <p className="text-lg md:text-xl text-[#4a4a4a] max-w-3xl mx-auto leading-relaxed">
-            Every journey we offer respects the land, supports local communities and celebrates traditional ways of living.  
-            Sustainability isn’t an add-on — it’s woven into every experience we create.
-          </p>
-        </motion.div>
+      {/* Sustainability Section */}
+<section className="bg-[#faf9f7] py-24 px-6">
+  <motion.div
+    className="max-w-6xl mx-auto text-center space-y-8"
+    initial={{ opacity: 0, y: 30 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 1 }}
+  >
+    <h3 className="text-4xl md:text-5xl font-serif text-[#5a4a3f]">
+      Rooted in Sustainability
+    </h3>
+    <p className="text-lg md:text-xl text-[#4a4a4a] max-w-3xl mx-auto leading-relaxed">
+      Every journey we offer respects the land, supports local communities and celebrates traditional ways of living.  
+      Sustainability isn’t an add-on — it’s woven into every experience we create.
+    </p>
+  </motion.div>
 
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
-          {[
-            {
-              title: 'Local Partnerships',
-              text: 'We collaborate with local farmers, artisans and healers to keep traditions alive and communities thriving.',
-              icon: '🌾',
-            },
-            {
-              title: 'Eco-conscious Experiences',
-              text: 'Our activities are low-impact, from herb walks to organic farm stays, rooted in harmony with nature.',
-              icon: '🌱',
-            },
-            {
-              title: 'Respect for Heritage',
-              text: 'We honor Crete’s cultural and natural heritage, creating experiences that nurture both guests and the land.',
-              icon: '🏺',
-            },
-          ].map((item, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.2, duration: 0.8 }}
-              className="bg-white p-8 rounded-3xl shadow-lg flex flex-col items-center text-center space-y-4 hover:shadow-2xl transition-all"
-            >
-              <div className="text-5xl">{item.icon}</div>
-              <h4 className="text-xl font-serif text-[#5a4a3f]">{item.title}</h4>
-              <p className="text-sm text-[#4a4a4a]">{item.text}</p>
-            </motion.div>
-          ))}
+  {/* Cards */}
+  <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
+    {[
+      {
+        title: 'Local Partnerships',
+        text: 'We collaborate with local farmers, artisans and healers to keep traditions alive and communities thriving.',
+        icon: '🌾',
+      },
+      {
+        title: 'Eco-conscious Experiences',
+        text: 'Our activities are low-impact, from herb walks to organic farm stays, rooted in harmony with nature.',
+        icon: '🌱',
+      },
+      {
+        title: 'Respect for Heritage',
+        text: 'We honor Crete’s cultural and natural heritage, creating experiences that nurture both guests and the land.',
+        icon: '🏺',
+      },
+    ].map((item, i) => (
+      <motion.div
+        key={i}
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ delay: i * 0.2, duration: 0.8 }}
+        className="bg-white rounded-3xl shadow-md hover:shadow-2xl p-10 flex flex-col items-center text-center space-y-6 transition-all duration-300 group"
+      >
+        {/* Icon Container */}
+        <div className="w-16 h-16 flex items-center justify-center rounded-full bg-[#e5e0d8] text-4xl group-hover:bg-[#8b6f47] group-hover:text-white transition-colors">
+          {item.icon}
         </div>
-      </section>
+        {/* Title */}
+        <h4 className="text-2xl font-serif text-[#5a4a3f]">{item.title}</h4>
+        {/* Description */}
+        <p className="text-base text-[#4a4a4a] leading-relaxed">
+          {item.text}
+        </p>
+      </motion.div>
+    ))}
+  </div>
+</section>
 
       {/*Motto */}
       <section className="py-24 px-6 text-center">

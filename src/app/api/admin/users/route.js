@@ -31,7 +31,7 @@ export async function GET(req) {
         surname: true,
         phone: true,
         role: true,
-        dateOfBirth: true, // ✅ Include new field
+        dateOfBirth: true, 
         createdAt: true,
       },
       orderBy: { createdAt: 'desc' },
@@ -54,12 +54,12 @@ export async function POST(req) {
     const newUser = await prisma.user.create({
       data: {
         email,
-        password, // ✅ In production: hash
+        password, // In production: hash
         name,
         surname,
         phone,
         role,
-        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null, // ✅ Handle new field
+        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null, // Handle new field
       },
     });
     return handleResponse(newUser);

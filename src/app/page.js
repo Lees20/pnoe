@@ -5,11 +5,31 @@ import { motion, useScroll, useTransform } from 'framer-motion'; // Import neces
 import { useRef } from 'react'; // Import useRef from React
 import Link from 'next/link';
 import LinkWithLoader from './components/LinkWithLoader';
+import { useEffect, useState } from 'react'; 
+
 
 export default function Home() {
   const heroRef = useRef(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
   const y = useTransform(scrollYProgress, [0, 1], ['0%', '20%']);
+
+
+
+  const [experiences, setExperiences] = useState([]);
+
+  useEffect(() => {
+    const fetchExperiences = async () => {
+      try {
+        const res = await fetch('/api/experiences');
+        const data = await res.json();
+        setExperiences(data);
+      } catch (error) {
+        console.error('Failed to load experiences', error);
+      }
+    };
+
+    fetchExperiences();
+  }, []);
 
   return (
     <main className="font-light text-[#2f2f2f] bg-[#f4f1ec]">
@@ -56,85 +76,101 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Intro / Vision */}
-      <section className="py-24 px-6">
+    {/* Essence Section */}
+    <section className="py-24 px-6 bg-gradient-to-b from-[#faf9f7] to-[#f4f1ec]">
+      <motion.div
+        className="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center"
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 1 }}
+      >
+        {/* Text Section */}
+        <div className="space-y-8 text-center md:text-left">
+          <h2 className="text-4xl md:text-5xl font-serif text-[#5a4a3f] leading-tight">
+            The Essence of Slow Living
+          </h2>
+          <p className="text-lg md:text-xl text-[#4a4a4a] leading-relaxed">
+            In the heart of Crete, time flows differently.  
+            Wander through olive groves, gather mountain herbs, and rediscover the art of simply being.  
+            Our experiences are invitations to reconnect — with the land, with tradition, and with yourself.
+          </p>
+          <div className="flex justify-center md:justify-start">
+            <Link href="/experiences">
+              <button className="mt-4 inline-flex items-center gap-2 bg-[#8b6f47] text-white px-6 py-3 rounded-full text-lg font-medium hover:bg-[#7a5f3a] transition shadow-md">
+                Explore Experiences
+              </button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Image Section */}
         <motion.div
-          className="max-w-6xl mx-auto grid sm:grid-cols-1 md:grid-cols-2 gap-12 items-center"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          className="rounded-3xl overflow-hidden shadow-2xl"
+          initial={{ scale: 0.95 }}
+          whileInView={{ scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
-          <div className="space-y-6">
-            <h2 className="text-3xl md:text-4xl font-serif text-[#5a4a3f]">
-              A slower, richer way to travel
-            </h2>
-            <p className="text-md md:text-lg text-[#4a4a4a] leading-relaxed">
-              Sink your hands in the soil, breathe in wild herbs, and walk ancient paths. Our curated experiences are rooted in the rhythms of Crete.
-            </p>
-          </div>
-          <div>
-            <Image
-              src="https://images.unsplash.com/photo-1556740749-887f6717d7e4"
-              alt="Herbal ritual"
-              width={900}
-              height={600}
-              className="rounded-3xl shadow-lg w-full h-auto object-cover"
-            />
-          </div>
+          <Image
+            src="/gorge.jpg"
+            alt="Slow Living Crete"
+            width={900}
+            height={600}
+            className="w-full h-auto object-cover"
+          />
         </motion.div>
-      </section>
+      </motion.div>
+    </section>
 
-      {/*3 Pillars */}
-      <section id="experiences" className="bg-[#faf9f7] py-24 px-6">
-        <div className="max-w-6xl mx-auto text-center mb-16">
-          <motion.h3
-            className="text-3xl md:text-4xl font-serif text-[#5a4a3f]"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-          >
-            Signature Experiences
-          </motion.h3>
-        </div>
-        <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+
+      {/* Sustainability Section */}
+      <section className="bg-[#faf9f7] py-24 px-6">
+        <motion.div
+          className="max-w-6xl mx-auto text-center space-y-8"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1 }}
+        >
+          <h3 className="text-3xl md:text-4xl font-serif text-[#5a4a3f]">
+            Rooted in Sustainability
+          </h3>
+          <p className="text-lg md:text-xl text-[#4a4a4a] max-w-3xl mx-auto leading-relaxed">
+            Every journey we offer respects the land, supports local communities and celebrates traditional ways of living.  
+            Sustainability isn’t an add-on — it’s woven into every experience we create.
+          </p>
+        </motion.div>
+
+        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
           {[
             {
-              title: 'Olive Grove Rituals',
-              text: 'Harvest, taste, and connect with Crete’s ancient olive wisdom.',
-              image: '/olive-rituals.jpg',  // This is the local image path relative to the public folder
+              title: 'Local Partnerships',
+              text: 'We collaborate with local farmers, artisans and healers to keep traditions alive and communities thriving.',
+              icon: '🌾',
             },
             {
-              title: 'Mountain Wellness',
-              text: 'Herbal walks, meditative hikes, and natural healing practices.',
-              image: 'https://images.unsplash.com/photo-1501004318641-b39e6451bec6',
+              title: 'Eco-conscious Experiences',
+              text: 'Our activities are low-impact, from herb walks to organic farm stays, rooted in harmony with nature.',
+              icon: '🌱',
             },
             {
-              title: 'Cretan Connection',
-              text: 'Meet local artisans, cook with grandmothers, live the slow life.',
-              image: '/reconnection.jpg',
+              title: 'Respect for Heritage',
+              text: 'We honor Crete’s cultural and natural heritage, creating experiences that nurture both guests and the land.',
+              icon: '🏺',
             },
           ].map((item, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.2, duration: 0.8 }}
               viewport={{ once: true }}
-              className="bg-white shadow-lg rounded-2xl overflow-hidden hover:shadow-xl transition-shadow"
+              transition={{ delay: i * 0.2, duration: 0.8 }}
+              className="bg-white p-8 rounded-3xl shadow-lg flex flex-col items-center text-center space-y-4 hover:shadow-2xl transition-all"
             >
-              <Image
-                src={item.image}
-                alt={item.title}
-                width={600}
-                height={400}
-                className="w-full h-56 object-cover"
-              />
-              <div className="p-6 space-y-2">
-                <h4 className="text-xl font-serif text-[#5a4a3f]">{item.title}</h4>
-                <p className="text-sm text-[#4a4a4a]">{item.text}</p>
-              </div>
+              <div className="text-5xl">{item.icon}</div>
+              <h4 className="text-xl font-serif text-[#5a4a3f]">{item.title}</h4>
+              <p className="text-sm text-[#4a4a4a]">{item.text}</p>
             </motion.div>
           ))}
         </div>

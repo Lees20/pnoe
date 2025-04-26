@@ -95,7 +95,7 @@ export default function CheckAvailabilityPage() {
     });
 
     if (res.ok) {
-        const data = await res.json(); // 👈 should contain `id`
+        const data = await res.json(); 
         const id = data.id;
         router.push(`/booking-confirmed/${id}`);
       } else {
@@ -217,7 +217,6 @@ export default function CheckAvailabilityPage() {
               Available Time Slots for {format(selectedDate, 'PPP')}:
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
             {availableSlots
               .filter((slot) => isSameDay(parseISO(slot.date), selectedDate))
               .map((slot) => {
@@ -329,9 +328,6 @@ export default function CheckAvailabilityPage() {
             )}
 
             </div>
-
-
-
             
           {/* Total Price */}
           {experience && (

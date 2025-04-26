@@ -27,20 +27,20 @@
       "static/chunks/main-app.js",
       "static/chunks/app/api/public/schedule/route.js"
     ],
-    "/page": [
+    "/admin/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/page.js"
+      "static/chunks/app/admin/page.js"
     ],
-    "/experiences/page": [
+    "/admin/users/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/experiences/page.js"
+      "static/chunks/app/admin/users/page.js"
     ],
-    "/sign-up/page": [
+    "/api/admin/users/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/sign-up/page.js"
+      "static/chunks/app/api/admin/users/route.js"
     ]
   }
 }

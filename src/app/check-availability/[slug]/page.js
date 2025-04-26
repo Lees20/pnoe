@@ -139,8 +139,14 @@ export default function CheckAvailabilityPage() {
         </div>
       ) : (
         <div className="text-sm text-center text-[#5a4a3f]">
-          Logged in as: <span className="font-medium">{session.user.name  || session.user.email}</span>
-        </div>
+        Logged in as: 
+        <span className="font-medium">
+          {session.user.name?.[0]?.toUpperCase() + session.user.name?.slice(1)}
+          {session.user.surname ? ` ${session.user.surname[0].toUpperCase() + session.user.surname.slice(1)}` : ''}
+        </span>
+      </div>
+      
+      
       )}
 
       {/* Content (Header + Calendar + Form) */}
@@ -328,7 +334,7 @@ export default function CheckAvailabilityPage() {
             )}
 
             </div>
-            
+
           {/* Total Price */}
           {experience && (
           <div

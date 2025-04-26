@@ -50,14 +50,14 @@ export default function LoginPage() {
 
     setLoading(false);
     if (process.env.NODE_ENV !== 'development') {
-      // Έλεγχος reCAPTCHA εδώ
+      // Έλεγχος reCAPTCHA 
     }
     if (result?.error) {
-      // Display a user-friendly error message if login fails
+ 
       if (result.error === 'CredentialsSignin') {
         setError('Invalid email or password');
       } else {
-        setError('An unexpected error occurred. Please try again.');
+        setError('Email or password is incorrect');
       }
     } else {
       router.push('/dashboard'); // Redirect to a protected page after login

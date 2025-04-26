@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation'; // Import useRouter for navigation
-import { useSession } from 'next-auth/react';  // Import useSession to check if user is already logged in
+import { useRouter } from 'next/navigation';
+import { signIn,useSession } from 'next-auth/react'; 
+import ReCAPTCHA from 'react-google-recaptcha'; 
 
 export default function Register() {
   const { data: session, status } = useSession();  // Check session status
@@ -16,7 +17,7 @@ export default function Register() {
   const [isSuccess, setIsSuccess] = useState(false);  // Success message visibility
   const router = useRouter();  // Initialize useRouter for page redirection
   const [dateOfBirth, setDateOfBirth] = useState('');
-
+  const [recaptchaToken, setRecaptchaToken] = useState(null);
 
   const isLegalAge = (dob) => { //checks if user is 18+
     const today = new Date();
@@ -44,6 +45,12 @@ export default function Register() {
     e.preventDefault();
     setIsLoading(true);
   
+    if (!recaptchaToken) {
+      setError('Please complete the reCAPTCHA challenge.');
+      setIsLoading(false);
+      return;
+    }
+    
     if (!isLegalAge(dateOfBirth)) {
       setError('You must be at least 18 years old to register.');
       setIsLoading(false);
@@ -51,10 +58,7 @@ export default function Register() {
     }
   
     try {
-      const token = await window.grecaptcha.execute(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY, {
-        action: 'submit',
-      });
-  
+
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         body: JSON.stringify({
@@ -64,7 +68,7 @@ export default function Register() {
           surname,
           phone,
           dateOfBirth,
-          recaptchaToken: token,
+          recaptchaToken,
         }),
         headers: {
           'Content-Type': 'application/json',
@@ -77,18 +81,30 @@ export default function Register() {
       if (res.ok) {
         setIsSuccess(true);
         setError('');
-        setTimeout(() => router.push('/login'), 2000);
-      } else {
-        setError(data.error || 'Something went wrong');
+      
+        const loginResult = await signIn('credentials', {
+          redirect: false,
+          email,
+          password,
+        });
+      
+        if (loginResult?.error) {
+          console.error('Auto-login failed:', loginResult.error);
+          router.push('/login');
+        } else {
+          router.push('/dashboard');
+        }
       }
-    } catch (err) {
+      } catch (err) {
       console.error(err);
       setError('Something went wrong. Please try again.');
       setIsLoading(false);
     }
   };
   
-
+  const handleRecaptchaChange = (token) => {
+    setRecaptchaToken(token);
+  };
   // Loading state while session is being fetched
   if (status === 'loading') return <p>Loading...</p>;
 
@@ -185,7 +201,12 @@ export default function Register() {
                     required
                   />
                 </div>
-
+                <div className="flex justify-center">
+                <ReCAPTCHA
+                  sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
+                  onChange={handleRecaptchaChange}
+                />
+              </div>
 
               {/* Error Message */}
               {error && <p className="text-red-500 text-sm">{error}</p>}

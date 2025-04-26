@@ -1,71 +1,66 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { signIn, useSession } from 'next-auth/react';  // Import useSession to check session state
+import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 export default function LoginPage() {
-  const { data: session, status } = useSession();  // Get session data using useSession
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [recaptchaToken, setRecaptchaToken] = useState(null);
 
-  // If the user is already signed in, redirect to the dashboard
+  const handleRecaptchaChange = (token) => {
+    setRecaptchaToken(token);
+  };
+
   useEffect(() => {
     if (session) {
-      router.push('/dashboard'); // Redirect to dashboard if already signed in
+      router.push('/dashboard');
     }
   }, [session, router]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = `https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`;
-    script.async = true;
-    document.body.appendChild(script);
-  }, []);
-  
+
   async function handleSubmit(event) {
     event.preventDefault();
     setLoading(true);
-    setError(''); // Reset the error state before a new login attempt
+    setError('');
+
+    if (!recaptchaToken) {
+      setError('Please complete the reCAPTCHA.');
+      setLoading(false);
+      return;
+    }
 
     const { email, password } = form;
 
-    const token = await window.grecaptcha.execute(
-      process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
-      { action: 'login' }
-    );
-  
-    // Use NextAuth's signIn method to send a POST request
     const result = await signIn('credentials', {
-      redirect: false, // Do not redirect automatically
+      redirect: false,
       email,
       password,
-      recaptchaToken: token,
+      recaptchaToken, // send token
     });
 
     setLoading(false);
-    if (process.env.NODE_ENV !== 'development') {
-      // Έλεγχος reCAPTCHA 
-    }
+
     if (result?.error) {
- 
       if (result.error === 'CredentialsSignin') {
-        setError('Invalid email or password');
+        setError('Invalid email or password.');
       } else {
-        setError('Email or password is incorrect');
+        setError('Something went wrong.');
       }
     } else {
-      router.push('/dashboard'); // Redirect to a protected page after login
+      router.push('/dashboard');
     }
   }
-  
 
-  if (status === 'loading') return <p>Loading...</p>;  // While loading session, show loading state
+  if (status === 'loading') return <p>Loading...</p>;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f4f1ec] px-4">
@@ -104,7 +99,15 @@ export default function LoginPage() {
                 />
               </div>
 
-              {error && <p className="text-red-500 text-sm">{error}</p>} {/* Display error messages */}
+              {/* ReCAPTCHA V2 */}
+              <div className="flex justify-center">
+                <ReCAPTCHA
+                  sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
+                  onChange={handleRecaptchaChange}
+                />
+              </div>
+
+              {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
               <button
                 type="submit"
@@ -115,20 +118,11 @@ export default function LoginPage() {
               </button>
             </form>
 
-            {/* <div className="my-6 text-center text-[#888]">or</div>
-            <button
-              onClick={() => signIn('google')}
-              className="w-full border border-[#ccc] py-2 rounded-full flex items-center justify-center gap-2 hover:bg-[#fafafa] transition-all"
-            >
-              <img src="/google-ico.svg" alt="Google" className="w-5 h-5" />
-              <span className="text-sm text-[#333] font-medium">Sign in with Google</span>
-            </button> */}
-
             <div className="mt-6 text-center">
               <p className="text-sm text-[#5a4a3f]">
                 Don't have an account?{' '}
                 <button
-                  onClick={() => router.push('/sign-up')}  // Redirect to the registration page
+                  onClick={() => router.push('/sign-up')}
                   className="text-[#8b6f47] underline"
                 >
                   Register
@@ -136,15 +130,14 @@ export default function LoginPage() {
               </p>
             </div>
             <div className="text-center">
-                <button
-                  type="button"
-                  onClick={() => router.push('/forgot-password')}
-                  className="text-sm text-[#8b6f47] hover:underline"
-                >
-                  Forgot your password?
-                </button>
-              </div>
-
+              <button
+                type="button"
+                onClick={() => router.push('/forgot-password')}
+                className="text-sm text-[#8b6f47] hover:underline"
+              >
+                Forgot your password?
+              </button>
+            </div>
           </>
         )}
       </div>

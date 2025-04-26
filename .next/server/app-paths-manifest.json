@@ -1,7 +1,9 @@
 {
-  "/api/auth/signup/route": "app/api/auth/signup/route.js",
   "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
+  "/api/auth/reset-password/route": "app/api/auth/reset-password/route.js",
+  "/api/admin/experiences/route": "app/api/admin/experiences/route.js",
+  "/reset-password/page": "app/reset-password/page.js",
   "/login/page": "app/login/page.js",
   "/dashboard/page": "app/dashboard/page.js",
-  "/sign-up/page": "app/sign-up/page.js"
+  "/forgot-password/page": "app/forgot-password/page.js"
 }

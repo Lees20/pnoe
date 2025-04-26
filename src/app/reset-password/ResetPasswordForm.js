@@ -2,6 +2,7 @@
 
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
+import ReCAPTCHA from 'react-google-recaptcha'; // ✅ Import ReCAPTCHA
 
 export default function ResetPasswordForm() {
   const searchParams = useSearchParams();
@@ -9,14 +10,26 @@ export default function ResetPasswordForm() {
   const router = useRouter();
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+  const [recaptchaToken, setRecaptchaToken] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!recaptchaToken) {
+      setMessage('Please complete the reCAPTCHA verification.');
+      return;
+    }
+
+    setIsLoading(true);
+
     const res = await fetch('/api/auth/reset-password', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token, password }),
+      body: JSON.stringify({ token, password, recaptchaToken }),
     });
+
+    setIsLoading(false);
 
     if (res.ok) {
       setMessage('Password updated! Redirecting...');
@@ -25,6 +38,16 @@ export default function ResetPasswordForm() {
       const data = await res.json();
       setMessage(data.error || 'Something went wrong.');
     }
+  };
+
+  const handleRecaptchaChange = (token) => {
+    setRecaptchaToken(token);
+    setMessage(''); // ✅ Clear any previous recaptcha errors
+  };
+
+  const handleRecaptchaExpired = () => {
+    setRecaptchaToken(null);
+    setMessage('reCAPTCHA expired, please complete it again.');
   };
 
   return (
@@ -39,11 +62,26 @@ export default function ResetPasswordForm() {
           required
           className="w-full p-2 mb-4 border border-[#d8cfc3] rounded"
         />
-        <button type="submit" className="w-full bg-[#8b6f47] text-white py-2 rounded hover:bg-[#7a5f3a]">
-          Reset Password
+
+        {/* ✅ reCAPTCHA Component */}
+        <div className="flex justify-center mb-4">
+          <ReCAPTCHA
+            sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
+            onChange={handleRecaptchaChange}
+            onExpired={handleRecaptchaExpired} // ✅ Handle expiration
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="w-full bg-[#8b6f47] text-white py-2 rounded hover:bg-[#7a5f3a]"
+          disabled={isLoading}
+        >
+          {isLoading ? 'Processing...' : 'Reset Password'}
         </button>
       </form>
-      {message && <p className="text-sm mt-4">{message}</p>}
+
+      {message && <p className="text-sm mt-4 text-center">{message}</p>}
     </div>
   );
 }

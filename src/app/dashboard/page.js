@@ -4,7 +4,7 @@ import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, CalendarCheck, Settings, Trash2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import DeleteAccountModal from './DeleteAccountModal'; // Import the modal component
+import DeleteAccountModal from './deleteAccountModal'; // Import the modal component
 
 export default function Dashboard() {
   const { data: session, status } = useSession();

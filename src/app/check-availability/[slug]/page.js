@@ -46,27 +46,30 @@ export default function CheckAvailabilityPage() {
   
 
   useEffect(() => {
-    if (!slug || status !== 'loading') return; 
-    
+    // Ensure `slug` is available before proceeding with fetching data
+    if (!slug) return;
+  
     const fetchExperienceAndSlots = async () => {
       try {
-        setLoadingSlots(true); 
+        setLoadingSlots(true); // Start loading
+  
         const res = await fetch(`/api/experiences/${slug}`);
         if (!res.ok) throw new Error('Experience not found');
         const matched = await res.json();
   
-        setExperience(matched);
-        await fetchAvailableSlots(matched.id);
+        setExperience(matched); // Set experience data
+        await fetchAvailableSlots(matched.id); // Fetch available slots for this experience
       } catch (error) {
         console.error(error);
         toast.error('Failed to load experience or availability.');
-      } finally{
-        setLoadingSlots(false);
+      } finally {
+        setLoadingSlots(false); // End loading
       }
     };
   
-    fetchExperienceAndSlots();
-  }, [slug, status]); 
+    fetchExperienceAndSlots(); // Fetch the data as soon as the slug is available
+  }, [slug]); // Depend on `slug` to refetch when it changes
+  
   
   
 
@@ -431,7 +434,6 @@ export default function CheckAvailabilityPage() {
             </div>
 
           </div>
-
         </div>
       )}
     </div>

@@ -1,7 +1,7 @@
 {
+  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
+  "/api/experiences/[slug]/route": "app/api/experiences/[slug]/route.js",
+  "/api/public/schedule/route": "app/api/public/schedule/route.js",
   "/experiences/page": "app/experiences/page.js",
-  "/page": "app/page.js",
-  "/bookings/page": "app/bookings/page.js",
-  "/contact/page": "app/contact/page.js",
-  "/terms/page": "app/terms/page.js"
+  "/check-availability/[slug]/page": "app/check-availability/[slug]/page.js"
 }

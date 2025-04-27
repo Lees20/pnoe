@@ -74,10 +74,10 @@ export default function Header() {
                     My Bookings
                   </button>
                   <button
-                    onClick={() => routeLoader?.triggerRouteChange('/account/settings')}
+                    onClick={() => routeLoader?.triggerRouteChange('/dashboard')}
                     className="block w-full text-left px-4 py-2 text-sm hover:bg-[#fdfaf5] text-[#5a4a3f]"
                   >
-                    Settings
+                    Dashboard
                   </button>
                   
                   {session?.user?.role === 'admin' && (
@@ -198,10 +198,10 @@ export default function Header() {
             My Bookings
           </button>
           <button
-            onClick={() => routeLoader?.triggerRouteChange('/account/settings')}
+            onClick={() => routeLoader?.triggerRouteChange('/dashboard')}
             className="block w-full text-left px-4 py-2 text-sm hover:bg-[#fdfaf5] text-[#5a4a3f]"
           >
-            Settings
+            Dashboard
           </button>
           {session?.user?.role === 'admin' && (
                     <nav>

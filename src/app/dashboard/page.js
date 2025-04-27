@@ -1,12 +1,18 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, CalendarCheck, Settings } from 'lucide-react';
+import { ArrowLeft, CalendarCheck, Settings, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import DeleteAccountModal from './deleteAccountModal'; 
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false); // Track modal visibility
+  const [message, setMessage] = useState(''); // Message to display in the modal
+  const [isError, setIsError] = useState(false); // Track if the message is an error
 
   if (status === 'loading') {
     return <p className="text-center text-[#8b6f47] font-serif">Loading...</p>;
@@ -16,6 +22,40 @@ export default function Dashboard() {
     if (typeof window !== 'undefined') window.location.href = '/login';
     return null;
   }
+
+  const handleDeleteAccount = async () => {
+    setMessage(''); // Clear any existing messages
+    setIsDeleting(true);
+      try {
+        const res = await fetch('/api/auth/delete-account', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userId: session.user.id }),  
+        });
+
+        const data = await res.json(); 
+
+        if (res.ok) {
+          setMessage('Account deleted successfully');
+          setIsError(false);
+          // Log out the user after account deletion
+          await signOut({ callbackUrl: '/goodbye' });
+        } else {
+          setMessage(data.error || 'Failed to delete account. Please try again.');
+          setIsError(true);
+        }
+      } catch (error) {
+        console.error('Error deleting account:', error);
+        setMessage('Something went wrong. Please try again later.');
+        setIsError(true);  
+      } finally {
+        setIsDeleting(false);
+        setIsModalOpen(true);
+      }
+    
+  };
 
   const handleRedirect = (path) => router.push(path);
 
@@ -81,7 +121,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-
         {/* Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <button
@@ -99,8 +138,27 @@ export default function Dashboard() {
             <Settings size={28} className="mb-2" />
             <span className="font-medium">Account Settings</span>
           </button>
+
+          {/* Account Deletion */}
+       {/* Add Account Deletion Button */}
+       <button
+            onClick={() => setIsModalOpen(true)}  // Open modal
+            disabled={isDeleting}
+            className="flex flex-col items-center justify-center bg-[#f8d7da] border border-[#e0c0c0] hover:bg-[#d9534f] hover:text-white text-[#5a4a3f] rounded-2xl p-6 transition-all shadow-lg hover:shadow-2xl"
+          >
+            <Trash2 size={28} className="mb-2 text-[#d9534f]" />
+            <span className="font-medium text-[#d9534f]">Delete Account</span>
+          </button>
         </div>
       </div>
+       {/* Modal */}
+       <DeleteAccountModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)} // Close modal on cancel
+        onConfirm={handleDeleteAccount}  // Call the handleDeleteAccount function on confirm
+        message={message}  // Pass the message
+        isError={isError}  // Pass error status
+      />
     </div>
   );
 }

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { signIn,useSession } from 'next-auth/react'; 
+import { signIn, useSession } from 'next-auth/react'; 
 import ReCAPTCHA from 'react-google-recaptcha'; 
 
 export default function Register() {
@@ -15,9 +15,11 @@ export default function Register() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);  // Loading state
   const [isSuccess, setIsSuccess] = useState(false);  // Success message visibility
-  const router = useRouter();  // Initialize useRouter for page redirection
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [recaptchaToken, setRecaptchaToken] = useState(null);
+  const [recaptchaCompleted, setRecaptchaCompleted] = useState(false); // Track if reCAPTCHA is completed
+  const router = useRouter();  // Initialize useRouter for page redirection
+  const recaptchaRef = useRef(); // Create a ref for the reCAPTCHA component
 
   const isLegalAge = (dob) => { //checks if user is 18+
     const today = new Date();
@@ -33,18 +35,25 @@ export default function Register() {
       router.push('/dashboard'); // Redirect to dashboard if already signed in
     }
   }, [session, router]);
+
+  // Reset reCAPTCHA on every render (when status changes)
   useEffect(() => {
-    const script = document.createElement('script');
-    script.src = `https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`;
-    script.async = true;
-    document.body.appendChild(script);
-  }, []);
-  
-  
+    if (recaptchaRef.current) {
+      recaptchaRef.current.reset(); // Reset reCAPTCHA after each render
+    }
+    setRecaptchaCompleted(false);  // Reset reCAPTCHA completed state
+  }, [status]);
+
+  const handleRecaptchaChange = (token) => {
+    setRecaptchaToken(token);
+    setRecaptchaCompleted(!!token);  // Set completed state based on token
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-  
+    setError('');
+
     if (!recaptchaToken) {
       setError('Please complete the reCAPTCHA challenge.');
       setIsLoading(false);
@@ -58,7 +67,6 @@ export default function Register() {
     }
   
     try {
-
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         body: JSON.stringify({
@@ -94,17 +102,17 @@ export default function Register() {
         } else {
           router.push('/dashboard');
         }
+      } else {
+        setError(data?.error || 'Failed to register. Please try again.');
+        recaptchaRef.current.reset(); // Reset reCAPTCHA after failed registration
       }
-      } catch (err) {
+    } catch (err) {
       console.error(err);
       setError('Something went wrong. Please try again.');
       setIsLoading(false);
     }
   };
-  
-  const handleRecaptchaChange = (token) => {
-    setRecaptchaToken(token);
-  };
+
   // Loading state while session is being fetched
   if (status === 'loading') return <p>Loading...</p>;
 
@@ -201,12 +209,15 @@ export default function Register() {
                     required
                   />
                 </div>
+
+                {/* ReCAPTCHA */}
                 <div className="flex justify-center">
-                <ReCAPTCHA
-                  sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
-                  onChange={handleRecaptchaChange}
-                />
-              </div>
+                  <ReCAPTCHA
+                    ref={recaptchaRef}
+                    sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
+                    onChange={handleRecaptchaChange}
+                  />
+                </div>
 
               {/* Error Message */}
               {error && <p className="text-red-500 text-sm">{error}</p>}
@@ -215,7 +226,7 @@ export default function Register() {
               <button
                 type="submit"
                 className="w-full py-4 rounded-full text-lg text-white bg-[#8b6f47] hover:bg-[#a78b62] transition-all duration-300 ease-in-out shadow-md"
-                disabled={isLoading}  // Disable the button while loading
+                disabled={isLoading || !recaptchaCompleted}  // Disable the button while loading and until reCAPTCHA is completed
               >
                 {isLoading ? 'Creating Account...' : 'Register'}  {/* Change text to 'Loading...' while submitting */}
               </button>

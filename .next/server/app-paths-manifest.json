@@ -1,7 +1,10 @@
 {
+  "/api/auth/forgot-password/route": "app/api/auth/forgot-password/route.js",
   "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
-  "/api/experiences/[slug]/route": "app/api/experiences/[slug]/route.js",
-  "/api/public/schedule/route": "app/api/public/schedule/route.js",
-  "/experiences/page": "app/experiences/page.js",
-  "/check-availability/[slug]/page": "app/check-availability/[slug]/page.js"
+  "/api/auth/reset-password/route": "app/api/auth/reset-password/route.js",
+  "/page": "app/page.js",
+  "/login/page": "app/login/page.js",
+  "/forgot-password/page": "app/forgot-password/page.js",
+  "/reset-password/page": "app/reset-password/page.js",
+  "/dashboard/page": "app/dashboard/page.js"
 }

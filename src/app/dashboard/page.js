@@ -3,8 +3,8 @@
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, CalendarCheck, Settings, Trash2 } from 'lucide-react';
-import { useState } from 'react';
-import DeleteAccountModal from './deleteAccountModal'; 
+import { useState, useEffect } from 'react';
+import DeleteAccountModal from './DeleteAccountModal'; // Import the modal component
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
@@ -13,6 +13,30 @@ export default function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false); // Track modal visibility
   const [message, setMessage] = useState(''); // Message to display in the modal
   const [isError, setIsError] = useState(false); // Track if the message is an error
+  const [hasActiveReservations, setHasActiveReservations] = useState(false); // Track if user has active reservations
+
+  // Use effect should be placed here, outside of any conditionals
+  useEffect(() => {
+    const checkActiveReservations = async () => {
+      if (!session?.user?.id) return;
+
+      try {
+        const res = await fetch(`/api/user/active-reservations/${session.user.id}`);
+        const data = await res.json();
+
+        if (res.ok && data.activeReservations > 0) {
+          setHasActiveReservations(true); // If there are active reservations
+        } else {
+          setHasActiveReservations(false); // No active reservations
+        }
+      } catch (error) {
+        console.error('Error checking active reservations:', error);
+        setHasActiveReservations(false); // Default to false in case of error
+      }
+    };
+
+    checkActiveReservations();
+  }, [session]);
 
   if (status === 'loading') {
     return <p className="text-center text-[#8b6f47] font-serif">Loading...</p>;
@@ -22,40 +46,42 @@ export default function Dashboard() {
     if (typeof window !== 'undefined') window.location.href = '/login';
     return null;
   }
-
   const handleDeleteAccount = async () => {
     setMessage(''); // Clear any existing messages
     setIsDeleting(true);
-      try {
-        const res = await fetch('/api/auth/delete-account', {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ userId: session.user.id }),  
-        });
-
-        const data = await res.json(); 
-
-        if (res.ok) {
-          setMessage('Account deleted successfully');
-          setIsError(false);
-          // Log out the user after account deletion
-          await signOut({ callbackUrl: '/goodbye' });
-        } else {
-          setMessage(data.error || 'Failed to delete account. Please try again.');
-          setIsError(true);
-        }
-      } catch (error) {
-        console.error('Error deleting account:', error);
-        setMessage('Something went wrong. Please try again later.');
-        setIsError(true);  
-      } finally {
-        setIsDeleting(false);
-        setIsModalOpen(true);
+  
+    try {
+      const res = await fetch('/api/auth/delete-account', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId: session.user.id }), 
+      });
+  
+      // Log the response for debugging
+      const data = await res.json();
+      console.log(data);
+  
+      if (res.ok) {
+        setMessage('Account deleted successfully');
+        setIsError(false);
+        // Log out the user after account deletion
+        await signOut({ callbackUrl: '/goodbye' });
+      } else {
+        setMessage(data.error || 'Failed to delete account. Please try again.');
+        setIsError(true);
       }
-    
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      setMessage('Something went wrong. Please try again later.');
+      setIsError(true);  
+    } finally {
+      setIsDeleting(false);
+      setIsModalOpen(true); // Open the modal to show the message
+    }
   };
+  
 
   const handleRedirect = (path) => router.push(path);
 
@@ -98,28 +124,28 @@ export default function Dashboard() {
         </div>
 
         {/* Info Card */}
-      <div className="bg-[#f8f6f2] border border-[#e0dcd4] p-6 rounded-xl shadow-inner space-y-4 text-[#5a4a3f] mb-10">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-semibold uppercase tracking-wide">Email</span>
-          <span className="text-md">{session.user.email}</span>
+        <div className="bg-[#f8f6f2] border border-[#e0dcd4] p-6 rounded-xl shadow-inner space-y-4 text-[#5a4a3f] mb-10">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-semibold uppercase tracking-wide">Email</span>
+            <span className="text-md">{session.user.email}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-semibold uppercase tracking-wide">Phone</span>
+            <span className="text-md">{session.user.phone || 'Not Provided'}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-semibold uppercase tracking-wide">Date of Birth</span>
+            <span className="text-md">
+              {session.user.dateOfBirth ? new Date(session.user.dateOfBirth).toLocaleDateString() : 'Not Provided'}
+            </span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-semibold uppercase tracking-wide">Member Since</span>
+            <span className="text-md">
+              {session.user.createdAt ? new Date(session.user.createdAt).toLocaleDateString() : 'Not Provided'}
+            </span>
+          </div>
         </div>
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-semibold uppercase tracking-wide">Phone</span>
-          <span className="text-md">{session.user.phone || 'Not Provided'}</span>
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-semibold uppercase tracking-wide">Date of Birth</span>
-          <span className="text-md">
-            {session.user.dateOfBirth ? new Date(session.user.dateOfBirth).toLocaleDateString() : 'Not Provided'}
-          </span>
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-semibold uppercase tracking-wide">Member Since</span>
-          <span className="text-md">
-            {session.user.createdAt ? new Date(session.user.createdAt).toLocaleDateString() : 'Not Provided'}
-          </span>
-        </div>
-      </div>
 
         {/* Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -140,19 +166,21 @@ export default function Dashboard() {
           </button>
 
           {/* Account Deletion */}
-       {/* Add Account Deletion Button */}
-       <button
+          <button
             onClick={() => setIsModalOpen(true)}  // Open modal
-            disabled={isDeleting}
-            className="flex flex-col items-center justify-center bg-[#f8d7da] border border-[#e0c0c0] hover:bg-[#d9534f] hover:text-white text-[#5a4a3f] rounded-2xl p-6 transition-all shadow-lg hover:shadow-2xl"
+            disabled={isDeleting || hasActiveReservations} // Disable if deleting or active reservations exist
+            className={`flex flex-col items-center justify-center bg-[#f8d7da] border border-[#e0c0c0] hover:bg-[#d9534f] hover:text-white text-[#5a4a3f] rounded-2xl p-6 transition-all shadow-lg hover:shadow-2xl ${hasActiveReservations ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <Trash2 size={28} className="mb-2 text-[#d9534f]" />
-            <span className="font-medium text-[#d9534f]">Delete Account</span>
+            <span className="font-medium text-[#d9534f]">
+              {hasActiveReservations ? 'You have active reservations. Please cancel them before deleting your account.' : 'Delete Account'}
+            </span>
           </button>
         </div>
       </div>
-       {/* Modal */}
-       <DeleteAccountModal
+
+      {/* Modal */}
+      <DeleteAccountModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)} // Close modal on cancel
         onConfirm={handleDeleteAccount}  // Call the handleDeleteAccount function on confirm

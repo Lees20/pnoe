@@ -2,7 +2,7 @@
 
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
-import ReCAPTCHA from 'react-google-recaptcha'; // ✅ Import ReCAPTCHA
+import ReCAPTCHA from 'react-google-recaptcha';
 
 export default function ResetPasswordForm() {
   const searchParams = useSearchParams();
@@ -42,7 +42,7 @@ export default function ResetPasswordForm() {
 
   const handleRecaptchaChange = (token) => {
     setRecaptchaToken(token);
-    setMessage(''); // ✅ Clear any previous recaptcha errors
+    setMessage(''); // clear any previous recaptcha errors
   };
 
   const handleRecaptchaExpired = () => {
@@ -68,7 +68,7 @@ export default function ResetPasswordForm() {
           <ReCAPTCHA
             sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
             onChange={handleRecaptchaChange}
-            onExpired={handleRecaptchaExpired} // Handle expiration
+            onExpired={handleRecaptchaExpired} 
           />
         </div>
 

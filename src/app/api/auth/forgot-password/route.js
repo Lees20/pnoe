@@ -4,7 +4,6 @@ import { transporter } from '@/lib/email/nodemailer';
 import { NextResponse } from 'next/server';
 // Count recent tokens for this user (π.χ. τα τελευταία 15 λεπτά)
 
-  
 export async function POST(req) {
   try {
     const { email } = await req.json();

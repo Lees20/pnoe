@@ -70,9 +70,6 @@ export default function CheckAvailabilityPage() {
     fetchExperienceAndSlots(); // Fetch the data as soon as the slug is available
   }, [slug]); // Depend on `slug` to refetch when it changes
   
-  
-  
-
   const handleReserve = async () => {
     if (!selectedSlotId || numberOfPeople <= 0) {
       toast.error('Please select a slot and number of people.');
@@ -216,10 +213,7 @@ export default function CheckAvailabilityPage() {
           </div>
         </div>
 
-        </div>
-
-
-            
+        </div>          
       {/* Slots and Form */}
       {selectedDate && (
          <div className="flex-1 space-y-8 w-full">

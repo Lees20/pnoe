@@ -108,7 +108,7 @@ export default function TermsPage() {
             <h2 className="text-xl font-bold mb-3 text-[#7a644c]">10. Contact Us</h2>
             <p>
               If you have any questions or concerns about these Terms, please contact us at&nbsp;
-              <a href="mailto:support@yourbrand.com" className="underline text-[#8b6f47]">support@yourbrand.com</a>.
+              <a href="mailto:oasis.mailsystem@gmail.com" className="underline text-[#8b6f47]">oasis.mailsystem@gmail.com</a>.
             </p>
           </section>
 

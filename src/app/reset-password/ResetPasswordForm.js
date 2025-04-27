@@ -63,12 +63,12 @@ export default function ResetPasswordForm() {
           className="w-full p-2 mb-4 border border-[#d8cfc3] rounded"
         />
 
-        {/* ✅ reCAPTCHA Component */}
+        {/* reCAPTCHA Component */}
         <div className="flex justify-center mb-4">
           <ReCAPTCHA
             sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
             onChange={handleRecaptchaChange}
-            onExpired={handleRecaptchaExpired} // ✅ Handle expiration
+            onExpired={handleRecaptchaExpired} // Handle expiration
           />
         </div>
 

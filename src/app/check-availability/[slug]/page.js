@@ -405,29 +405,31 @@ export default function CheckAvailabilityPage() {
               className="accent-[#8b6f47]"
             />
             <label htmlFor="agreeTerms" className="text-sm text-[#5a4a3f]">
-              I agree to the <a href="/terms-of-use" className="underline text-[#8b6f47]">Terms of Use</a>
+              I agree to the <a href="/terms" className="underline text-[#8b6f47]">Terms of Use</a>
             </label>
           </div>
             {/* Submit Button */}
             <div className="pt-2">
               <button
-              onClick={handleReserve}
-              disabled={!session || isSubmitting}
-              className={`w-full py-3 rounded-lg font-semibold text-lg transition-all flex items-center justify-center gap-2 shadow-md ${
-                !session ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#8b6f47] hover:bg-[#7a5f3a] text-white'
-              }`}
+                onClick={handleReserve}
+                disabled={!session || isSubmitting || !agreedToTerms}
+                className={`w-full py-3 rounded-lg font-semibold text-lg transition-all flex items-center justify-center gap-2 shadow-md ${
+                  !session || !agreedToTerms
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-[#8b6f47] hover:bg-[#7a5f3a] text-white'
+                }`}
               >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Reserving...
-                </>
-              ) : (
-                !session ? 'Log in to Reserve' : 'Reserve Now'
-              )}
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Reserving...
+                  </>
+                ) : (
+                  !session ? 'Log in to Reserve' : 'Reserve Now'
+                )}
               </button>
-
             </div>
+
           </div>
 
         </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import ReCAPTCHA from 'react-google-recaptcha';
@@ -12,10 +12,18 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [recaptchaToken, setRecaptchaToken] = useState(null);
+  const recaptchaRef = useRef(); // Create a ref for the reCAPTCHA component
 
   const handleRecaptchaChange = (token) => {
     setRecaptchaToken(token);
   };
+
+  // Reset reCAPTCHA on each render
+  useEffect(() => {
+    if (recaptchaRef.current) {
+      recaptchaRef.current.reset(); // Reset reCAPTCHA after each render
+    }
+  }, [status]); // Run whenever the session status changes (e.g., after a login attempt)
 
   useEffect(() => {
     if (session) {
@@ -35,7 +43,7 @@ export default function LoginPage() {
     if (!recaptchaToken) {
       setError('Please complete the reCAPTCHA.');
       setLoading(false);
-      return;
+      return; // Prevent further action if reCAPTCHA is not completed
     }
 
     const { email, password } = form;
@@ -44,7 +52,7 @@ export default function LoginPage() {
       redirect: false,
       email,
       password,
-      recaptchaToken, // send token
+      recaptchaToken, // Send token along with credentials
     });
 
     setLoading(false);
@@ -53,7 +61,10 @@ export default function LoginPage() {
       if (result.error === 'CredentialsSignin') {
         setError('Invalid email or password.');
       } else {
-        setError('Something went wrong.');
+        setError('Invalid Email or Password');
+      }
+      if (recaptchaRef.current) {
+        recaptchaRef.current.reset(); // Reset reCAPTCHA when login fails
       }
     } else {
       router.push('/dashboard');
@@ -102,6 +113,7 @@ export default function LoginPage() {
               {/* ReCAPTCHA V2 */}
               <div className="flex justify-center">
                 <ReCAPTCHA
+                  ref={recaptchaRef}  // Attach ref to the ReCAPTCHA component
                   sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
                   onChange={handleRecaptchaChange}
                 />

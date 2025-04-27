@@ -54,7 +54,7 @@ export async function POST(req) {
 
     await transporter.sendMail({
       to: user.email,
-      from: process.env.EMAIL_FROM,
+      from: `"Oasis" <${process.env.EMAIL_USER}>`,
       subject: 'Reset Your Password – Oasis Experiences',
       html: `
         <div style="font-family: sans-serif; padding: 20px; background-color: #fdfaf5; color: #333;">

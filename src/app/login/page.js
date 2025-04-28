@@ -65,6 +65,7 @@ export default function LoginPage() {
       }
       if (recaptchaRef.current) {
         recaptchaRef.current.reset(); // Reset reCAPTCHA when login fails
+        
       }
     } else {
       router.push('/dashboard');

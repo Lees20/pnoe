@@ -149,35 +149,50 @@ export default function Dashboard() {
 
         {/* Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <button
-            onClick={() => handleRedirect('/bookings')}
-            className="flex flex-col items-center justify-center bg-[#fdfaf7] border border-[#d8cfc3] hover:bg-[#8b6f47] hover:text-white text-[#5a4a3f] rounded-2xl p-6 transition-all shadow-lg hover:shadow-2xl"
-          >
-            <CalendarCheck size={28} className="mb-2" />
-            <span className="font-medium">My Bookings</span>
-          </button>
+            {/* My Bookings Button */}
+            <button
+              onClick={() => handleRedirect('/bookings')}
+              className="flex flex-col items-center justify-center bg-[#fdfaf7] border border-[#d8cfc3] hover:bg-[#8b6f47] hover:text-white text-[#5a4a3f] rounded-2xl p-6 transition-all shadow-lg hover:shadow-2xl"
+            >
+              <CalendarCheck size={28} className="mb-2" />
+              <span className="font-medium">My Bookings</span>
+            </button>
 
-          <button
-            onClick={() => handleRedirect('/account/settings')}
-            className="flex flex-col items-center justify-center bg-[#fdfaf7] border border-[#d8cfc3] hover:bg-[#8b6f47] hover:text-white text-[#5a4a3f] rounded-2xl p-6 transition-all shadow-lg hover:shadow-2xl"
-          >
-            <Settings size={28} className="mb-2" />
-            <span className="font-medium">Account Settings</span>
-          </button>
+            {/* Account Settings Button */}
+            <button
+              onClick={() => handleRedirect('/account/settings')}
+              className="flex flex-col items-center justify-center bg-[#fdfaf7] border border-[#d8cfc3] hover:bg-[#8b6f47] hover:text-white text-[#5a4a3f] rounded-2xl p-6 transition-all shadow-lg hover:shadow-2xl"
+            >
+              <Settings size={28} className="mb-2" />
+              <span className="font-medium">Account Settings</span>
+            </button>
 
-          {/* Account Deletion */}
-          <button
-            onClick={() => setIsModalOpen(true)}  // Open modal
-            disabled={isDeleting || hasActiveReservations} // Disable if deleting or active reservations exist
-            className={`flex flex-col items-center justify-center bg-[#f8d7da] border border-[#e0c0c0] hover:bg-[#d9534f] hover:text-white text-[#5a4a3f] rounded-2xl p-6 transition-all shadow-lg hover:shadow-2xl ${hasActiveReservations ? 'opacity-50 cursor-not-allowed' : ''}`}
-          >
-            <Trash2 size={28} className="mb-2 text-[#d9534f]" />
-            <span className="font-medium text-[#d9534f]">
-              {hasActiveReservations ? 'You have active reservations. Please cancel them before deleting your account.' : 'Delete Account'}
-            </span>
-          </button>
-        </div>
-      </div>
+            {/* Delete Account Button */}
+            <div className="flex justify-center col-span-1 md:col-span-2">
+              <button
+                onClick={() => setIsModalOpen(true)}
+                disabled={isDeleting || hasActiveReservations}
+                className={`flex flex-col items-center justify-center rounded-lg px-6 py-3 border transition-all shadow-sm hover:shadow-md text-sm
+                  ${hasActiveReservations 
+                    ? 'bg-red-100 border-red-200 text-red-400 opacity-60 cursor-not-allowed' 
+                    : 'bg-white border-red-300 text-red-600 hover:bg-red-600 hover:text-white'
+                  }
+                `}
+              >
+                <Trash2 
+                  size={20} 
+                  className={`mb-1 ${hasActiveReservations ? 'text-red-300' : 'text-red-500 group-hover:text-white'}`} 
+                />
+                <span className="font-semibold leading-tight">
+                  {hasActiveReservations 
+                    ? 'Cancel reservations first' 
+                    : 'Delete Account'}
+                </span>
+              </button>
+            </div>
+          </div>
+                </div>
+
 
       {/* Modal */}
       <DeleteAccountModal

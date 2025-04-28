@@ -18,6 +18,10 @@ export async function POST(req) {
       where: { email: session.user.email },
     });
 
+    if (!user) {
+      return NextResponse.json({ message: 'User not found' }, { status: 404 });
+    }
+
     const updates = {
       name,
       email,
@@ -35,24 +39,31 @@ export async function POST(req) {
         );
       }
 
-      // Limit to 2 changes per 30 days
+      // Handle password change limits
       const now = new Date();
-      const history = user.passwordChangeHistory || [];
-      const recentChanges = history.filter(
-        (timestamp) => new Date(timestamp) > new Date(now.setDate(now.getDate() - 30))
-      );
+      const THIRTY_DAYS_AGO = new Date(now);
+      THIRTY_DAYS_AGO.setDate(now.getDate() - 30);
 
-      if (recentChanges.length >= 2) {
+      let history = user.passwordChangeHistory || [];
+
+      // Filter only the last 30 days history
+      history = history.filter((timestamp) => {
+        const date = new Date(timestamp);
+        return date > THIRTY_DAYS_AGO;
+      });
+
+      if (history.length >= 2) {
         return NextResponse.json(
-          { message: 'You can only update your settings up to 2 times per month.' },
+          { message: 'You can only update your password 2 times per 30 days.' },
           { status: 403 }
         );
       }
 
-      //  Update password and history
+      // Hash the new password
       const hashedPassword = await bcrypt.hash(password, 10);
+
       updates.password = hashedPassword;
-      updates.passwordChangeHistory = [...recentChanges, new Date().toISOString()];
+      updates.passwordChangeHistory = [...history, now.toISOString()]; // Update history
     }
 
     const updatedUser = await prisma.user.update({

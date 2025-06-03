@@ -9,7 +9,7 @@ export default function Footer() {
         
         {/* Left - Copyright */}
         <p className="tracking-tight opacity-70">
-          © {new Date().getFullYear()} Oasis
+          © {new Date().getFullYear()} Oasis. All rights reserved.
         </p>
 
         {/* Center - Minimal Links */}
@@ -33,7 +33,7 @@ export default function Footer() {
           onClick={() => window.open('https://panteliskarabetsos.com', '_blank')}
           className="opacity-70 hover:opacity-100 transition-opacity"
         >
-         Developed by Pantelis.dev
+         Developed by Pantelis Karabetsos
         </button>
       </div>
     </footer>

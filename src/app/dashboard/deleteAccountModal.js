@@ -8,7 +8,7 @@ export default function DeleteAccountModal({ isOpen, onClose, onConfirm, message
       <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
         <h2 className="text-lg font-semibold text-[#5a4a3f]">Confirm Account Deletion</h2>
         <p className="text-sm text-[#7a6a5f] mt-2">
-          Are you sure you want to delete your account? This action cannot be undone.
+          Are you sure you want to delete your account? This action can not be undone.
         </p>
 
         {/* Show the response message */}

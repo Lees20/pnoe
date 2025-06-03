@@ -131,7 +131,7 @@ export default function Register() {
             <form onSubmit={handleSubmit} autoComplete="off" className="space-y-8">
               {/* Name Input */}
               <div>
-                <label className="block text-sm font-medium text-[#5a4a3f] mb-2">First Name (*)</label>
+                <label className="block text-sm font-medium text-[#5a4a3f] mb-2">First Name*</label>
                 <input
                   type="text"
                   value={name}
@@ -145,7 +145,7 @@ export default function Register() {
 
               {/* Surname Input */}
               <div>
-                <label className="block text-sm font-medium text-[#5a4a3f] mb-2">Surname (*)</label>
+                <label className="block text-sm font-medium text-[#5a4a3f] mb-2">Surname*</label>
                 <input
                   type="text"
                   value={surname}
@@ -159,7 +159,7 @@ export default function Register() {
 
               {/* Email Input */}
               <div>
-                <label className="block text-sm font-medium text-[#5a4a3f] mb-2">Email (*)</label>
+                <label className="block text-sm font-medium text-[#5a4a3f] mb-2">Email*</label>
                 <input
                   type="email"
                   value={email}
@@ -173,7 +173,7 @@ export default function Register() {
 
               {/* Password Input */}
               <div>
-                <label className="block text-sm font-medium text-[#5a4a3f] mb-2">Password (*)</label>
+                <label className="block text-sm font-medium text-[#5a4a3f] mb-2">Password*</label>
                 <input
                   type="password"
                   value={password}
@@ -200,7 +200,7 @@ export default function Register() {
 
               {/* Date of Birth */}
                 <div>
-                  <label className="block text-sm font-medium text-[#5a4a3f] mb-2">Date of Birth (*)</label>
+                  <label className="block text-sm font-medium text-[#5a4a3f] mb-2">Date of Birth*</label>
                   <input
                     type="date"
                     value={dateOfBirth}
